@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
+<!--
+  ==========================================================================
+  package "Member Awards" Addon for Elkarte
+  author Spuds
+  copyright (c) 2013 Spuds
+  license license.txt (included with package) MPL 1.1
+  ==========================================================================
+-->
+<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
+	<id>spuds:member_awards</id>
+	<version>1.0</version>
+
+	<file name="$sourcedir/Load.php">
+
+		<operation>
+			<search position="before"><![CDATA[
+			$user_profile[$row['id_member']] = $row;]]></search>
+			<add><![CDATA[
+			$user_profile[$row['id_member']]['awards'] = array();
+			$user_profile[$row['id_member']]['awardlist'] = array();]]></add>
+		</operation>
+
+		<operation>
+			<search position="after"><![CDATA[
+	}
+
+	if (!empty($new_loaded_ids) && $set !== 'minimal')]]></search>
+			<add><![CDATA[
+
+		// I'm sorry, but I've got to stick this award somewhere ...
+		if ($modSettings['awards_in_post'] > 0 && !empty($new_loaded_ids))
+		{
+			global $sourcedir;
+			require_once($sourcedir . '/AwardsManage.php');
+			AwardsLoad($new_loaded_ids);
+			AwardsAutoCheck($new_loaded_ids);
+		}]]></add>
+		</operation>
+
+		<operation>
+			<search position="before"><![CDATA[
+		'local_time' => timeformat(time() + ($profile['time_offset'] - $user_info['time_offset']) * 3600, false),]]></search>
+			<add><![CDATA[
+		'awards' => &$profile['awards'],]]></add>
+		</operation>
+	</file>
+
+	<file name="$sourcedir/Who.php">
+		<operation>
+			<search position="before"><![CDATA[
+		'viewmembers' => array('moderate_forum'),]]></search>
+			<add><![CDATA[
+		'awards' => array('manage_awards'),]]></add>
+		</operation>
+	</file>
+
+</modification>
