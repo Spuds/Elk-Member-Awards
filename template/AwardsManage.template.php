@@ -32,14 +32,13 @@ function template_modify()
 
 	echo '
 					<div class="cat_bar">
-						<h3 class="catbg">
+						<h3 class="category_header">
 							', ($context['editing'] == true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : ('<img class="icon" src="' . $settings['images_url'] . '/awards/award_add.png" alt="" />&nbsp;' . $txt['awards_add_award'])), '
 						</h3>
 					</div>';
 
 	echo '
 					<div class="windowbg2">
-						<span class="topslice"><span></span></span>
 						<div class="content">
 							<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
 								<legend>', $txt['awards_add_name'], '</legend>
@@ -191,7 +190,6 @@ function template_modify()
 								<input type="submit" class="button_submit" name="award_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_submit'], '" accesskey="s" />
 							</div>
 						</div>
-						<span class="botslice"><span></span></span>
 					</div>
 					<br class="clear" />
 				</form>';
@@ -222,13 +220,10 @@ function template_assign_group()
 			<div id="awardassign">
 				<form action="', $scripturl, '?action=admin;area=awards;sa=assigngroup;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="', $context['character_set'], '">
 					<div class="floatleft" style="width:22%">
-						<div class="cat_bar">
-							<h3 class="catbg">
-								<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
-							</h3>
-						</div>
+						<h3 class="category_header">
+							<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
+						</h3>
 						<div class="windowbg">
-							<span class="topslice"><span></span></span>
 							<div class="content">
 								<dl class="settings">
 									<dt>
@@ -245,18 +240,14 @@ function template_assign_group()
 									</dt>
 								</dl>
 							</div>
-							<span class="botslice"><span></span></span>
 						</div>
 					</div>
 
 					<div class="floatright" style="width:75%">
-						<div class="cat_bar">
-							<h3 class="catbg">
-								<img class="icon" src="' . $settings['images_url'] . '/awards/award_add.png" alt="" />&nbsp;', $txt['awards_assign_badge'], '
-							</h3>
-						</div>
+						<h3 class="category_header hdicon cat_img_plus">
+							', $txt['awards_assign_badge'], '
+						</h3>
 						<div class="windowbg">
-							<span class="topslice"><span></span></span>
 								<div class="content">
 									<dl class="settings">
 										<dt>
@@ -331,7 +322,6 @@ function template_assign_group()
 										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
 									</div></div>
 								</div>
-							<span class="botslice"><span></span></span>
 						</div>
 					</div>
 				</form>
@@ -379,13 +369,10 @@ function template_assign()
 			<div id="awardassign">
 				<form action="', $scripturl, '?action=admin;area=awards;sa=assign;step=2" method="post" name="assign" id="assign" accept-charset="', $context['character_set'], '">
 					<div class="floatleft" style="width:22%">
-						<div class="cat_bar">
-							<h3 class="catbg">
-								<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
-							</h3>
-						</div>
+						<h3 class="category_header">
+							<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
+						</h3>
 						<div class="windowbg">
-							<span class="topslice"><span></span></span>
 							<div class="content">
 								<dl class="settings">
 									<dt>
@@ -401,18 +388,14 @@ function template_assign()
 									</dt>
 								</dl>
 							</div>
-							<span class="botslice"><span></span></span>
 						</div>
 					</div>
 
 					<div class="floatright" style="width:75%">
-						<div class="cat_bar">
-							<h3 class="catbg">
-								<img class="icon" src="' . $settings['images_url'] . '/awards/award_add.png" alt="" />&nbsp;', $txt['awards_assign_badge'], '
-							</h3>
-						</div>
+						<h3 class="category_header hdicon cat_img_plus">
+							', $txt['awards_assign_badge'], '
+						</h3>
 						<div class="windowbg">
-							<span class="topslice"><span></span></span>
 								<div class="content">
 									<dl class="settings">
 										<dt>
@@ -482,7 +465,6 @@ function template_assign()
 										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
 									</div>
 								</div>
-							<span class="botslice"><span></span></span>
 						</div>
 					</div>
 				</form>
@@ -505,7 +487,7 @@ function template_assign()
 		<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/awards.js?rc1"></script>
 		<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/suggest.js?rc1"></script>
 		<script type="text/javascript"><!-- // --><![CDATA[
-			var oAwardSend = new smf_AwardSend({
+			var oAwardSend = new elk_AwardSend({
 				sSelf: \'oAwardSend\',
 				sSessionId: \'', $context['session_id'], '\',
 				sSessionVar: \'', $context['session_var'], '\',
@@ -514,6 +496,7 @@ function template_assign()
 				aToRecipients: [
 				]
 			});
+
 			function saveEntities()
 			{
 				var textFields = ["subject", "message"];
@@ -521,6 +504,7 @@ function template_assign()
 					if (document.forms.postmodify.elements[textFields[i]])
 						document.forms.postmodify[textFields[i]].value = document.forms.postmodify[textFields[i]].value.replace(/&#/g, "&#38;#");
 			}
+
 			function showaward()
 			{' . $context['awardsjavasciptarray'] . '
 				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assign.award.value][\'filename\'];
@@ -546,14 +530,11 @@ function template_assign_mass()
 			<br class="clear" />
 
 			<div id="awardassign">
-				<div class="cat_bar">
-					<h3 class="catbg">
-						', $txt['awards_mem_group'], '
-					</h3>
-				</div>
+				<h3 class="category_header">
+					', $txt['awards_mem_group'], '
+				</h3>
 
 				<div class="windowbg">
-					<span class="topslice"><span></span></span>
 					<div class="content">
 						<form action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="', $context['character_set'], '">
 							<dl class="select">
@@ -574,20 +555,16 @@ function template_assign_mass()
 							</div>
 						</form>
 					</div>
-					<span class="botslice"><span></span></span>
 				</div>
 
 				<br class="clear" />
 				<form action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=3" method="post" name="assigngroup2" id="assigngroup2" accept-charset="', $context['character_set'], '">
 
 				<div class="floatleft" style="width:22%">
-					<div class="cat_bar">
-						<h3 class="catbg">
-							<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
-						</h3>
-					</div>
+					<h3 class="category_header">
+						<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
+					</h3>
 					<div class="windowbg">
-						<span class="topslice"><span></span></span>
 						<div class="content">
 							<dl class="settings">
 								<dt>
@@ -603,20 +580,16 @@ function template_assign_mass()
 								</dt>
 							</dl>
 						</div>
-						<span class="botslice"><span></span></span>
 					</div>
 				</div>
 
 				<div class="floatright" style="width:75%">
 
-					<div class="cat_bar">
-						<h3 class="catbg">
-							<img class="icon" src="' . $settings['images_url'] . '/awards/award_add.png" alt="" />&nbsp;', $txt['awards_assign_badge'], '
-						</h3>
-					</div>
+					<h3 class="category_header hdicon cat_img_plus">
+						', $txt['awards_assign_badge'], '
+					</h3>
 
 					<div class="windowbg">
-						<span class="topslice"><span></span></span>
 							<div class="content">
 								<dl class="settings">
 									<dt>
@@ -750,7 +723,6 @@ function template_assign_mass()
 	echo '
 								</div>
 							</div>
-						<span class="botslice"><span></span></span>
 					</div>
 				</div>
 				</form>
@@ -822,11 +794,9 @@ function template_settings()
 					<span class="lowerframe"><span></span></span>';
 
 	echo '
-					<div class="cat_bar">
-						<h3 class="catbg">
-							<img class="icon" src="' . $settings['images_url'] . '/awards/settings.png" alt="" />', $txt['awards_settings'], '
-						</h3>
-					</div>
+					<h3 class="category_header hdicon cat_img_config">
+						', $txt['awards_settings'], '
+					</h3>
 
 					<br class="clear" />
 					<form action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="', $context['character_set'], '" enctype="multipart/form-data" style="padding:0; margin: 0;">
@@ -977,13 +947,10 @@ function template_edit_category()
 
 	echo '
 				<form action="', $scripturl, '?action=admin;area=awards;sa=editcategory" method="post" name="category" id="category" accept-charset="', $context['character_set'], '" style="padding:0; margin: 0;">
-					<div class="cat_bar">
-						<h3 class="catbg">
-							', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? $txt['awards_saved_category'] : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
-						</h3>
-					</div>
+					<h3 class="category_header">
+						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? $txt['awards_saved_category'] : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
+					</h3>
 					<div class="windowbg">
-						<span class="topslice"><span></span></span>
 						<div class="content">
 							<dl class="settings">
 								<dt>
@@ -999,7 +966,6 @@ function template_edit_category()
 								<input type="submit" class="button_submit" name="category_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_category'], '" accesskey="s" />
 							</div>
 						</div>
-						<span class="botslice"><span></span></span>
 					</div>
 				</form>
 				<br class="clear" />';
@@ -1013,11 +979,9 @@ function template_list_categories()
 	global $context, $txt, $settings, $scripturl;
 
 	echo '
-				<div class="cat_bar">
-					<h3 class="catbg">
-						<img class="icon" src="' . $settings['images_url'] . '/awards/category.png" alt="" />&nbsp;', $txt['awards_list_categories'], '
-					</h3>
-				</div>
+				<h3 class="category_header">
+					<img class="icon" src="' . $settings['images_url'] . '/awards/category.png" alt="" />&nbsp;', $txt['awards_list_categories'], '
+				</h3>
 				<table class="table_grid" width="100%">
 				<thead>
 					<tr class="catbg">
@@ -1094,11 +1058,9 @@ function template_view_category()
 	else
 	{
 		echo '
-				<div class="cat_bar">
-					<h3 class="catbg">
-						', $context['category'], '
-					</h3>
-				</div>
+				<h3 class="category_header">
+					', $context['category'], '
+				</h3>
 				<table class="table_grid" width="100%">
 					<thead>
 						<tr class="catbg">
@@ -1165,11 +1127,9 @@ function template_request_award()
 	{
 		// There be requests woohoo!
 		echo '
-			<div class="cat_bar">
-				<h3 class="catbg">
-					', $txt['awards_requests'], '
-				</h3>
-			</div>';
+			<h3 class="category_header">
+				', $txt['awards_requests'], '
+			</h3>';
 
 		// Start with the form.
 		echo '
@@ -1181,7 +1141,6 @@ function template_request_award()
 			// show this awards info in the header
 			echo '
 					<div class="windowbg">
-						<span class="topslice"><span></span></span>
 						<div class="content" align="center">
 							<img style="padding:0 0 5px 0" src="', $award['img'], '" alt="', $award['award_name'], '" /><br />';
 
@@ -1193,11 +1152,9 @@ function template_request_award()
 			echo '
 							<strong>', $award['award_name'], '</strong><br />', $award['description'], '
 						</div>
-						<span class="botslice"><span></span></span>
 					</div>
 
 					<div class="windowbg2">
-						<span class="topslice"><span></span></span>
 						<div class="content">';
 
 			// Now output the table of members who requested this award
@@ -1233,7 +1190,6 @@ function template_request_award()
 								</tbody>
 							</table>
 						</div>
-						<span class="botslice"><span></span></span>
 					</div>
 					<hr class="hrcolor" />';
 		}

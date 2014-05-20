@@ -29,8 +29,9 @@ function AwardsLoadAward($id = -1)
 
 	// Load single award
 	$request = $db->query('', '
-		SELECT id_award, award_name, description, id_category, time_added, award_trigger,
-				award_type, award_location, award_requestable, award_assignable, filename, minifile
+		SELECT
+			id_award, award_name, description, id_category, time_added, award_trigger,
+			award_type, award_location, award_requestable, award_assignable, filename, minifile
 		FROM {db_prefix}awards
 		WHERE id_award = {int:id}
 		LIMIT 1',
@@ -70,7 +71,8 @@ function AwardsLoadAward($id = -1)
 
 /**
  * Helper function to load the number of awards in a given category
- * Used by createlist in awardsmain
+ *
+ * - Used by createlist in awardsmain
  *
  * @param int $cat
  */
@@ -95,7 +97,8 @@ function AwardsCountCategoryAwards($cat)
 
 /**
  * Helper function to load the awards in a given category
- * Used by createlist in awardsmain
+ *
+ * - Used by createlist in awardsmain
  *
  * @param int $start
  * @param int $items_per_page
@@ -257,7 +260,8 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 
 /**
  * Loads all of the non-auto assignable awards for use in the template
- * Returns an array of awards/details for each one allowable
+ *
+ * - Returns an array of awards/details for each one allowable
  */
 function AwardsLoadAssignableAwards()
 {
@@ -292,7 +296,8 @@ function AwardsLoadAssignableAwards()
 
 /**
  * Loads all of the member reqestable awards that have active requests against them
- * Finds members that have requested these awards for approval display
+ *
+ * - Finds members that have requested these awards for approval display
  */
 function AwardsLoadRequestedAwards()
 {
@@ -475,8 +480,9 @@ function AwardsDeleteAward($id)
 
 /**
  * Load the list of groups that this member can see
- * Counts the number of members in each group (including post count based ones)
- * returns the array of values
+ *
+ * - Counts the number of members in each group (including post count based ones)
+ * - Returns the array of values
  */
 function AwardsLoadGroups()
 {
@@ -665,7 +671,8 @@ function AwardsLoadGroupMembers()
 
 /**
  * Callback for createlist
- * List all members and groups who have recived an award
+ *
+ * - List all members and groups who have recived an award
  *
  * @param int $start
  * @param int $items_per_page
@@ -717,7 +724,8 @@ function AwardsLoadMembers($start, $items_per_page, $sort, $id)
 
 /**
  * Callback for createlist
- * Used to get the total number of members/groups who have recived a specific award
+ *
+ * - Used to get the total number of members/groups who have recived a specific award
  *
  * @param type $id
  */
@@ -781,7 +789,7 @@ function AwardsMakeRequest($id, $date, $comments, $flush = true)
 		array('id_member', 'id_award')
 	);
 
-	// update the cache as well
+	// Update the cache as well
 	if ($flush)
 	{
 		// Get the number of unapproved requests so the awards team knows about it.
@@ -850,7 +858,8 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 
 /**
  * Loads all of the categoies in the system
- * Returns array of categories with key of name and value of id
+ *
+ * - Returns array of categories with key of name and value of id
  *
  * @param string $sort order to return the categories
  * @param boolean $multi if true will return an array of arrays
@@ -923,7 +932,8 @@ function AwardsLoadCategory($id)
 
 /**
  * Loads all the categories in the system
- * Returns an array of categorys and links
+ *
+ * - Returns an array of categorys and links
  */
 function AwardsLoadAllCategories()
 {
@@ -1013,6 +1023,7 @@ function AwardsCount()
 
 /**
  * Lists all awards in teh system by cat, tuned to a users view
+ *
  * @todo combine with AwardsLoadCategoryAwards
  *
  * @param array $awardcheck
@@ -1073,6 +1084,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 
 /**
  * Save or update a category in the system
+ *
  * @param string $name
  * @param int $id_category
  */
@@ -1109,7 +1121,8 @@ function AwardsSaveCategory($name, $id_category = 0)
 
 /**
  * Removes a category from the system
- * Moves any awards assigned to that category back to the default cat
+ *
+ * - Moves any awards assigned to that category back to the default cat
  *
  * @param int $id
  */
@@ -1226,7 +1239,8 @@ function AwardLoadFiles($id)
 
 /**
  * Updates the award database with the  image filenames
- * Requires a specific award ID to update
+ *
+ * - Requires a specific award ID to update
  *
  * @param int $id
  * @param string $newName
@@ -1252,8 +1266,9 @@ function AwardsAddImage($id, $newName = '', $miniName = '')
 
 /**
  * This handles the uploading of award images, regular and mini
- * Runs all files though AwardsValidateImage for security
- * To prevent duplicate file; filenames have the awardid prefixed to them
+ *
+ * - Runs all files though AwardsValidateImage for security
+ * - To prevent duplicate file; filenames have the awardid prefixed to them
  *
  * @param int $id_award
  */
@@ -1352,7 +1367,8 @@ function AwardsValidateImage($name, $id)
 
 /**
  * Converts a php array to a JS object
- * Yes I know about json, kthanks
+ *
+ * - Yes I know about json, kthanks
  *
  * @param array $array
  * @param string $object_name

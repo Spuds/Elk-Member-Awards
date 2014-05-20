@@ -2,7 +2,7 @@
 // This is just a stripped-down version of PersonalMessage.js
 
 // Handle the JavaScript surrounding awards send form.
-function smf_AwardSend(oOptions)
+function elk_AwardSend(oOptions)
 {
 	this.opt = oOptions;
 	this.oToAutoSuggest = null;
@@ -10,7 +10,7 @@ function smf_AwardSend(oOptions)
 	this.init();
 }
 
-smf_AwardSend.prototype.init = function()
+elk_AwardSend.prototype.init = function()
 {
 	var oToControl = document.getElementById(this.opt.sToControlId);
 	this.oToAutoSuggest = new smc_AutoSuggest({
@@ -32,7 +32,7 @@ smf_AwardSend.prototype.init = function()
 }
 
 // Prevent items to be added twice or to both the 'To'.
-smf_AwardSend.prototype.callbackAddItem = function(oAutoSuggestInstance, sSuggestId)
+elk_AwardSend.prototype.callbackAddItem = function(oAutoSuggestInstance, sSuggestId)
 {
 	this.oToAutoSuggest.deleteAddedItem(sSuggestId);
 	return true;

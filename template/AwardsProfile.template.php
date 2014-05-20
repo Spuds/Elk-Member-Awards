@@ -20,11 +20,9 @@ function template_awards()
 	global $context, $txt, $settings;
 
 	echo '
-					<div class="cat_bar">
-						<h3 class="catbg">
-							' ,$txt['awards'], '
-						</h3>
-					</div>';
+					<h3 class="category_header">
+						' ,$txt['awards'], '
+					</h3>';
 
 	// Show the amount of awards that a member has
 	if (!empty($context['count_awards']))
@@ -49,11 +47,9 @@ function template_awards()
 		foreach($context['categories'] as $category)
 		{
 			echo '
-						<div class="cat_bar">
-							<h3 class="catbg">
-								<img class="icon" src="' . $settings['images_url'] . '/awards/category.png" alt="" />&nbsp;', $txt['awards_category'], ': ', $category['name'], '
-							</h3>
-						</div>
+						<h3 class="category_header hdicon cat_img_database">
+							', $txt['awards_category'], ': ', $category['name'], '
+						</h3>
 						<table class="table_grid" width="100%">
 						<thead>
 							<tr class="catbg">
@@ -120,7 +116,6 @@ function template_awards_members()
 		</div>
 
 		<div class="windowbg">
-			<span class="topslice"><span></span></span>
 			<div class="content centertext">
 				<img style="padding:0 0 5px 0" src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" /><br />';
 
@@ -131,7 +126,6 @@ function template_awards_members()
 	echo '
 				<strong>', $context['award']['award_name'], '</strong><br />', $context['award']['description'], '
 			</div>
-			<span class="botslice"><span></span></span>
 		</div>
 		<br class="clear" />';
 
@@ -150,11 +144,9 @@ function template_awards_list()
 	global $context, $txt, $settings;
 
 	echo '
-				<div class="cat_bar">
-					<h3 class="catbg">
-						', $txt['awards_title'], '
-					</h3>
-				</div>
+				<h3 class="category_header">
+					', $txt['awards_title'], '
+				</h3>
 				<br class="clear" />';
 
 	// Check if there are any awards
@@ -240,7 +232,6 @@ function template_awards_request()
 		</div>
 
 		<div class="windowbg">
-			<span class="topslice"><span></span></span>
 			<div class="content centertext">
 				<img style="padding:0 0 5px 0" src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" /><br />';
 
@@ -251,7 +242,6 @@ function template_awards_request()
 	echo '
 				<strong>', $context['award']['award_name'], '</strong><br />', $context['award']['description'], '
 			</div>
-			<span class="botslice"><span></span></span>
 		</div>
 		<br class="clear" />';
 

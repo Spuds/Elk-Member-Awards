@@ -89,13 +89,13 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function membersAwards()
 	{
-		global $context, $scripturl, $txt, $sourcedir;
+		global $context, $scripturl, $txt;
 
 		// Are they allowed to see the memberlist at all?
 		isAllowedTo('view_mlist');
 
 		// Load in our helper functions
-		require_once($sourcedir . '/Subs-List.php');
+		require_once(SUBSDIR . '/List.class.php');
 
 		// Load this awards details
 		$id = (int) $_REQUEST['a_id'];

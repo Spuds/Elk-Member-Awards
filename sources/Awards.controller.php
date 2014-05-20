@@ -70,8 +70,8 @@ class Awards_Controller extends Action_Controller
 	}
 
 	/**
-	 * Default action method, if a specific method wasn't
-	 * directly called already. Simply forwards to main.
+	 * Default action method, if a specific method wasn't directly called
+	 * already. Simply forwards to main.
 	 */
 	public function action_index()
 	{
@@ -80,14 +80,15 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * Main page for the admin panel
-	 * Loads all the awards and categories that have been added to the system
+	 *
+	 * - Loads all the awards and categories that have been added to the system
 	 */
 	function action_awards_main()
 	{
 		global $context, $scripturl, $txt;
 
 		// Load dependancies
-		require_once($sourcedir . '/Subs-List.php');
+		require_once(SUBSDIR . '/List.class.php');
 
 		// Load all the categories.
 		$categories = AwardsLoadCategories();
@@ -313,14 +314,14 @@ class Awards_Controller extends Action_Controller
 			cache_put_data('awards:autoawards', null, 60);
 			cache_put_data('awards:autoawardsid', null, 60);
 
-			// back to the admin panel
+			// Back to the admin panel
 			redirectexit('action=admin;area=awards;sa=modify;saved=1;a_id='.$id);
 		}
 
 		// Not saving so we must be adding or modifying
 		$context['categories'] = AwardsLoadCategories('ASC', true);
 
-		// some javascript to disable the trigger text box if the first option e.g. regular is selected
+		// Some javascript to disable the trigger text box if the first option e.g. regular is selected
 		addInlineJavascript('
 			var award_type = document.getElementById(\'id_type\');
 			mod_addEvent(award_type, \'change\', toggleAwardTrigger);
@@ -670,7 +671,8 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * This is where you see the members that have been assigned a certain award.
-	 * Can unassign the award for selected members.
+	 *
+	 * - Can unassign the award for selected members.
 	 */
 	public function action_view_assigned()
 	{
@@ -801,7 +803,7 @@ class Awards_Controller extends Action_Controller
 		);
 
 		// Create the list.
-		require_once($sourcedir . '/Subs-List.php');
+		require_once(SUBSDIR . '/List.class.php');
 		createList($listOptions);
 	}
 
@@ -922,7 +924,8 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * List all the categories
-	 * provides option to edit or delete them
+	 *
+	 * - Provides option to edit or delete them
 	 */
 	public function action_list_categories()
 	{
@@ -949,7 +952,8 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * List all the categories
-	 * provides option to edit or delete them
+	 *
+	 * Provides option to edit or delete them
 	 */
 	public function action_delete_category()
 	{
@@ -998,6 +1002,8 @@ class Awards_Controller extends Action_Controller
 		$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=awards;sa=viewcategory', $context['start'], $count_awards, $max_awards);
 		$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_viewing_category'];
 		$context['sub_template'] = 'view_category';
+
+		// And the admin tabs
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
@@ -1007,8 +1013,9 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * Shows all the awards that members have requested
-	 * Groups the requests by category
-	 * Calls request_award template
+	 *
+	 * - Groups the requests by category
+	 * - Calls request_award template
 	 */
 	public function action_awards_requests()
 	{
@@ -1034,8 +1041,9 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * Does the actual approval or deny of the request
-	 * if approved flips the active bit
-	 * if rejected removes the request
+	 *
+	 * - If approved flips the active bit
+	 * - If rejected removes the request
 	 */
 	private function action_awards_requests2()
 	{
@@ -1061,7 +1069,7 @@ class Awards_Controller extends Action_Controller
 		// Accept the request
 		if (isset($_POST['approve_selected']))
 			AwardsApproveDenyRequests($awards, true);
-		// or the more fun, deny em!
+		// Or the more fun, deny em!
 		elseif (isset($_POST['reject_selected']))
 			AwardsApproveDenyRequests($awards, false);
 

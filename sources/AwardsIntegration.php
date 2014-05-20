@@ -18,6 +18,7 @@ if (!defined('ELK'))
 
 /**
  * Profile Menu Hook, integrate_profile_areas, called from Profile.controller.php
+ *
  * Used to add menu items to the profile area
  * Adds show my & view award options
  *
@@ -78,7 +79,8 @@ function ipa_member_awards(&$profile_areas)
 
 /**
  * User Info Hook, integrate_user_info, called from Load.php
- * Used to add items to the $user_info array
+ *
+ * - Used to add items to the $user_info array
  *
  * @param array $profile_areas
  */
@@ -91,8 +93,9 @@ function iui_member_awards()
 
 /**
  * Admin hook, integrate_admin_areas, called from Admin.php
- * adds the admin menu and all award sub actions as a sub menu
- * hidden to all but admin, accessable via manage_award permission
+ *
+ * - Adds the admin menu and all award sub actions as a sub menu
+ * - hidden to all but admin, accessable via manage_award permission
  * @param array $admin_areas
  */
 function iaa_member_awards(&$admin_areas)
@@ -124,7 +127,8 @@ function iaa_member_awards(&$admin_areas)
 
 /**
  * Permissions hook, integrate_load_permissions, called from ManagePermissions.php
- * used to add new permisssions
+ *
+ * - Used to add new permisssions
  *
  * @param array $permissionGroups
  * @param array $permissionList
@@ -146,7 +150,8 @@ function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissio
 
 /**
  * Menu Button hook, integrate_menu_buttons, called from subs.php
- * used to add top menu buttons
+ *
+ * - Used to add top menu buttons
  *
  * @param type $buttons
  */

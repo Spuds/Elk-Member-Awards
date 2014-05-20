@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
-<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
-<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
-<id>spuds:HS4SMF</id>
-	
-<file name="$languagedir/Modifications.english.php">
+<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
+<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
+<id>spuds:MemberAwards</id>
+
+<file name="LANGUAGEDIR/english/Addons.english.php">
 	<operation>
 		<search position="end" />
 		<add><![CDATA[
-		
+
 ### Awards
 // Used by: Awards Errors
 $txt['cannot_manage_awards'] = 'You aren\'t allowed to manage awards.';
@@ -27,7 +27,7 @@ $txt['awards_desc'] = 'Award Description';
 $txt['awards_view_album'] = 'View member\'s badge album.';
 $txt['awards_main'] = 'Main';
 $txt['awards_modify'] = 'Modify';
-$txt['awards_add'] = 'Add Award'; 
+$txt['awards_add'] = 'Add Award';
 $txt['awards_actions'] = 'Actions';
 $txt['awards_categories'] = 'Categories';
 $txt['awards_settings'] = 'Settings';

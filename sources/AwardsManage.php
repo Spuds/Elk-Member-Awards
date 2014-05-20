@@ -119,9 +119,10 @@ function AwardsLoad($new_loaded_ids)
 
 /**
  * Master auto award function, runs the show
- * Loads all of the defined auto awards and groups them
- * Uses the cache when it can
- * Determines if any members in the list have earned any of the auto awards
+ *
+ * - Loads all of the defined auto awards and groups them
+ * - Uses the cache when it can
+ * - Determines if any members in the list have earned any of the auto awards
  *
  * @param type $new_loaded_ids
  */
@@ -134,7 +135,7 @@ function AwardsAutoCheck($new_loaded_ids)
 	$autoawardsid = cache_get_data('awards:autoawardsid', 4 * 3600);
 	if ($autoawards === null || $autoawardsid === null)
 	{
-		// init
+		// Init
 		$autoawards = array();
 		$autoawardsid = array();
 
@@ -151,7 +152,7 @@ function AwardsAutoCheck($new_loaded_ids)
 				'type' => 1,
 			)
 		);
-		// build up the auto awards array
+		// Build up the auto awards array
 		while ($row = $db->fetch_assoc($request))
 		{
 			$autoawards[$row['award_type']][] = $row; // holds all the awards information for each award type
@@ -159,7 +160,7 @@ function AwardsAutoCheck($new_loaded_ids)
 		}
 		$db->free_result($request);
 
-		// save it for 4 hours, really could be longer since it only changes when a new auto award is added / edited.
+		// Save it for 4 hours, really could be longer since it only changes when a new auto award is added / edited.
 		if (!empty($modSettings['cache_enable']))
 		{
 			cache_put_data('awards:autoawards', $autoawards, 4 * 3600);
@@ -240,8 +241,9 @@ function AwardsAutoCheck($new_loaded_ids)
 
 /**
  * Given the award limits, the members to check and the area, does the comparison
- * uses the data set in $user_profile by the various award querys (topic, post, timeon, etc)
- * Returns the member ids, from the supplied list, of any who have reached a threshold
+ *
+ * - uses the data set in $user_profile by the various award querys (topic, post, timeon, etc)
+ * - Returns the member ids, from the supplied list, of any who have reached a threshold
  *
  * @param type $awardids
  * @param type $new_loaded_ids
@@ -294,7 +296,8 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 
 /**
  * Does the database work of setting an autoaward to a member
- * Makes sure each member only has 1 of each award
+ *
+ * - Makes sure each member only has 1 of each award
  *
  * @param type $members
  * @param type $award_type
@@ -353,7 +356,7 @@ function AwardsAutoAssign($members, $award_type, $awardids)
 }
 
 /**
- * returns the number of topics started for each member in memberlist
+ * Returns the number of topics started for each member in memberlist
  *
  * @param type $memberlist
  * @param type $ttl
@@ -365,16 +368,16 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 
 	$db = database();
 
-	// init with all members in the query
+	// Init with all members in the query
 	$temp = $memberlist;
 
 	// Lets see if this is cached in our "cache in a cache"tm :P
 	if (($awards_topic_started = cache_get_data('awards:topic_started', $ttl)) != null)
 	{
-		// reset this since we have a cache, we will build it for only the members we need data on
+		// Reset this since we have a cache, we will build it for only the members we need data on
 		$temp = array();
 
-		// we have *some* cache data, see what members we have data for, and if its not stale use it
+		// We have *some* cache data, see what members we have data for, and if its not stale use it
 		foreach ($memberlist as $member)
 		{
 			if (isset($awards_topic_started[$member]['update']))
@@ -384,7 +387,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 					$user_profile[$member]['num_topics'] = $awards_topic_started[$member]['num_topics'];
 				else
 				{
-					// its a stale entry in the cache, add it to our lookup and drop if from the cache array
+					// Its a stale entry in the cache, add it to our lookup and drop if from the cache array
 					unset($awards_topic_started[$member]);
 					$temp[] = $member;
 				}
@@ -394,7 +397,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 		}
 	}
 
-	// if we did not find them all in the cache, or it was stale then do the query
+	// If we did not find them all in the cache, or it was stale then do the query
 	if (!empty($temp))
 	{
 		// Number of topics started.
@@ -409,7 +412,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 				'recycle_board' => $modSettings['recycle_board'],
 			)
 		);
-		// load them in to user_profile
+		// Load them in to user_profile
 		while ($row = $db->fetch_assoc($request))
 		{
 			$user_profile[$row['id_member_started']]['num_topics'] = $row['num_topics'];
@@ -421,12 +424,12 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 		$db->free_result($request);
 	}
 
-	// put this back in the cache
+	// Put this back in the cache
 	cache_put_data('awards:topic_started', $awards_topic_started, $ttl);
 }
 
 /**
- * returns the top X posters in $user_profile
+ * Returns the top X posters in $user_profile
  *
  * @param type $limit
  */
@@ -473,7 +476,7 @@ function AwardsTopPosters_1_N($limit = 10)
 }
 
 /**
- * returns the top X topic starters in $user_profile
+ * Returns the top X topic starters in $user_profile
  *
  * @param type $limit
  */
@@ -536,7 +539,7 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 }
 
 /**
- * returns the top X time on line members in $user_profile
+ * Returns the top X time on line members in $user_profile
  *
  * @param type $limit
  */
@@ -559,7 +562,7 @@ function AwardsTopTimeon_1_N($limit = 10)
 			'limit' => $limit
 		)
 	);
-	// init
+	// Init
 	$time_number = 0;
 	$temp2 = array();
 	// Make them available for use to use in user_profile
@@ -579,7 +582,7 @@ function AwardsTopTimeon_1_N($limit = 10)
 }
 
 /**
- * returns the top X join date based in $user_profile
+ * Returns the top X join date based in $user_profile
  *
  * @param type $memberlist
  */
@@ -595,7 +598,7 @@ function AwardsSeniority($memberlist)
 }
 
 /**
- * returns the karma level for the given list of users
+ * Returns the karma level for the given list of users
  *
  * @param type $memberlist
  */
@@ -613,7 +616,7 @@ function AwardsPopularity($memberlist)
 }
 
 /**
- * utility function to get the x.y years between to dates e.g. 1.5 is 1 year 6 months
+ * Utility function to get the x.y years between to dates e.g. 1.5 is 1 year 6 months
  *
  * @param type $time1
  * @param type $time2
@@ -642,7 +645,7 @@ function AwardsDateDiff($time1, $time2)
 		}
 	}
 
-	// build our return array of year, month
+	// Build our return array of year, month
 	foreach ($diffs as $interval => $value)
 		$times[$interval] = !empty($value) ? $value : 0;
 

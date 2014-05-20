@@ -1,19 +1,23 @@
 <?xml version="1.0"?>
-<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
-<!--
-  ==========================================================================
-  package "Member Awards" Addon for Elkarte
-  author Spuds
-  copyright (c) 2013 Spuds
-  license license.txt (included with package) MPL 1.1
-  ==========================================================================
--->
-<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
-	<id>spuds:member_awards</id>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+	<id>Spuds:MemberAwards</id>
+	<name>Member Awards</name>
 	<version>1.0</version>
+	<type>addon</type>
+	<license><![CDATA[
+/**
+ * Member Awards
+ *
+ * @author spuds
+ * @license MPL 1.1 http://mozilla.org/MPL/1.1/
+ *
+ * @version 1.0
+ */
+]]></license>
+<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
 
 	<file name="$sourcedir/Load.php">
-
 		<operation>
 			<search position="before"><![CDATA[
 			$user_profile[$row['id_member']] = $row;]]></search>

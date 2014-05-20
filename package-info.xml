@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
 <package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
-	<id>Spuds:memberawards</id>
+	<id>Spuds:MemberAwards</id>
 	<name>Member Awards</name>
 	<version>1.0</version>
-	<type>modification</type>
+	<type>addon</type>
 	<license><![CDATA[
 /**
  * Member Awards
