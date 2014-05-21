@@ -64,10 +64,10 @@ class Awards_Controller extends Action_Controller
 			redirectexit('action=profile;area=showAwards;u=' . $memID);
 		}
 
-		// Get the total number of awards this member has earned
-		$context['count_awards'] = AwardsCountMembersAwards();
+		// Count the number of items in the database for create index
+		$context['count_awards'] = AwardsCountMembersAwards($memID);
 
-		// Set the max number of results to pull up.
+	// Calculate the number of results to pull up.
 		$max_awards = 25;
 
 		// Construct the page index
@@ -99,11 +99,11 @@ class Awards_Controller extends Action_Controller
 
 		// Load this awards details
 		$id = (int) $_REQUEST['a_id'];
-		AwardsLoadAward($id);
+		$context['award'] = AwardsLoadAward($id);
 
-		// build the listoption array to display the data
+		// Build the listoption array to display the data, in this case who has this award
 		$listOptions = array(
-			'id' => 'view_assigned',
+			'id' => 'view_profile_assigned',
 			'title' => $txt['awards_showmembers'] . ': ' . $context['award']['award_name'],
 			'items_per_page' => 25,
 			'no_items_label' => $txt['awards_no_assigned_members2'],
@@ -182,7 +182,7 @@ class Awards_Controller extends Action_Controller
 
 		// Array of this members awards to prevent a request for something they have
 		$awardcheck = array();
-		$awards = $user_profile[$user_info['id']]['awards'];
+		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards'] : array();
 		foreach ($awards as $award)
 			$awardcheck[$award['id']] = 1;
 
@@ -205,7 +205,7 @@ class Awards_Controller extends Action_Controller
 		{
 			// Load this awards details for the form
 			$id = (int) $_REQUEST['a_id'];
-			AwardsLoadAward($id);
+			$context['award'] = AwardsLoadAward($id);
 
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
@@ -236,7 +236,7 @@ class Awards_Controller extends Action_Controller
 			$date = date('Y-m-d');
 
 			// let's see if the award exists, silly hackers
-			AwardsLoadAward($id);
+			$context['award'] = AwardsLoadAward($id);
 
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
@@ -249,6 +249,10 @@ class Awards_Controller extends Action_Controller
 
 			// If we made it this far insert /replace it so it can be reviewed.
 			AwardsMakeRequest($id, $date, $comments, true);
+
+			updateSettings(array(
+				'awards_request' => $modSettings['awards_request'],
+			));
 
 			// Redirect to their awards page.
 			redirectexit('action=profile;area=showAwards;u=' . $user_info['id']);
