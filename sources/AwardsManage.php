@@ -32,7 +32,8 @@ function AwardsLoad($new_loaded_ids)
 
 	// Build our database request to load all existing member awards for this group of members, including group awards
 	$request = $db->query('', '
-		SELECT am.id_member, am.active, am.id_group,
+		SELECT 
+			am.id_member, am.active, am.id_group,
 			aw.id_award, aw.award_name, aw.description, aw.minifile, aw.award_trigger, aw.award_type, aw.award_location
 		FROM {db_prefix}awards_members AS am
 			INNER JOIN {db_prefix}awards AS aw ON (aw.id_award = am.id_award)
@@ -128,6 +129,8 @@ function AwardsLoad($new_loaded_ids)
  */
 function AwardsAutoCheck($new_loaded_ids)
 {
+	global $modSettings;
+	
 	$db = database();
 
 	// See if we already have this in the cache
@@ -144,7 +147,8 @@ function AwardsAutoCheck($new_loaded_ids)
 		// The key is the trigger desc sort, this allows us to use 1 query for that auto award 'type',
 		// all others will be a subset of that
 		$request = $db->query('', '
-			SELECT id_award, award_name, award_trigger, award_type
+			SELECT 
+				id_award, award_name, award_trigger, award_type
 			FROM {db_prefix}awards
 			WHERE award_type > {int:type}
 			ORDER BY award_type DESC, award_trigger DESC',
@@ -346,7 +350,8 @@ function AwardsAutoAssign($members, $award_type, $awardids)
 	}
 
 	// Now the adds, Insert the award data
-	$db->insert('insert', '{db_prefix}awards_members',
+	$db->insert('insert', '
+		{db_prefix}awards_members',
 		array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'award_type' => 'int', 'active' => 'int'),
 		$values,
 		array('id_member', 'id_award')
@@ -402,7 +407,8 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 	{
 		// Number of topics started.
 		$request = $db->query('', '
-			SELECT COUNT(*) AS num_topics, id_member_started
+			SELECT 
+				COUNT(*) AS num_topics, id_member_started
 			FROM smf_topics
 			WHERE id_member_started IN ({array_int:memberlist})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 				AND id_board != {int:recycle_board}' : '') . '
@@ -444,7 +450,8 @@ function AwardsTopPosters_1_N($limit = 10)
 	if (($members = cache_get_data('awards_top_posters', 360)) == null)
 	{
 		$request = $db->query('', '
-			SELECT id_member, posts
+			SELECT 
+				id_member, posts
 			FROM {db_prefix}members
 			WHERE posts > {int:no_posts}
 			ORDER BY posts DESC
@@ -491,7 +498,8 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 	if (($members = cache_get_data('awards_top_starters', 360)) == null)
 	{
 		$request = $db->query('', '
-			SELECT id_member_started, COUNT(*) AS hits
+			SELECT
+				id_member_started, COUNT(*) AS hits
 			FROM {db_prefix}topics' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 			WHERE id_board != {int:recycle_board}' : '') . '
 			GROUP BY id_member_started
@@ -517,7 +525,8 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 
 	// And now get the top 1-N topic starter.
 	$request = $db->query('top_topic_starters', '
-		SELECT id_member
+		SELECT 
+			id_member
 		FROM {db_prefix}members
 		WHERE id_member IN ({array_int:member_list})
 		ORDER BY FIND_IN_SET(id_member, {string:top_topic_posters})
@@ -552,7 +561,8 @@ function AwardsTopTimeon_1_N($limit = 10)
 	// The time on line 1-N list will not change that often, so cache it for a bit
 	$temp = cache_get_data('awards_total_time_members', 600);
 	$request = $db->query('', '
-		SELECT id_member, total_time_logged_in
+		SELECT 
+			id_member, total_time_logged_in
 		FROM {db_prefix}members' . (!empty($temp) ? '
 		WHERE id_member IN ({array_int:member_list_cached})' : '') . '
 		ORDER BY total_time_logged_in DESC
