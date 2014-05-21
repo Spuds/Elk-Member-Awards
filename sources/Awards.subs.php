@@ -30,8 +30,8 @@ function AwardsLoadAward($id = -1)
 	// Load single award
 	$request = $db->query('', '
 		SELECT
-			id_award, award_name, description, id_category, time_added, award_trigger,
-			award_type, award_location, award_requestable, award_assignable, filename, minifile
+			id_award, award_name, description, id_category, time_added, filename, minifile,
+			award_trigger, award_type, award_location, award_requestable, award_assignable
 		FROM {db_prefix}awards
 		WHERE id_award = {int:id}
 		LIMIT 1',
@@ -51,7 +51,7 @@ function AwardsLoadAward($id = -1)
 		'award_name' => $row['award_name'],
 		'description' => $row['description'],
 		'category' => $row['id_category'],
-		'time' => timeformat($row['time_added']),
+		'time' => standardTime($row['time_added']),
 		'trigger' => $row['award_trigger'],
 		'type' => $row['award_type'],
 		'location' => $row['award_location'],
@@ -86,7 +86,7 @@ function AwardsCountCategoryAwards($cat)
 		FROM {db_prefix}awards
 		WHERE id_category = {int:cat}',
 		array(
-			'cat' => (int) $cat,
+			'cat' => $cat,
 		)
 	);
 	list($countAwards) = $db->fetch_row($request);
@@ -115,7 +115,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 	$request = $db->query('', '
 		SELECT
 			a.id_category, a.id_award, a.award_name, a.description, a.time_added, a.filename, a.minifile, a.award_type,
-			a.award_requestable, a.award_assignable, a.trigger
+			a.award_requestable, a.award_assignable, a.award_trigger,
 			c.category_name
 		FROM {db_prefix}awards AS a
 			LEFT JOIN {db_prefix}awards_categories AS c ON (c.id_category = a.id_category)
@@ -126,7 +126,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 			'start' => $start,
 			'end' => $items_per_page,
 			'sort' => $sort,
-			'cat' => (int) $cat,
+			'cat' => $cat,
 		)
 	);
 	$categories = array();
@@ -139,7 +139,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 			'award_name' => $row['award_name'],
 			'award_type' => $row['award_type'],
 			'description' => $row['description'],
-			'time' => timeformat($row['time_added']),
+			'time' => standardTime($row['time_added']),
 			'requestable' => $row['award_requestable'],
 			'assignable' => $row['award_assignable'],
 			'filename' => $row['filename'],
@@ -171,18 +171,18 @@ function AwardsCountMembersAwards($memID)
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT id_award
+		SELECT id_award, id_group, active
 		FROM {db_prefix}awards_members
-		WHERE (id_member = {int:mem}
-			OR (id_member < 0 AND id_group IN({array_int:groups})))
+		WHERE (id_member = {int:mem}' . (!empty($cur_profile['groups']) ? '
+				OR (id_member < 0 AND id_group IN ({array_int:groups}))' : '') . ')
 			AND active = {int:active}',
 		array(
 			'mem' => $memID,
-			'groups' => array_map(intval, $cur_profile['groups']),
+			'groups' => !empty($cur_profile['groups']) ? array_map('intval', $cur_profile['groups']) : '',
 			'active' => 1
 		)
 	);
-	// load/count them this way as they may have been assinged an award individually or via group
+	// load/count them this way as they may have been assigned an award individually or via group
 	while ($row = $db->fetch_assoc($request))
 		$awards[$row['id_award']] = $row['id_award'];
 	$db->free_result($request);
@@ -213,8 +213,8 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 		FROM {db_prefix}awards AS aw
 			LEFT JOIN {db_prefix}awards_members AS am ON (am.id_award = aw.id_award)
 			LEFT JOIN {db_prefix}awards_categories AS c ON (c.id_category = aw.id_category)
-		WHERE (am.id_member = {int:member}
-			OR (am.id_member < 0 AND am.id_group IN({array_int:groups})))
+		WHERE (am.id_member = {int:member}' . (!empty($cur_profile['groups']) ? '
+			OR (am.id_member < 0 AND am.id_group IN({array_int:groups}))' : '') .')
 			AND am.active = {int:active}
 		ORDER BY am.favorite DESC, c.category_name DESC, aw.award_name DESC
 		LIMIT {int:start}, {int:end}',
@@ -222,7 +222,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 			'start' => $start,
 			'end' => $end,
 			'member' => $memID,
-			'groups' => array_map(intval, $cur_profile['groups']),
+			'groups' => !empty($cur_profile['groups']) ? array_map('intval', $cur_profile['groups']) : '',
 			'active' => 1
 		)
 	);
@@ -233,7 +233,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 		if (!isset($categories[$row['id_category']]['name']))
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
-				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
+				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;id=' . $row['id_category'],
 				'awards' => array(),
 			);
 
@@ -244,8 +244,8 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 			'more' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'favorite' => array(
 				'fav' => $row['favorite'],
-				'href' => $scripturl . '?action=profile;area=showAwards;in=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
-				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite'] . '" title="' . $txt['awards_favorite'] . '" />',
+				'href' => $scripturl . '?action=profile;area=showAwards;id=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
+				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
 			),
 			'filename' => $row['filename'],
 			'time' => list ($year, $month, $day) = sscanf($row['date_received'], '%d-%d-%d'),
@@ -295,7 +295,7 @@ function AwardsLoadAssignableAwards()
 }
 
 /**
- * Loads all of the member reqestable awards that have active requests against them
+ * Loads all of the member requestable awards that have active requests against them
  *
  * - Finds members that have requested these awards for approval display
  */
@@ -482,6 +482,7 @@ function AwardsDeleteAward($id)
  * Load the list of groups that this member can see
  *
  * - Counts the number of members in each group (including post count based ones)
+ * - Loads all groups, normal, moderator, postcount, hidden, etc
  * - Returns the array of values
  */
 function AwardsLoadGroups()
@@ -498,8 +499,10 @@ function AwardsLoadGroups()
 
 	// Find all the groups
 	$request = $db->query('', '
-		SELECT mg.id_group, mg.group_name, mg.group_type, mg.hidden,
-			IFNULL(gm.id_member, 0) AS can_moderate, CASE WHEN min_posts != {int:min_posts} THEN 1 ELSE 0 END AS is_post_group
+		SELECT
+			mg.id_group, mg.group_name, mg.group_type, mg.hidden,
+			IFNULL(gm.id_member, 0) AS can_moderate,
+			CASE WHEN min_posts != {int:min_posts} THEN 1 ELSE 0 END AS is_post_group
 		FROM {db_prefix}membergroups AS mg
 			LEFT JOIN {db_prefix}group_moderators AS gm ON (gm.id_group = mg.id_group AND gm.id_member = {int:current_member})
 		WHERE mg.id_group != {int:mod_group}' . (allowedTo('admin_forum') ? '' : '
@@ -536,59 +539,13 @@ function AwardsLoadGroups()
 	}
 	$db->free_result($request);
 
-	// Now count up the number of members in each of the normal groups
-	if (!empty($group_ids))
+	// Now count up ALL of members in each groups
+	require_once(SUBSDIR . '/Membergroups.subs.php');
+	$group_count = membersInGroups($group_ids_pc, $group_ids, true, true);
+	foreach ($group_count as $id_group => $number)
 	{
-		$query = $db->query('', '
-			SELECT id_group, COUNT(*) AS num_members
-			FROM {db_prefix}members
-			WHERE id_group IN ({array_int:group_list})
-			GROUP BY id_group',
-			array(
-				'group_list' => $group_ids,
-			)
-		);
-		while ($row = $db->fetch_assoc($query))
-			$groups[$row['id_group']]['member_count'] += $row['num_members'];
-		$db->free_result($query);
-
-		// Only do additional groups if we can moderate...
-		if ($context['can_moderate'])
-		{
-			$query = $db->query('', '
-				SELECT mg.id_group, COUNT(*) AS num_members
-				FROM {db_prefix}membergroups AS mg
-					INNER JOIN {db_prefix}members AS mem ON (mem.additional_groups != {string:blank_screen}
-						AND mem.id_group != mg.id_group
-						AND FIND_IN_SET(mg.id_group, mem.additional_groups) != 0)
-				WHERE mg.id_group IN ({array_int:group_list})
-				GROUP BY mg.id_group',
-				array(
-					'group_list' => $group_ids,
-					'blank_screen' => '',
-				)
-			);
-			while ($row = $db->fetch_assoc($query))
-				$groups[$row['id_group']]['member_count'] += $row['num_members'];
-			$db->free_result($query);
-		}
-	}
-
-	// Now on to the post count groups
-	if (!empty($group_ids_pc))
-	{
-		$query = $db->query('', '
-			SELECT id_post_group AS id_group, COUNT(*) AS num_members
-			FROM {db_prefix}members
-			WHERE id_post_group IN ({array_int:group_list})
-			GROUP BY id_post_group',
-			array(
-				'group_list' => $group_ids_pc,
-			)
-		);
-		while ($row = $db->fetch_assoc($query))
-			$groups[$row['id_group']]['member_count'] += $row['num_members'];
-		$db->free_result($query);
+		if (isset($groups[$id_group]))
+			$groups[$id_group] ['member_count'] = $number;
 	}
 
 	return $groups;
@@ -699,7 +656,7 @@ function AwardsLoadMembers($start, $items_per_page, $sort, $id)
 		ORDER BY {raw:sort}
 		LIMIT {int:start}, {int:per_page}',
 		array(
-			'award' => (int) $id,
+			'award' => $id,
 			'active' => 1,
 			'sort' => $sort,
 			'start' => $start,
@@ -740,7 +697,7 @@ function AwardsLoadMembersCount($id)
 		WHERE id_award = {int:award}
 			AND active = {int:active}',
 		array(
-			'award' => (int) $id,
+			'award' => $id,
 			'active' => 1
 		)
 	);
@@ -857,7 +814,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 }
 
 /**
- * Loads all of the categoies in the system
+ * Loads all of the categories in the system
  *
  * - Returns array of categories with key of name and value of id
  *
@@ -933,7 +890,7 @@ function AwardsLoadCategory($id)
 /**
  * Loads all the categories in the system
  *
- * - Returns an array of categorys and links
+ * - Returns an array of categories and links
  */
 function AwardsLoadAllCategories()
 {
@@ -1056,7 +1013,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 		if (!isset($categories[$row['id_category']]['name']))
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
-				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
+				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;id=' . $row['id_category'],
 				'awards' => array(),
 			);
 
@@ -1064,7 +1021,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
 			'description' => $row['description'],
-			'time' => timeformat($row['time_added']),
+			'time' => standardTime($row['time_added']),
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
 			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
@@ -1180,7 +1137,7 @@ function AwardsRemoveMembers($id, $members = array())
 			WHERE id_award = {int:id}
 				AND uniq_id IN (' . implode(', ', $members) . ')',
 			array(
-				'id' => $id
+				'id' => $id,
 			)
 		);
 }
@@ -1194,14 +1151,15 @@ function AwardsAddMembers($values, $group = false)
 {
 	$db = database();
 
-	// Insert the data
-	if ($group)
+	// Insert the data for a set of members
+	if (!$group)
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
 			array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'active' => 'int'),
 			$values,
 			array('id_member', 'id_award')
 		);
+	// Insert the data for a group award
 	else
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
@@ -1274,18 +1232,15 @@ function AwardsAddImage($id, $newName = '', $miniName = '')
  */
 function AwardsUpload($id_award)
 {
-	global $modSettings, $boarddir, $sourcedir;
+	global $modSettings;
 
 	// Go
 	$newName = '';
 	$miniName = '';
 
-	// Load in our helper functions
-	require_once($sourcedir . '/AwardsSubs.php');
-
 	// Lets try to CHMOD the awards dir if needed.
-	if (!is_writable($boarddir . '/' . $modSettings['awards_dir']))
-		@chmod($boarddir . '/' . $modSettings['awards_dir'], 0755);
+	if (!is_writable(BOARDDIR . '/' . $modSettings['awards_dir']))
+		@chmod(BOARDDIR . '/' . $modSettings['awards_dir'], 0755);
 
 	// Did they upload a new award image
 	if ($_FILES['awardFile']['error'] != 4)
@@ -1295,10 +1250,10 @@ function AwardsUpload($id_award)
 
 		// Define $award
 		$award = $_FILES['awardFile'];
-		$newName = $boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '.' . strtolower(substr(strrchr($award['name'], '.'), 1));
+		$newName = BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '.' . strtolower(substr(strrchr($award['name'], '.'), 1));
 
 		// create the miniName in case we need to use this file as the mini as well
-		$miniName = $boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '-mini.' . strtolower(substr(strrchr($award['name'], '.'), 1));
+		$miniName = BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '-mini.' . strtolower(substr(strrchr($award['name'], '.'), 1));
 
 		// Move the file to the right directory
 		move_uploaded_file($award['tmp_name'], $newName);
@@ -1315,7 +1270,7 @@ function AwardsUpload($id_award)
 
 		// Define $award
 		$award = $_FILES['awardFileMini'];
-		$miniName = $boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '-mini.' . strtolower(substr(strrchr($award['name'], '.'), 1));
+		$miniName = BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '-mini.' . strtolower(substr(strrchr($award['name'], '.'), 1));
 
 		// Now move the file to the right directory
 		move_uploaded_file($award['tmp_name'], $miniName);
@@ -1339,7 +1294,7 @@ function AwardsUpload($id_award)
  */
 function AwardsValidateImage($name, $id)
 {
-	global $sourcedir, $modSettings;
+	global $modSettings;
 
 	$award = $_FILES[$name];
 
@@ -1360,63 +1315,9 @@ function AwardsValidateImage($name, $id)
 		fatal_lang_error('awards_error_upload_failed');
 
 	// Now check if it has a potential virus etc.
-	require_once($sourcedir . '/Subs-Graphics.php');
+	require_once(SUBSDIR . '/Graphics.subs.php');
 	if (!checkImageContents($award['tmp_name'], !empty($modSettings['avatar_paranoid'])))
 		fatal_lang_error('awards_error_upload_security_failed');
-}
-
-/**
- * Converts a php array to a JS object
- *
- * - Yes I know about json, kthanks
- *
- * @param array $array
- * @param string $object_name
- */
-function AwardsBuildJavascriptObject($array, $object_name)
-{
-    return 'var ' . $object_name . ' = ' . AwardsBuildJavascriptObject_Recurse($array) . ";\n";
-}
-
-/**
- * Main function to do the array to JS object conversion
- *
- * @param array $array
- */
-function AwardsBuildJavascriptObject_Recurse($array)
-{
-	// Not an array so just output it.
-	if (!is_array($array))
-	{
-		// Handle null correctly
-		if ($array === null)
-			return 'null';
-
-		return '"' . $array . '"';
-	}
-
-	// Start of this object.
-	$retVal = "{";
-
-	// Output all key/value pairs as "$key" : $value
-	$first = true;
-	foreach ($array as $key => $value)
-	{
-		// Add a comma before all but the first pair.
-		if (!$first)
-			$retVal .= ', ';
-
-		$first = false;
-
-		// Quote $key if it's a string.
-		if (is_string($key))
-			$key = '"' . $key . '"';
-
-		$retVal .= $key . ' : ' . AwardsBuildJavascriptObject_Recurse($value);
-	}
-
-	// Close and return the JS object.
-	return $retVal . "}";
 }
 
 /**
