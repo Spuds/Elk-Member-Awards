@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @name      Member Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -32,7 +32,7 @@ function ipa_member_awards(&$profile_areas)
 	if ($user_info['is_guest'])
 		return;
 
-	member_awards_array_insert($profile_areas, 'info', array(
+	elk_array_insert($profile_areas, 'info', array(
 		'member_awards' => array(
 			'title' => $txt['awards'],
 			'areas' => array(
@@ -109,18 +109,19 @@ function iaa_member_awards(&$admin_areas)
 	// our main awards menu area, under the members tab
 	$admin_areas['members']['areas']['awards'] = array(
 		'label' => $txt['awards'],
-		'file' => 'AwardsAdmin.php',
-		'function' => 'Awards',
-		'icon' => 'awards.gif',
-		'permission' => array('manage_awards','assign_awards'),
+		'file' => 'ManageAwards.controller.php',
+		'controller' => 'Awards_Controller',
+		'function' => 'action_index',
+		'icon' => 'awards.png',
+		'permission' => array('manage_awards', 'assign_awards'),
 		'subsections' => array(
-			'main' => array($txt['awards_main'],array('assign_awards','manage_awards')),
-			'categories' => array($txt['awards_categories'],'manage_awards'),
-			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),			'assign' => array($txt['awards_assign'],array('assign_awards','manage_awards')),
-			'assigngroup' => array($txt['awards_assign_membergroup'],'manage_awards'),
+			'main' => array($txt['awards_main'], array('assign_awards','manage_awards')),
+			'categories' => array($txt['awards_categories'], 'manage_awards'),
+			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'), 'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
+			'assigngroup' => array($txt['awards_assign_membergroup'], 'manage_awards'),
 			'assignmass' => array($txt['awards_assign_mass'],'manage_awards'),
-			'requests' => array($txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'),array('assign_awards','manage_awards')),
-			'settings' => array($txt['awards_settings'],'manage_awards'),
+			'requests' => array($txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'), array('assign_awards', 'manage_awards')),
+			'settings' => array($txt['awards_settings'], 'manage_awards'),
 		)
 	);
 }
@@ -168,31 +169,216 @@ function imb_member_awards(&$buttons)
 }
 
 /**
- * Helper function to insert a menu
+ * Load Member Data hook, integrate_load_member_data, Called from load.php
  *
- * @param array $input the array we will insert to
- * @param string $key the key in the array
- * @param array $insert the data to add before or after the above key
- * @param string $where adding before or after
- * @param bool $strict
+ * Used to add columns / tables to the query so additional data can be loaded for a set
+ *
  */
-function member_awards_array_insert(&$input, $key, $insert, $where = 'before', $strict = false)
+function iamd_member_awards($new_loaded_ids, $set)
 {
-	$position = array_search($key, array_keys($input), $strict);
+	global $user_profile, $modSettings;
 
-	// If the key is not found, just insert it at the end
-	if ($position === false)
+	// Give them all nothing to start
+	// @todo is this needed outside of minimal ?
+	foreach ($new_loaded_ids as $id)
 	{
-		$input = array_merge($input, $insert);
-		return;
+		$user_profile[$id]['awards'] = array();
+		$user_profile[$id]['awardlist'] = array();
 	}
 
-	if ($where === 'after')
-		$position += 1;
+	// I'm sorry, but I've got to stick this award somewhere ...
+	if ($modSettings['awards_in_post'] > 0 && $set !== 'minimal')
+	{
+		require_once(SUBSDIR . '/AwardsManage.php');
+		AwardsLoad($new_loaded_ids);
+		AwardsAutoCheck($new_loaded_ids);
+	}
+}
 
-	// Insert as first
-	if ($position === 0)
-		$input = array_merge($insert, $input);
-	else
-		$input = array_merge(array_slice($input, 0, $position), $insert, array_slice($input, $position));
+/**
+ * Load data to Member Context, integrate_member_context
+ *
+ * Called from load.php
+ * Used to add items to the $memberContext array
+ */
+function imc_member_awards($user)
+{
+	global $memberContext, $user_profile, $context;
+
+	// @todo reference needed here?, like &$user_profile[$user]['awards']
+	if ($context['loadMemberContext_set'] !== 'minimal')
+		$memberContext[$user]['awards'] = $user_profile[$user]['awards'];
+}
+
+/**
+ * Whos online hook
+ *
+ * integrate_whos_online_allowed
+ *
+ * - Used to add action view permissions checks to the who's online listing
+ *
+ * @param mixed[] $actions
+ */
+function iwoa_member_awards(&$allowedActions)
+{
+	$allowedActions['awards'] = array('manage_awards');
+
+	return;
+}
+
+function injectProfileAwards(&$poster_div, $message)
+{
+	global $txt, $scripturl, $modSettings, $context, $settings;
+
+	// Showing member awards in all the wrong places
+	if (!empty($message['member']['awards']) && $modSettings['awards_in_post'] > 0)
+	{
+		// Show their profile awards, maybe for badges and the like
+		$awards_link = array();
+
+		// Load all this members award areas
+		foreach ($message['member']['awards'] as $award)
+		{
+			// Above
+			if ($award['location'] == 2)
+			{
+				$awards_link[2][] = '
+					<a href="' . $scripturl . $award['more'] . '">
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+					</a> ';
+			}
+			// Below
+			elseif ($award['location'] == 1)
+			{
+				$awards_link[1][] = '
+					<a href="' . $scripturl . $award['more'] . '">
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+					</a> ';
+				$awards++;
+			}
+			// Signature
+			elseif ($award['location'] == 3)
+			{
+				$awards_link[3][] = '
+					<a href="' . $scripturl . $award['more'] . '">
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+					</a> ';
+			}
+		}
+
+		// Above profile awards ...
+		if (!empty($awards_link[2]))
+		{
+			// Only allow the number the admin set
+			array_splice($awards_link[2], $modSettings['awards_in_post']);
+
+			// Specific style class chosen?
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
+			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
+			: 'award_poster_3');
+
+			$award_output = '
+				<li>
+					<fieldset class="' . $style . '">';
+
+			// Title for the above awards "box"
+			if (isset($modSettings['awards_aboveavatar_title']))
+				$award_output .= '
+						<legend>
+							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_aboveavatar_title'] . '</a>
+						</legend>';
+
+			$award_output .= implode('', $awards_link[2]) . '
+					</fieldset>
+				</li>';
+
+			// Insert the award output in the approriate spot, right above the dropdown
+			$find = '<ul class="menulevel2" id="msg_' . $message['id'];
+			$replace = $award_output . $find;
+			$poster_div = awards_str_replace_once($find, $replace, $poster_div);
+		}
+
+		// Below profile awards ...
+		if (!empty($awards_link[1]))
+		{
+			// Only allow the number the admin set
+			array_splice($awards_link[1], $modSettings['awards_in_post']);
+
+			// Style for this area?
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
+			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
+			: 'award_poster_3');
+
+			$award_output = '
+				<li>
+					<fieldset class="' . $style . '">';
+
+			if (isset($modSettings['awards_belowavatar_title']))
+				$award_output .= '
+						<legend>
+							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_belowavatar_title'] . '</a>
+						</legend>';
+
+			$award_output .= implode('', $awards_link[1]) . '
+					</fieldset>
+				</li>';
+
+			// Insert the award output in the approriate spot, at the end of the poster div sounds good
+			$poster_div .= $award_output;
+		}
+
+		// Show their signature awards?
+		if (!empty($awards_link[3]))
+		{
+			// Only allow the number set
+			array_splice($awards_link[1], $modSettings['awards_in_post']);
+
+			// Style for the sigs?
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_signature_1'
+			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
+			: 'award_signature_3');
+
+			$award_output = '
+					<div class="signature">
+						<fieldset class="' .  $style . '">';
+
+				// Title for the signature area?
+				if (isset($modSettings['awards_signature_title']))
+					$award_output .= '
+							<legend>
+								<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_signature_title'] . '</a>
+							</legend>';
+
+			$award_output .= implode('', $awards_link[1]) . '
+						</fieldset>
+					</div>';
+
+			// Just make it availale to the template, can't inject this one from here
+			$context['award']['signature'] = $award_output;
+
+		}
+
+		// Give them a link to see all the awards
+		$poster_div .= '
+				<li>
+					<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/award.png" alt="' . $txt['awards'] . '" title="' . $txt['awards'] . '" border="0" />' : $txt['awards']) . '</a>
+				</li>';
+	}
+}
+
+/**
+ * Helper function for string replacement
+ *
+ * @param string $needle
+ * @param string $replace
+ * @param string $haystack
+ */
+function awards_str_replace_once($needle, $replace, $haystack)
+{
+	// Looks for the first occurrence of $needle in $haystack and replaces it with $replace
+	$pos = strpos($haystack, $needle);
+	if ($pos === false)
+		return $haystack;
+
+	return substr_replace($haystack, $replace, $pos, strlen($needle));
 }
