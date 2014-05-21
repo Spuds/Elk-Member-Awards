@@ -247,7 +247,7 @@ function template_awards_request()
 
 	// Start with the form.
 	echo '
-		<form action="', $scripturl, '?action=profile;area=requestAwards;step=2" method="post" name="request" id="request" accept-charset="', $context['character_set'], '" enctype="multipart/form-data">';
+		<form action="', $scripturl, '?action=profile;area=requestAwards;step=2" method="post" name="request" id="request" accept-charset="UTF-8" enctype="multipart/form-data">';
 
 	// Enter a reason why you want this award.
 	echo '

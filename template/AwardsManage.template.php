@@ -1,7 +1,5 @@
 <?php
 
-// Version: 3.0 AwardsManage.template
-
 function template_main()
 {
 	global $context;
@@ -15,32 +13,25 @@ function template_main()
 
 function template_modify()
 {
-	global $context, $txt, $scripturl, $settings;
+	global $context, $txt, $scripturl;
 
 	echo '
-				<form action="', $scripturl, '?action=admin;area=awards;sa=modify" method="post" name="award" id="award" accept-charset="', $context['character_set'], '" enctype="multipart/form-data">';
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=modify" method="post" name="award" accept-charset="UTF-8" enctype="multipart/form-data">';
 
 	if (isset($_GET['saved']))
 		echo'
-					<span class="upperframe"><span></span></span>
-					<div class="roundframe">
-						<div id="savestatus"><img class="icon" src="' . $settings['images_url'] . '/awards/award_save.png" alt="" />&nbsp;',
-							$txt['awards_saved_award'], '
-						</div>
-					</div>
-					<span class="lowerframe"><span></span></span>';
-
-	echo '
-					<div class="cat_bar">
-						<h3 class="category_header">
-							', ($context['editing'] == true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : ('<img class="icon" src="' . $settings['images_url'] . '/awards/award_add.png" alt="" />&nbsp;' . $txt['awards_add_award'])), '
-						</h3>
+					<div class="infobox">',
+						$txt['awards_saved_award'], '
 					</div>';
 
 	echo '
-					<div class="windowbg2">
+					<h3 class="category_header hdicon cat_img_award_add ">
+						', ($context['editing'] === true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : $txt['awards_add_award']), '
+					</h3>';
+
+	echo '			<div class="windowbg2">
 						<div class="content">
-							<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+							<fieldset>
 								<legend>', $txt['awards_add_name'], '</legend>
 								<dl class="settings">
 									<dt>
@@ -73,7 +64,7 @@ function template_modify()
 								</dl>
 							</fieldset>
 
-							<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+							<fieldset>
 								<legend>', $txt['awards_add_type'], '</legend>
 								<dl class="settings">
 									<dt>
@@ -96,20 +87,20 @@ function template_modify()
 										<br />
 										<span id="awardTrigger_desc" class="smalltext" ></span>';
 
-	// and the descriptions for them, hidden and used by javascript to fill in the awardTrigger_desc span
+	// The descriptions for them, hidden and used by javascript to fill in the awardTrigger_desc span
 	foreach ($context['award_types'] as $desc)
 		echo '
 										<span id="trigger_desc_', $desc['id'], '" style="display:none">', $desc['desc'], '</span>';
 
 	echo '
 									</dt>
-										<dd>
-											<input type="text" name="awardTrigger" id="awardTrigger" value="', $context['award']['trigger'], '" size="30" class="input_text"/>
-										</dd>
+									<dd>
+										<input type="text" name="awardTrigger" id="awardTrigger" value="', $context['award']['trigger'], '" size="30" class="input_text"/>
+									</dd>
 								</dl>
 							</fieldset>
 
-							<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+							<fieldset>
 								<legend>', $txt['awards_add_image'], '</legend>
 								<dl class="settings">
 									<dt>
@@ -163,7 +154,7 @@ function template_modify()
 								</dl>
 							</fieldset>
 
-							<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+							<fieldset>
 								<legend>', $txt['awards_extras'], '</legend>
 								<dl class="settings">
 									<dt>
@@ -183,49 +174,38 @@ function template_modify()
 								</dl>
 							</fieldset>
 
-							<input type="hidden" name="a_id" value="', $context['award']['id'], '" />
-							<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-							<hr class="hrcolor" />
-							<div class="righttext">
+							<div class="submitbutton">
+								<input type="hidden" name="a_id" value="', $context['award']['id'], '" />
+								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 								<input type="submit" class="button_submit" name="award_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_submit'], '" accesskey="s" />
 							</div>
 						</div>
 					</div>
-					<br class="clear" />
 				</form>';
-
-	if (!empty($context['settings_post_javascript']))
-		echo '
-			<script type="text/javascript"><!-- // --><![CDATA[
-			', $context['settings_post_javascript'], '
-			// ]]></script>';
 }
 
+/**
+ * Used to assign a member group to an award
+ */
 function template_assign_group()
 {
 	global $context, $scripturl, $txt, $modSettings, $settings;
 
 	echo '
 		<div id="awardpage">
-			<span class="upperframe"><span></span></span>
-			<div class="roundframe">
-				<div id="welcome">',
-					$txt['awards_assigngroup_intro'], '
-				</div>
+			<div class="infobox">',
+				$txt['awards_assigngroup_intro'], '
 			</div>
-			<span class="lowerframe"><span></span></span>
-
-			<br class="clear" />
 
 			<div id="awardassign">
-				<form action="', $scripturl, '?action=admin;area=awards;sa=assigngroup;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="', $context['character_set'], '">
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assigngroup;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="UTF-8">
 					<div class="floatleft" style="width:22%">
 						<h3 class="category_header">
-							<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
+							', $txt['awards_select_badge'], '
 						</h3>
 						<div class="windowbg">
 							<div class="content">
-								<dl class="settings">
+								<dl id="awardselect" class="settings">
 									<dt>
 										<select name="award" onchange="showaward();" size="10">';
 
@@ -248,348 +228,6 @@ function template_assign_group()
 							', $txt['awards_assign_badge'], '
 						</h3>
 						<div class="windowbg">
-								<div class="content">
-									<dl class="settings">
-										<dt>
-											<label for="awards"><b>', $txt['awards_image'], ':</b></label>
-										</dt>
-										<dd>
-											<img id="awards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['filename'] : '', '" align="middle"  alt=""/>
-										</dd>
-										<dt>
-											<label for="miniawards"><b>', $txt['awards_mini'], ':</b></label>
-										</dt>
-										<dd>
-											<img id="miniawards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['minifile'] : '', '" align="middle"  alt=""/>
-										</dd>
-										<dt>
-											<label for="date_received"><b>', $txt['awards_date'], '</b></label>:
-										</dt>
-										<dd id="date_received">';
-
-	// The month... and day... and year...
-	echo '
-											<select name="month" tabindex="', $context['tabindex']++, '">';
-
-	foreach ($txt['months'] as $key => $month)
-		echo '
-												<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
-
-	echo '
-											</select>
-											<select name="day" tabindex="', $context['tabindex']++, '">';
-
-	for ($i = 1; $i <= 31; $i++)
-		echo '
-												<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
-
-	echo '
-											</select>
-											<select name="year" tabindex="', $context['tabindex']++, '">';
-
-	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
-		echo '
-												<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
-
-	echo '
-											</select>
-										</dd>
-									</dl>
-									<div class="title_bar">
-										<h3 class="titlebg">
-											<span class="ie6_header floatleft"><img class="icon" src="' . $settings['images_url'] . '/awards/group.png" alt="" />', $txt['awards_mem_group'], '</span>
-										</h3>
-									</div>
-									<div class="windowbg">
-										<dl class="settings">
-											<dt>';
-
-	foreach ($context['groups'] as $group)
-		echo '
-											<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check" /> ', $group['name'], ' <em>(', $group['member_count'], ')</em><br />';
-
-	echo '
-											<br class="clear" />
-											<input type="checkbox" id="checkAllGroups" onclick="invertAll(this, this.form, \'who\');" class="input_check" /> <em>', $txt['check_all'], '</em>
-										</dt>
-										<dd>' . $txt['awards_mem_group_desc'] . '
-										</dd>
-
-									</dl>
-									<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-									<hr class="hrcolor" />
-									<div class="righttext">
-										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
-									</div></div>
-								</div>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-		<br class="clear" />';
-
-	// Now create a javascript array from our php awards array so we can use it
-	$script = "var awardValues = [";
-	foreach ($context['awards'] as $key => $value)
-	{
-		if ($key < (count($context['awards']) - 1))
-			$script = $script . implode(",", $value) . ',';
-		else
-			$script = $script . implode(",", $value) . "];\n";
-	}
-	$script = $script . "</script>";
-
-	echo '
-		<script type="text/javascript"><!-- // --><![CDATA[
-			function showaward()
-			{' . $context['awardsjavasciptarray'] . '
-				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'filename\'];
-				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'minifile\'];
-			}
-		// ]]></script>';
-}
-
-function template_assign()
-{
-	global $context, $scripturl, $txt, $modSettings, $settings;
-
-	echo '
-		<div id="awardpage">
-			<span class="upperframe"><span></span></span>
-			<div class="roundframe">
-				<div id="welcome">',
-					$txt['awards_assign_intro'], '
-				</div>
-			</div>
-			<span class="lowerframe"><span></span></span>
-
-			<br class="clear" />
-
-			<div id="awardassign">
-				<form action="', $scripturl, '?action=admin;area=awards;sa=assign;step=2" method="post" name="assign" id="assign" accept-charset="', $context['character_set'], '">
-					<div class="floatleft" style="width:22%">
-						<h3 class="category_header">
-							<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
-						</h3>
-						<div class="windowbg">
-							<div class="content">
-								<dl class="settings">
-									<dt>
-										<select name="award" onchange="showaward();" size="10">';
-
-	// Loop and show the drop down.
-	foreach ($context['awards'] as $key => $award)
-		echo '
-											<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
-
-	echo '
-										</select>
-									</dt>
-								</dl>
-							</div>
-						</div>
-					</div>
-
-					<div class="floatright" style="width:75%">
-						<h3 class="category_header hdicon cat_img_plus">
-							', $txt['awards_assign_badge'], '
-						</h3>
-						<div class="windowbg">
-								<div class="content">
-									<dl class="settings">
-										<dt>
-											<label for="awards"><b>', $txt['awards_image'], ':</b></label>
-										</dt>
-										<dd>
-											<img id="awards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['filename'] : '', '" align="middle"  alt=""/>
-										</dd>
-										<dt>
-											<label for="miniawards"><b>', $txt['awards_mini'], ':</b></label>
-										</dt>
-										<dd>
-											<img id="miniawards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['minifile'] : '', '" align="middle"  alt=""/>
-										</dd>
-										<dt>
-											<label for="date_received"><b>', $txt['awards_date'], '</b></label>:
-										</dt>
-										<dd id="date_received">';
-
-	// The month... and day... and year...
-	echo '
-											<select name="month" tabindex="', $context['tabindex']++, '">';
-
-	foreach ($txt['months'] as $key => $month)
-		echo '
-												<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
-
-	echo '
-											</select>
-											<select name="day" tabindex="', $context['tabindex']++, '">';
-	for ($i = 1; $i <= 31; $i++)
-		echo '
-												<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
-
-	echo '
-											</select>
-											<select name="year" tabindex="', $context['tabindex']++, '">';
-
-	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
-		echo '
-												<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
-
-	echo '
-											</select>
-										</dd>
-									</dl>
-									<div class="title_bar">
-										<h3 class="titlebg">
-											<span class="ie6_header floatleft"><img class="icon" src="' . $settings['images_url'] . '/awards/user.png" alt="" />', $txt['awards_select_member'], '</span>
-										</h3>
-									</div>
-									<div class="windowbg">
-										<dl class="settings">
-											<dt>
-												<label for="to_control"><b>', $txt['awards_member_name'], ':</b></label><br />
-												<input class="smalltext" type="text" name="to" id="to_control" tabindex="', $context['tabindex']++, '" size="40" style="width: 130px;" />
-											</dt>
-											<dd>
-												<label for="to_control"><b>', $txt['awards_member_selected'], ':</b></label><br />
-												<div id="to_item_list_container"></div>
-											</dd>
-										</dl>
-									</div>
-									<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-									<hr class="hrcolor" />
-									<div class="righttext">
-										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
-									</div>
-								</div>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-		<br class="clear" />';
-
-	// Now create a javascript array from our php awards array so we can use it
-	$script = "var awardValues = [";
-	foreach ($context['awards'] as $key => $value)
-	{
-		if ($key < (count($context['awards']) - 1))
-			$script = $script . implode(",", $value) . ',';
-		else
-			$script = $script . implode(",", $value) . "];\n";
-	}
-	$script = $script . "</script>";
-
-	echo '
-		<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/awards.js?rc1"></script>
-		<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/suggest.js?rc1"></script>
-		<script type="text/javascript"><!-- // --><![CDATA[
-			var oAwardSend = new elk_AwardSend({
-				sSelf: \'oAwardSend\',
-				sSessionId: \'', $context['session_id'], '\',
-				sSessionVar: \'', $context['session_var'], '\',
-				sTextDeleteItem: \'', $txt['autosuggest_delete_item'], '\',
-				sToControlId: \'to_control\',
-				aToRecipients: [
-				]
-			});
-
-			function saveEntities()
-			{
-				var textFields = ["subject", "message"];
-				for (i in textFields)
-					if (document.forms.postmodify.elements[textFields[i]])
-						document.forms.postmodify[textFields[i]].value = document.forms.postmodify[textFields[i]].value.replace(/&#/g, "&#38;#");
-			}
-
-			function showaward()
-			{' . $context['awardsjavasciptarray'] . '
-				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assign.award.value][\'filename\'];
-				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assign.award.value][\'minifile\'];
-			}
-		// ]]></script>';
-}
-
-function template_assign_mass()
-{
-	global $context, $scripturl, $txt, $modSettings, $settings;
-
-	echo '
-		<div id="awardpage">
-			<span class="upperframe"><span></span></span>
-			<div class="roundframe">
-				<div id="welcome">',
-					$txt['awards_assignmass_intro'], '
-				</div>
-			</div>
-			<span class="lowerframe"><span></span></span>
-
-			<br class="clear" />
-
-			<div id="awardassign">
-				<h3 class="category_header">
-					', $txt['awards_mem_group'], '
-				</h3>
-
-				<div class="windowbg">
-					<div class="content">
-						<form action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="', $context['character_set'], '">
-							<dl class="select">
-								<dt>';
-
-	// create the membergroup selection list
-	foreach ($context['groups'] as $group)
-		echo '
-									<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check"' . ((isset($_POST['who'][$group['id']])) ? 'checked="checked"' : '') . ' /> ', $group['name'], ' <em>(', $group['member_count'], ')</em>';
-
-	echo '
-									<br class="clear" />
-								</dt>
-							</dl>
-							<div class="righttext">
-								<input type="submit" class="button_submit" value="', $txt['awards_mem_group'], '" tabindex="', $context['tabindex']++, '" />
-								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-							</div>
-						</form>
-					</div>
-				</div>
-
-				<br class="clear" />
-				<form action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=3" method="post" name="assigngroup2" id="assigngroup2" accept-charset="', $context['character_set'], '">
-
-				<div class="floatleft" style="width:22%">
-					<h3 class="category_header">
-						<span class="ie6_header floatleft">', $txt['awards_select_badge'], '</span>
-					</h3>
-					<div class="windowbg">
-						<div class="content">
-							<dl class="settings">
-								<dt>
-									<select name="award" onchange="showaward();" size="10">';
-
-	// Loop and show the drop down.
-	foreach ($context['awards'] as $key => $award)
-		echo '
-										<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
-
-	echo '
-									</select>
-								</dt>
-							</dl>
-						</div>
-					</div>
-				</div>
-
-				<div class="floatright" style="width:75%">
-
-					<h3 class="category_header hdicon cat_img_plus">
-						', $txt['awards_assign_badge'], '
-					</h3>
-
-					<div class="windowbg">
 							<div class="content">
 								<dl class="settings">
 									<dt>
@@ -637,22 +275,283 @@ function template_assign_mass()
 										</select>
 									</dd>
 								</dl>
+								<h3 class="secondary_header">
+									<img class="icon" src="' . $settings['images_url'] . '/awards/group.png" alt="" />', $txt['awards_mem_group'], '
+								</h3>
+								<div class="windowbg">
+									<dl class="settings">
+										<dt>';
 
+	foreach ($context['groups'] as $group)
+		echo '
+											<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check" /> ', $group['name'], ' <em>(', $group['member_count'], ')</em><br />';
+
+	echo '
+											<br class="clear" />
+											<input type="checkbox" id="checkAllGroups" onclick="invertAll(this, this.form, \'who\');" class="input_check" /> <em>', $txt['check_all'], '</em>
+										</dt>
+										<dd>' . $txt['awards_mem_group_desc'] . '
+										</dd>
+									</dl>
+									<hr class="hrcolor" />
+									<div class="submitbutton">
+										<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>';
+}
+
+/**
+ * Template used to assign awards to specific members
+ */
+function template_assign()
+{
+	global $context, $scripturl, $txt, $modSettings, $settings;
+
+	echo '
+		<div id="awardpage">
+			<div class="infobox">',
+				$txt['awards_assign_intro'], '
+			</div>
+			<div id="awardassign">
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assign;step=2" method="post" name="assign" id="assign" accept-charset="UTF-8">
+					<div class="floatleft" style="width:22%">
+						<h3 class="category_header">
+							', $txt['awards_select_badge'], '
+						</h3>
+						<div class="windowbg">
+							<div class="content">
+								<dl id="awardselect" class="settings">
+									<dt>
+										<select name="award" onchange="showaward();" size="10">';
+
+	// Loop and show the award selection drop down.
+	foreach ($context['awards'] as $key => $award)
+		echo '
+											<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
+
+	echo '
+										</select>
+									</dt>
+								</dl>
+							</div>
+						</div>
+					</div>
+
+					<div class="floatright" style="width:75%">
+						<h3 class="category_header hdicon cat_img_plus">
+							', $txt['awards_assign_badge'], '
+						</h3>
+						<div class="windowbg">
+							<div class="content">
+								<dl class="settings">
+									<dt>
+										<label for="awards"><b>', $txt['awards_image'], ':</b></label>
+									</dt>
+									<dd>
+										<img id="awards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['filename'] : '', '" align="middle"  alt=""/>
+									</dd>
+									<dt>
+										<label for="miniawards"><b>', $txt['awards_mini'], ':</b></label>
+									</dt>
+									<dd>
+										<img id="miniawards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['minifile'] : '', '" align="middle"  alt=""/>
+									</dd>
+									<dt>
+										<label for="date_received"><b>', $txt['awards_date'], '</b></label>:
+									</dt>
+									<dd id="date_received">';
+
+	// The month... and day... and year...
+	echo '
+										<select name="month" tabindex="', $context['tabindex']++, '">';
+
+	foreach ($txt['months'] as $key => $month)
+		echo '
+											<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
+
+	echo '
+										</select>
+										<select name="day" tabindex="', $context['tabindex']++, '">';
+	for ($i = 1; $i <= 31; $i++)
+		echo '
+											<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+
+	echo '
+										</select>
+										<select name="year" tabindex="', $context['tabindex']++, '">';
+
+	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
+		echo '
+											<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+
+	echo '
+										</select>
+									</dd>
+								</dl>
 								<div class="title_bar">
-									<h3 class="titlebg">
-										<span class="ie6_header floatleft"><img class="icon" src="' . $settings['images_url'] . '/awards/multiple.png" alt="" />', $txt['awards_select_member'], '</span>
+									<h3 class="secondary_header">
+										<img class="icon" src="' . $settings['images_url'] . '/awards/user.png" alt="" />', $txt['awards_select_member'], '
 									</h3>
 								</div>
+								<div class="windowbg">
+									<dl class="settings">
+										<dt>
+											<label for="to_control"><b>', $txt['awards_member_name'], ':</b></label><br />
+											<input class="smalltext" type="text" name="to" id="to_control" tabindex="', $context['tabindex']++, '" size="40" style="width: 130px;" />
+										</dt>
+										<dd>
+											<label for="to_control"><b>', $txt['awards_member_selected'], ':</b></label><br />
+											<div id="to_item_list_container"></div>
+										</dd>
+									</dl>
+								</div>
+								<hr class="hrcolor" />
+								<div class="submitbutton">
+									<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+									<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>';
+}
 
-								<div class="windowbg">';
+/**
+ * Used to assign a lot of members to a specific award
+ */
+function template_assign_mass()
+{
+	global $context, $scripturl, $txt, $modSettings, $settings;
 
-	// show the member selection boxes if they have chosen a member group.
+	echo '
+		<div id="awardpage">
+			<div class="infobox">',
+				$txt['awards_assignmass_intro'], '
+			</div>
+
+			<div id="awardassign">
+				<h3 class="category_header">
+					', $txt['awards_mem_group'], '
+				</h3>
+				<div class="windowbg">
+					<div class="content">
+						<form action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="UTF-8">
+							<dl class="select">
+								<dt>';
+
+	// Create the membergroup selection list
+	foreach ($context['groups'] as $group)
+		echo '
+									<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check"' . ((isset($_POST['who'][$group['id']])) ? 'checked="checked"' : '') . ' /> ', $group['name'], ' <em>(', $group['member_count'], ')</em>';
+
+	echo '
+									<br class="clear" />
+								</dt>
+							</dl>
+							<div class="submitbutton">
+								<input type="submit" class="button_submit" value="', $txt['awards_mem_group'], '" tabindex="', $context['tabindex']++, '" />
+								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=3" method="post" name="assigngroup2" id="assigngroup2" accept-charset="UTF-8">
+				<div class="floatleft" style="width:22%">
+					<h3 class="category_header">
+						', $txt['awards_select_badge'], '
+					</h3>
+					<div class="windowbg">
+						<div class="content">
+							<dl id="awardselect" class="settings">
+								<dt>
+									<select name="award" onchange="showaward();" size="10">';
+
+	// Loop and show the drop down.
+	foreach ($context['awards'] as $key => $award)
+		echo '
+										<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
+
+	echo '
+									</select>
+								</dt>
+							</dl>
+						</div>
+					</div>
+				</div>
+
+				<div class="floatright" style="width:75%">
+					<h3 class="category_header hdicon cat_img_plus">
+						', $txt['awards_assign_badge'], '
+					</h3>
+					<div class="windowbg">
+						<div class="content">
+							<dl class="settings">
+								<dt>
+									<label for="awards"><b>', $txt['awards_image'], ':</b></label>
+								</dt>
+								<dd>
+									<img id="awards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['filename'] : '', '" align="middle"  alt=""/>
+								</dd>
+								<dt>
+									<label for="miniawards"><b>', $txt['awards_mini'], ':</b></label>
+								</dt>
+								<dd>
+									<img id="miniawards" src="', isset($_REQUEST['a_id']) ? dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $context['awards'][$_REQUEST['a_id']]['minifile'] : '', '" align="middle"  alt=""/>
+								</dd>
+								<dt>
+									<label for="date_received"><b>', $txt['awards_date'], '</b></label>:
+								</dt>
+								<dd id="date_received">';
+
+	// The month... and day... and year...
+	echo '
+									<select name="month" tabindex="', $context['tabindex']++, '">';
+
+	foreach ($txt['months'] as $key => $month)
+		echo '
+										<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
+
+	echo '
+									</select>
+									<select name="day" tabindex="', $context['tabindex']++, '">';
+
+	for ($i = 1; $i <= 31; $i++)
+		echo '
+										<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+
+	echo '
+									</select>
+									<select name="year" tabindex="', $context['tabindex']++, '">';
+
+	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
+		echo '
+										<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+
+	echo '
+									</select>
+								</dd>
+							</dl>
+
+							<h3 class="secondary_header">
+								<img class="icon" src="' . $settings['images_url'] . '/awards/multiple.png" alt="" />', $txt['awards_select_member'], '
+							</h3>
+							<div class="windowbg">';
+
+	// Show the member selection boxes if they have chosen a member group.
 	if (empty($context['members']))
 	{
 		echo '
-									<span class="upperframe"><span></span></span>
-									<div class="roundframe">', $txt['awards_mem_mass_desc'], '</div>
-									<span class="lowerframe"><span></span></span>';
+								<div class="infobox">', $txt['awards_mem_mass_desc'], '</div>';
 	}
 	else
 	{
@@ -661,25 +560,30 @@ function template_assign_mass()
 		$counter = 0;
 
 		echo '
-									<table width="100%" cellpadding="5" cellspacing="0" border="0" align="center" class="tborder">';
+								<table width="100%" cellpadding="5" cellspacing="0" border="0" align="center" class="tborder">';
 
 		foreach ($context['members'] as $key => $member)
 		{
 			// Open the tr
 			if ($counter == 0)
 				echo '
-										<tr>';
+									<tr>';
 
 			// The member
 			echo '
-											<td class="windowbg2"><label for="member', $key, '"><input type="checkbox" name="member[]" id="member', $key, '" value="', $key, '" checked="checked" class="check" /> ', $member, '</label></td>';
+										<td class="windowbg2">
+											<label for="member', $key, '">
+												<input type="checkbox" name="member[]" id="member', $key, '" value="', $key, '" checked="checked" class="check" /> ', $member, '
+											</label>
+										</td>';
 			$counter++;
 
 			// Close the tr
 			if ($counter == $columns)
 			{
 				echo '
-										</tr>';
+									</tr>';
+
 				// Reset the counter
 				$counter = 0;
 			}
@@ -692,43 +596,42 @@ function template_assign_mass()
 			{
 				for ($i = 0; $i < $columns - $counter; $i++)
 					echo '
-											<td class="windowbg2">&nbsp;</td>';
+										<td class="windowbg2">&nbsp;</td>';
 			}
 
 			echo '
-										</tr>';
+									</tr>';
 		}
 
 		// Close the table
 		echo '
-										<tr>
-											<td  colspan="', $columns, '" align="right" class="windowbg2">
-												<label for="checkAllGroups"><input type="checkbox" id="checkAllGroups" checked="checked" onclick="invertAll(this, this.form, \'member\');" class="check" /> <i>', $txt['check_all'], '</i></label><br />
-											</td>
-										</tr>
-									</table>
-
-									<br class="clear" />';
+									<tr>
+										<td  colspan="', $columns, '" class="windowbg2 righttext">
+											<label for="checkAllGroups">
+												<input type="checkbox" id="checkAllGroups" checked="checked" onclick="invertAll(this, this.form, \'member\');" class="check" /> <i>', $txt['check_all'], '</i>
+											</label><br />
+										</td>
+									</tr>
+								</table>';
 
 		// show the submit box
 		echo '
+								<hr class="hrcolor" />
+								<div class="submitbutton">
 									<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-									<hr class="hrcolor" />
-									<div class="righttext">
-										<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
-									</div>';
+									<input type="submit" class="button_submit" value="', $txt['awards_button_assign'], '" tabindex="', $context['tabindex']++, '" />
+								</div>';
 	}
 
 	// close this page up
 	echo '
-								</div>
 							</div>
+						</div>
 					</div>
 				</div>
 				</form>
 			</div>
-		</div>
-		<br class="clear" />';
+		</div>';
 
 	// Create a javascript array from our php awards array so we can use it
 	$script = "var awardValues = [";
@@ -744,7 +647,8 @@ function template_assign_mass()
 	echo '
 		<script type="text/javascript"><!-- // --><![CDATA[
 			function showaward()
-			{' . $context['awardsjavasciptarray'] . '
+			{
+				awards = ' . $context['awardsjavasciptarray'] . '
 				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'filename\'];
 				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'minifile\'];
 			}
@@ -781,7 +685,7 @@ function template_view_assigned()
  */
 function template_settings()
 {
-	global $context, $txt, $scripturl, $modSettings, $settings;
+	global $context, $txt, $scripturl, $modSettings;
 
 	if (isset($_GET['saved']))
 		echo'
@@ -799,7 +703,7 @@ function template_settings()
 					</h3>
 
 					<br class="clear" />
-					<form action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="', $context['character_set'], '" enctype="multipart/form-data" style="padding:0; margin: 0;">
+					<form action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="UTF-8" enctype="multipart/form-data" style="padding:0; margin: 0;">
 						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
 						<legend>', $txt['awards_basic_settings'], '</legend>
 						<span class="upperframe"><span></span></span>
@@ -946,7 +850,7 @@ function template_edit_category()
 	global $context, $txt, $scripturl;
 
 	echo '
-				<form action="', $scripturl, '?action=admin;area=awards;sa=editcategory" method="post" name="category" id="category" accept-charset="', $context['character_set'], '" style="padding:0; margin: 0;">
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=editcategory" method="post" name="category" id="category" accept-charset="UTF-8">
 					<h3 class="category_header">
 						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? $txt['awards_saved_category'] : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
 					</h3>
@@ -960,15 +864,14 @@ function template_edit_category()
 									<input type="text" name="category_name" id="category_name" value="', $context['category']['name'], '" size="30" />
 								</dd>
 							</dl>
-							<div class="righttext">
+							<div class="submitbutton">
 								<input type="hidden" name="id_category" value="', $context['category']['id'], '" />
 								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 								<input type="submit" class="button_submit" name="category_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_category'], '" accesskey="s" />
 							</div>
 						</div>
 					</div>
-				</form>
-				<br class="clear" />';
+				</form>';
 }
 
 /**
@@ -979,66 +882,59 @@ function template_list_categories()
 	global $context, $txt, $settings, $scripturl;
 
 	echo '
-				<h3 class="category_header">
-					<img class="icon" src="' . $settings['images_url'] . '/awards/category.png" alt="" />&nbsp;', $txt['awards_list_categories'], '
+			<form id="admin_form_wrapper" accept-charset="UTF-8" method="post" action="', $scripturl, '?action=admin;area=awards;sa=editcategory">
+				<h3 class="category_header hdicon cat_img_database">
+					', $txt['awards_list_categories'], '
 				</h3>
-				<table class="table_grid" width="100%">
-				<thead>
-					<tr class="catbg">
-						<th scope="col" class="first_th smalltext">', $txt['awards_actions'], '</th>
-						<th scope="col" align="left" class="smalltext">', $txt['awards_category_name'], '</th>
-						<th scope="col" class="last_th smalltext">', $txt['awards_num_in_category'], '</th>
-					</tr>
-				</thead>
-				<tbody>';
+				<table class="table_grid">
+					<thead>
+						<tr class="table_head">
+							<th class="grid20" scope="col">', $txt['awards_actions'], '</th>
+							<th scope="col">', $txt['awards_category_name'], '</th>
+							<th class="grid20 centertext" scope="col">', $txt['awards_num_in_category'], '</th>
+						</tr>
+					</thead>
+					<tbody>';
 
 	// Check if there are any categories
 	if (empty($context['categories']))
 		echo '
-					<tr class="windowbg2">
-						<td colspan="3">', $txt['awards_error_no_categories'], '</td>
-					</tr>';
+						<tr class="windowbg2">
+							<td colspan="3">', $txt['awards_error_no_categories'], '</td>
+						</tr>';
 	else
 	{
-		$which = false;
-
 		foreach ($context['categories'] as $cat)
 		{
-			$which = !$which;
 			echo '
-					<tr class="windowbg', $which ? '2' : '', '">
-						<td width="20%" align="left">
-							<a href="', $cat['edit'], '" title="', $txt['awards_button_edit'], '">[', $txt['awards_button_edit'], ']&nbsp;<img align="top" src="', $settings['images_url'], '/awards/modify.png" alt="" /></a> ', ($cat['id'] != 1) ? '
-							<a href="' . $cat['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_category'] . '\');" title="' . $txt['awards_button_delete'] . '">
-								[' . $txt['awards_button_delete'] . ']&nbsp;<img align="top" src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
-							</a>' : '', '
-						</td>
-						<td width="60%" align="left">
-							<a href="', $cat['view'], '" title="', $cat['name'], '">', $cat['name'], '</a>
-						</td>
-						<td width="20%" align="center">
-							', empty($cat['awards']) ? '0' : '<a href="' . $scripturl . '?action=admin;area=awards;sa=viewcategory;a_id=' . $cat['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $cat['awards'] . '</a>', '
-						</td>
-					</tr>';
+						<tr class="windowbg">
+							<td>
+								<a href="', $cat['edit'], '" title="', $txt['awards_button_edit'], '">[', $txt['awards_button_edit'], ']&nbsp;<img class="icon" src="', $settings['images_url'], '/awards/modify.png" alt="" /></a> ', ($cat['id'] != 1) ? '
+								<a href="' . $cat['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_category'] . '\');" title="' . $txt['awards_button_delete'] . '">
+									[' . $txt['awards_button_delete'] . ']&nbsp;<img class="icon" src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
+								</a>' : '', '
+							</td>
+							<td>
+								<a href="', $cat['view'], '" title="', $cat['name'], '">', $cat['name'], '</a>
+							</td>
+							<td class="centertext">
+								', empty($cat['awards']) ? '0' : '<a href="' . $scripturl . '?action=admin;area=awards;sa=viewcategory;a_id=' . $cat['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $cat['awards'] . '</a>', '
+							</td>
+						</tr>';
 		}
-
-		echo '
-					<tr class="catbg">
-						<td align="right" colspan="3">
-							<form class="floatright" accept-charset="ISO-8859-1" method="post" action="', $scripturl, '?action=admin;area=awards;sa=editcategory">
-								<input id="add_category" class="button_submit" type="submit" value="', $txt['awards_add_category'], '" name="add_category" />
-							</form>
-						</td>
-					</tr>';
 	}
 
 	echo '
-				</tbody>
-				</table>';
+					</tbody>
+				</table>
+				<div class="submitbutton">
+					<input id="add_category" class="button_submit" type="submit" value="', $txt['awards_add_category'], '" name="add_category" />
+				</div>
+			</form>';
 }
 
 /**
- * View a single category list
+ * View a single category list with all its awards
  */
 function template_view_category()
 {
@@ -1047,13 +943,11 @@ function template_view_category()
 	if (empty($context['category']))
 	{
 		echo '
-			<span class="upperframe"><span></span></span>
 			<div class="roundframe">
 				<div id="welcome">',
-		$txt['awards_error_no_category'], '
+					$txt['awards_error_no_category'], '
 				</div>
-			</div>
-			<span class="lowerframe"><span></span></span>';
+			</div>';
 	}
 	else
 	{
@@ -1061,13 +955,13 @@ function template_view_category()
 				<h3 class="category_header">
 					', $context['category'], '
 				</h3>
-				<table class="table_grid" width="100%">
+				<table class="table_grid">
 					<thead>
-						<tr class="catbg">
-							<th scope="col" class="first_th smalltext">', $txt['awards_image'], '</th>
-							<th scope="col" class="smalltext">', $txt['awards_mini'], '</th>
-							<th scope="col" class="smalltext">', $txt['awards_name'], '</th>
-							<th scope="col" class="last_th smalltext">', $txt['awards_description'], '</th>
+						<tr class="table_head">
+							<th class="centertext" scope="col">', $txt['awards_image'], '</th>
+							<th class="centertext" scope="col">', $txt['awards_mini'], '</th>
+							<th scope="col">', $txt['awards_name'], '</th>
+							<th scope="col" class="centertext">', $txt['awards_description'], '</th>
 						</tr>
 					</thead>
 					<tbody>';
@@ -1080,15 +974,19 @@ function template_view_category()
 						</tr>';
 		else
 		{
-			$which = false;
 			foreach ($context['awards'] as $award)
 			{
-				$which = !$which;
 				echo '
-						<tr class="windowbg', $which ? '2' : '', '">
-							<td align="center"><img src="', $award['img'], '" alt="', $award['award_name'], '" /></td>
-							<td align="center"><img src="', $award['small'], '" alt="', $award['award_name'], '" /></td>
-							<td><a href="', $award['edit'], '">', $award['award_name'], '</a></td>
+						<tr class="windowbg">
+							<td>
+								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+							</td>
+							<td>
+								<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+							</td>
+							<td>
+								<a href="', $award['edit'], '">', $award['award_name'], '</a>
+							</td>
 							<td>', $award['description'], '</td>
 						</tr>';
 			}
@@ -1133,7 +1031,7 @@ function template_request_award()
 
 		// Start with the form.
 		echo '
-				<form action="', $scripturl, '?action=admin;area=awards;sa=requests" method="post" name="requests" id="requests" accept-charset="', $context['character_set'], '" enctype="multipart/form-data">';
+				<form action="', $scripturl, '?action=admin;area=awards;sa=requests" method="post" name="requests" id="requests" accept-charset="UTF-8" enctype="multipart/form-data">';
 
 		// Loop through the awards
 		foreach ($context['awards'] as $award)
