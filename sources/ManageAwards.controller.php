@@ -18,7 +18,8 @@ if (!defined('ELK'))
 
 /**
  * This is the awards administration controller class.
- * This file handles the admin side of Awards.
+ *
+ * - This file handles the admin side of Awards.
  */
 class Awards_Controller extends Action_Controller
 {
@@ -27,29 +28,30 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function pre_dispatch()
 	{
-		global $context, $txt, $modSettings;
+		global $context, $txt, $modSettings, $user_info;
 
-		// If Member Awards is disabled, we don't go any further
-		if (empty($modSettings['awards_enabled']))
+		// If Member Awards is disabled, we don't go any further unless you are the admin
+		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
 			fatal_lang_error('feature_disabled', true);
 
-		// Are we allowed to manage or assign
-		isAllowedTo(array('manage_awards','assign_awards'));
+		// Its on, but are we allowed to manage or assign
+		isAllowedTo(array('manage_awards', 'assign_awards'));
 
 		// Some things we will need
 		loadLanguage('AwardsManage');
 		loadTemplate('AwardsManage');
+		loadCSSFile('awards.css');
 		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// Our award types array, do not mess with these
 		$context['award_types'] = array(
 			array('id' => 1, 'name' => $txt['awards_manual'], 'desc' => $txt['awards_manual_desc']),
-			array('id' => 2, 'name' => $txt['awards_post_count'], 'desc' => $txt['awards_post_count_desc'] ),
-			array('id' => 3, 'name' => $txt['awards_top_posters'], 'desc' => $txt['awards_top_posters_desc'] ),
-			array('id' => 4, 'name' => $txt['awards_topic_count'], 'desc' => $txt['awards_topic_count_desc'] ),
-			array('id' => 5, 'name' => $txt['awards_top_topic_starters'], 'desc' => $txt['awards_top_topic_starters_desc'] ),
-			array('id' => 6, 'name' => $txt['awards_time_online'], 'desc' => $txt['awards_time_online_desc'] ),
-			array('id' => 7, 'name' => $txt['awards_member_since'], 'desc' => $txt['awards_member_since_desc'] ),
+			array('id' => 2, 'name' => $txt['awards_post_count'], 'desc' => $txt['awards_post_count_desc']),
+			array('id' => 3, 'name' => $txt['awards_top_posters'], 'desc' => $txt['awards_top_posters_desc']),
+			array('id' => 4, 'name' => $txt['awards_topic_count'], 'desc' => $txt['awards_topic_count_desc']),
+			array('id' => 5, 'name' => $txt['awards_top_topic_starters'], 'desc' => $txt['awards_top_topic_starters_desc']),
+			array('id' => 6, 'name' => $txt['awards_time_online'], 'desc' => $txt['awards_time_online_desc']),
+			array('id' => 7, 'name' => $txt['awards_member_since'], 'desc' => $txt['awards_member_since_desc']),
 			array('id' => 8, 'name' => $txt['awards_karma_level'], 'desc' => $txt['awards_karma_level_desc']),
 		);
 
@@ -75,7 +77,73 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_index()
 	{
-		$this->action_awards_main();
+		global $context, $txt, $modSettings;
+
+		$subActions = array(
+			'main' => array($this, 'action_awards_main', 'permission' => array('assign_awards','manage_awards')),
+			'categories' => array($this, 'action_list_categories', 'permission' => 'manage_awards'),
+			'modify' => array($this, 'action_modify', 'permission' => 'manage_awards'),
+			'assign' => array($this, 'action_assign', 'permission' => array('assign_awards', 'manage_awards')),
+			'assigngroup' => array($this, 'action_assign_member_group', 'permission' => 'manage_awards'),
+			'assignmass' => array($this, 'action_assign_mass', 'permission' => 'manage_awards'),
+			'requests' => array($this, 'action_awards_requests', 'permission' => array('assign_awards', 'manage_awards')),
+			'settings' => array($this, 'action_settings', 'permission' => 'manage_awards'),
+			'delete' => array($this, 'action_delete', 'permission' => 'manage_awards'),
+			'editcategory' => array($this, 'action_edit_category', 'permission' => 'manage_awards'),
+			'deletecategory' => array($this, 'action_delete_category', 'permission' => 'manage_awards'),
+			'viewassigned' => array($this, 'action_view_assigned', 'permission' => 'manage_awards'),
+		);
+
+		// You way will end here if you don't have permission.
+		$action = new Action();
+
+		// Set up the admin tabs
+		$context[$context['admin_menu_name']]['tab_data'] = array(
+			'title' => $txt['awards'],
+			'help' => 'awards_help',
+			'description' => $txt['awards_description_main'],
+			'tabs' => array(
+				'main' => array(
+					'label' => $txt['awards_main'],
+					'permission' => array('assign_awards','manage_awards')
+				),
+				'categories' => array(
+					'label' => $txt['awards_categories'],
+					'permission' => 'manage_awards'
+				),
+				'modify' => array(
+					'label' => isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'],
+					'permission' => 'manage_awards'
+				),
+				'assign' => array(
+					'label' => $txt['awards_assign'],
+					'permission' => array('assign_awards', 'manage_awards')
+				),
+				'assigngroup' => array(
+					'label' => $txt['awards_assign_membergroup'],
+					'permission' => 'manage_awards'
+				),
+				'assignmass' => array(
+					'label' => $txt['awards_assign_mass'],
+					'permission' => 'manage_awards'
+				),
+				'requests' => array(
+					'label' => $txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'),
+					'permission' => array('assign_awards', 'manage_awards')
+				),
+				'settings' => array(
+					'label' => $txt['awards_settings'],
+					'permission' => 'manage_awards'
+				),
+			),
+		);
+
+		// Default to sub-action 'main'
+		$subAction = $action->initialize($subActions, 'main');
+		$context['sub_action'] = $subAction;
+
+		// Call the right function
+		$action->dispatch($subAction);
 	}
 
 	/**
@@ -109,14 +177,14 @@ class Awards_Controller extends Action_Controller
 					'desc' => 'desc' . $count,
 				),
 				'get_items' => array(
-					'file' => 'AwardsSubs.php',
+					'file' => 'Awards.subs.php',
 					'function' => 'AwardsLoadCategoryAwards',
 					'params' => array(
 						$cat,
 					),
 				),
 				'get_count' => array(
-					'file' => 'AwardsSubs.php',
+					'file' => 'Awards.subs.php',
 					'function' => 'AwardsCountCategoryAwards',
 					'params' => array(
 						$cat,
@@ -126,6 +194,7 @@ class Awards_Controller extends Action_Controller
 					'img' => array(
 						'header' => array(
 							'value' => $txt['awards_image'],
+							'class' => 'grid8 nowrap centertext',
 						),
 						'data' => array(
 							'sprintf' => array(
@@ -135,13 +204,13 @@ class Awards_Controller extends Action_Controller
 									'award_name' => false,
 								),
 							),
-							'style' => "width: 15%",
-							'class' => "centertext",
+							'class' => 'centertext',
 						),
 					),
 					'small' => array(
 						'header' => array(
 							'value' => $txt['awards_mini'],
+							'class' => 'grid8 nowrap centertext',
 						),
 						'data' => array(
 							'sprintf' => array(
@@ -151,8 +220,7 @@ class Awards_Controller extends Action_Controller
 									'award_name' => false,
 								),
 							),
-							'style' => "width: 15%",
-							'class' => "centertext",
+							'class' => 'centertext',
 						),
 					),
 					'award_name' => array(
@@ -161,7 +229,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'db' => 'award_name',
-							'style' => "width: 25%",
+							'class' => "grid25",
 						),
 						'sort' => array(
 							'default' => 'award_name',
@@ -175,7 +243,6 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'db' => 'description',
-							'style' => "width: 35%",
 						),
 						'sort' => array(
 							'default' => 'description',
@@ -185,6 +252,7 @@ class Awards_Controller extends Action_Controller
 					'action' => array(
 						'header' => array(
 							'value' => $txt['awards_actions'],
+							'class' => 'centertext',
 						),
 						'data' => array(
 							'function' => create_function('$row', '
@@ -203,8 +271,7 @@ class Awards_Controller extends Action_Controller
 
 								return $result;'
 							),
-							'class' => "centertext",
-							'style' => "width: 10%",
+							'class' => 'grid8 centertext',
 						),
 					),
 				),
@@ -217,7 +284,9 @@ class Awards_Controller extends Action_Controller
 		// Set up for the template display
 		$context['count'] = $count;
 		$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_main'];
-		$context['tabindex'] = 1;
+		$context['sub_template'] = 'main';
+
+		// And the old admin tabs
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
@@ -227,19 +296,17 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * Sets up the $context['award'] array for the add/edit page.
-	 * If it's a new award, inserts a new row if not it updates an existing one.
-	 * Uses AwardsUpload for files upload.
-	 * If a new image is uploaded for an existing award, deletes the old images.
+	 *
+	 * - If it's a new award, inserts a new row if not it updates an existing one.
+	 * - Uses AwardsUpload for files upload.
+	 * - If a new image is uploaded for an existing award, deletes the old images.
 	 */
 	public function action_modify()
 	{
-		global $context, $txt, $modSettings, $boarddir, $sourcedir;
-
-		// Only manage awards can go farther
-		isAllowedTo('manage_awards');
+		global $context, $txt, $modSettings;
 
 		// Load in our helper functions
-		require_once($sourcedir . '/AwardsSubs.php');
+		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// Check if they are saving the changes
 		if (isset($_POST['award_save']))
@@ -293,17 +360,17 @@ class Awards_Controller extends Action_Controller
 				if ($editAward == true && ((isset($_FILES['awardFile']) && $_FILES['awardFile']['error'] == 0) || (isset($_FILES['awardFileMini']) && $_FILES['awardFileMini']['error'] == 0)))
 				{
 					// Lets make sure that we delete the file that we are supposed to and not something harmful
-					list ($filename, $minifile) = AwardsLoadFiles($id);
+					list ($filename, $minifile) = AwardLoadFiles($id);
 
 					// Delete the old file(s) first.
 					if ($_FILES['awardFile']['error'] == 0)
 					{
-						if (file_exists($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename))
-							@unlink($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
+						if (file_exists(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename))
+							@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
 					}
 
-					if (file_exists($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile))
-						@unlink($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile);
+					if (file_exists(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile))
+						@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile);
 
 					// Now add the new one.
 					AwardsUpload($id);
@@ -324,30 +391,27 @@ class Awards_Controller extends Action_Controller
 		// Some javascript to disable the trigger text box if the first option e.g. regular is selected
 		addInlineJavascript('
 			var award_type = document.getElementById(\'id_type\');
+
 			mod_addEvent(award_type, \'change\', toggleAwardTrigger);
 			toggleAwardTrigger();
 
 			function mod_addEvent(control, ev, fn)
 			{
 				if (control.addEventListener)
-				{
 					control.addEventListener(ev, fn, false);
-				}
 				else if (control.attachEvent)
-				{
 					control.attachEvent(\'on\'+ev, fn);
-				}
 			}
 
 			function toggleAwardTrigger()
 			{
 				var select_elem = document.getElementById(\'awardTrigger\');
+
 				select_elem.disabled = award_type.value == 1;
 
 				var desc = document.getElementById(\'trigger_desc_\' + award_type.value + \'\').firstChild.data;
 				document.getElementById(\'awardTrigger_desc\').innerHTML = desc;
-			}
-		');
+			}', true);
 
 		// Load the data for editing/viewing an existing award
 		if (isset($_REQUEST['a_id']))
@@ -393,15 +457,13 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * This function handles deleting an award
-	 * If the image exists delete it then deletes the row from the database
-	 * Deletes any trace of the award from the awards_members table.
+	 *
+	 * - If the image exists delete it then deletes the row from the database
+	 * - Deletes any trace of the award from the awards_members table.
 	 */
 	public function action_delete()
 	{
-		global $boarddir, $modSettings;
-
-		// Only manage awards can go farther
-		isAllowedTo('manage_awards');
+		global $modSettings;
 
 		// Check the session
 		checkSession('get');
@@ -409,11 +471,11 @@ class Awards_Controller extends Action_Controller
 		$id = (int) $_GET['a_id'];
 
 		// Select the file name to delete
-		list ($filename, $minifile) = AwardsLoadFiles($id);
+		list ($filename, $minifile) = AwardLoadFiles($id);
 
 		// Now delete the award from the server
-		@unlink($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
-		@unlink($boarddir . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile);
+		@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
+		@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile);
 
 		// Now delete the entry from the database and remove it from the members
 		AwardsDeleteAward($id);
@@ -425,9 +487,9 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * This is where you assign awards to members.
+	 *
 	 * Step 1
 	 *   - Select the award that you want to assign
-	 *   - Uses AwardsBuildJavascriptObject to build the form so the correct image displays with the award
 	 *
 	 * - Step 2
 	 *   - Select the members that you want to give this award to.
@@ -435,17 +497,17 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_assign()
 	{
-		global $context, $sourcedir, $txt, $user_info;
+		global $context, $txt, $user_info, $modSettings, $scripturl;
 
 		// Load in our helper functions
-		require_once($sourcedir . '/AwardsSubs.php');
+		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// First step, select the awards that can be assigned by this member
 		if (!isset($_GET['step']) || $_GET['step'] == 1)
 		{
 			// Select all the non auto awards to populate the menu.
 			$context['awards'] = AwardsLoadAssignableAwards();
-			$context['awardsjavasciptarray'] = AwardsBuildJavascriptObject($context['awards'], 'awards');
+			$context['awardsjavasciptarray'] = json_encode($context['awards']);
 
 			// Quick check for mischievous users, you can't just enter any a_id ;)
 			if (!allowedTo('manage_awards') && isset($_REQUEST['a_id']) && empty($context['awards'][$_REQUEST['a_id']]['assignable']))
@@ -463,7 +525,8 @@ class Awards_Controller extends Action_Controller
 			// Check session.
 			checkSession('post');
 
-			// Make sure that they picked an award and members to assign it to... but not themselfs, that would be wrong
+			// Make sure that they picked an award and members to assign it to...
+			// but not themselfs, that would be wrong
 			foreach($_POST['recipient_to'] as $recipient)
 			{
 				if ($recipient != $user_info['id'] || $user_info['is_admin'])
@@ -475,12 +538,12 @@ class Awards_Controller extends Action_Controller
 
 			// Set a valid date, award.
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
-			$_POST['award'] = (int) $_POST['award'];
+			$award_id = (int) $_POST['award'];
 
 			// Prepare the values and add them
 			$values = array();
 			foreach ($members as $member)
-				$values[] = array($_POST['award'], $member, $date_received, 1);
+				$values[] = array($award_id, $member, $date_received, 1);
 
 			AwardsAddMembers($values);
 
@@ -495,6 +558,26 @@ class Awards_Controller extends Action_Controller
 			'help' => $txt['awards_help'],
 			'description' => $txt['awards_description_assign'],
 		);
+
+		// Some JS for the UI
+		loadJavascriptFile(array('awards.js', 'suggest.js'), array('defer' => true));
+		addInlineJavascript('
+			var oAwardSend = new elk_AwardSend({
+				sSelf: \'oAwardSend\',
+				sSessionId: elk_session_id,
+				sSessionVar: elk_session_var,
+				sTextDeleteItem: \'' . $txt['autosuggest_delete_item'] . '\',
+				sToControlId: \'to_control\',
+				aToRecipients: [
+				]
+			});
+
+			function showaward()
+			{
+				awards = ' . $context['awardsjavasciptarray'] . '
+				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assign.award.value][\'filename\'];
+				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assign.award.value][\'minifile\'];
+			}', true);
 	}
 
 	/**
@@ -503,7 +586,6 @@ class Awards_Controller extends Action_Controller
 	 * Step 1
 	 *   - Select the award that you want to assign
 	 *	 - Select the groups that you want to assign them to
-	 *   - Uses AwardsBuildJavascriptObject to build the form so the correct image displays with the award
 	 *
 	 * - Step 2
 	 *   - Preps and checks the data
@@ -511,13 +593,10 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_assign_member_group()
 	{
-		global $context, $sourcedir, $txt;
-
-		// Must have manage not just assign permission for this action
-		isAllowedTo('manage_awards');
+		global $context, $txt, $modSettings, $scripturl;
 
 		// Load in our helper functions
-		require_once($sourcedir . '/AwardsSubs.php');
+		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// First step, select the memebrgroups and awards
 		if (!isset($_REQUEST['step']) || (int) $_REQUEST['step'] == 1)
@@ -527,7 +606,7 @@ class Awards_Controller extends Action_Controller
 
 			// Done with groups, now on to selecting the non auto awards to populate the menu.
 			$context['awards'] = AwardsLoadAssignableAwards();
-			$context['awardsjavasciptarray'] = AwardsBuildJavascriptObject($context['awards'], 'awards');
+			$context['awardsjavasciptarray'] = json_encode($context['awards']);
 
 			// Set the template details
 			$context['step'] = 1;
@@ -548,12 +627,12 @@ class Awards_Controller extends Action_Controller
 
 			// Set the award date
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
-			$award = (int) $_POST['award'];
+			$award_id = (int) $_POST['award'];
 
 			// Prepare and insert the values.
 			$values = array();
 			foreach ($membergroups as $group)
-				$values[] = array($award, -$group, $group, $date_received, 1);
+				$values[] = array($award_id, -$group, $group, $date_received, 1);
 
 			AwardsAddMembers($values, true);
 
@@ -561,25 +640,34 @@ class Awards_Controller extends Action_Controller
 			redirectexit('action=admin;area=awards;sa=viewassigned;a_id=' . $_POST['award']);
 		}
 
+		// Set up for the template
 		$context['sub_template'] = 'assign_group';
 		$context['tabindex'] = 1;
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_assign_group'],
+			'description' => $txt['awards_description_assigngroup'],
 		);
+
+		// Add some JS for the UI excperiance
+		addInlineJavascript('
+			function showaward()
+			{
+				awards= ' . $context['awardsjavasciptarray'] . '
+				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'filename\'];
+				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'minifile\'];
+			}', true);
 	}
 
 	/**
-	 * This is where you add an award to all the memebers of a membergroup
+	 * This is where you add an award to all or some of the members of a membergroup
 	 *
 	 * Step 1
 	 *   - Select the membergroups to generate a list of members to assign
 	 *
 	 * Step 2
 	 *	 - Select the award and members to assign the award
-	 *   - The memberlist is created from the chosen group and all memeber are pre-selected
-	 *   - Uses AwardsBuildJavascriptObject to build the form so the correct image displays with the award
+	 *   - The memberlist is created from the chosen group and all memebers are pre-selected
 	 *
 	 * - Step 3
 	 *   - Preps and checks the data
@@ -587,13 +675,10 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_assign_mass()
 	{
-		global $context, $sourcedir, $txt;
-
-		// Must have manage not just assign permission for this action
-		isAllowedTo('manage_awards');
+		global $context, $txt;
 
 		// Load in our helper functions
-		require_once($sourcedir . '/AwardsSubs.php');
+		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// First step, select the membergroups and awards
 		if (!isset($_REQUEST['step']) || (int) $_REQUEST['step'] < 3)
@@ -601,16 +686,16 @@ class Awards_Controller extends Action_Controller
 			// Load all the member groups
 			$context['groups'] = AwardsLoadGroups();
 
-			// Done with groups, now on to selecting the non auto awards to populate the menu.
+			// Done with groups, now on to selecting the non auto assignable awards to populate the menu.
 			$context['awards'] = AwardsLoadAssignableAwards();
-			$context['awardsjavasciptarray'] = AwardsBuildJavascriptObject($context['awards'], 'awards');
+			$context['awardsjavasciptarray'] = json_encode($context['awards']);
 
 			// Set the template details
 			$context['step'] = 1;
 			$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_select_group'];
 
-			// Something to check
-			$_SESSION['allowed_groups'] = array_keys($context['awards']);
+			// Something to check to make sure a false group_id is not passed back
+			$_SESSION['allowed_groups'] = array_keys($context['groups']);
 
 			// Good old number 2 ... they have selected some groups, we need to load the members for them
 			if (isset($_REQUEST['step']) && (int) $_REQUEST['step'] == 2)
@@ -626,7 +711,7 @@ class Awards_Controller extends Action_Controller
 				}
 				else
 				{
-					// they made a mistake, back to step 1 they go!
+					// They made a mistake, back to step 1 they go!
 					$context['step'] = 1;
 					$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_select_group'];
 				}
@@ -637,7 +722,7 @@ class Awards_Controller extends Action_Controller
 		{
 			checkSession();
 
-			// no members no awards
+			// No members no awards
 			if (empty($_POST['member']) || empty($_POST['award']))
 				fatal_lang_error('awards_error_no_members');
 
@@ -645,14 +730,14 @@ class Awards_Controller extends Action_Controller
 			foreach($_POST['member'] as $member)
 				$members[] = (int) $member;
 
-			// Set a valid date, award.
+			// Set a valid date and award
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
-			$_POST['award'] = (int) $_POST['award'];
+			$award_id = (int) $_POST['award'];
 
 			// Prepare the values.
 			$values = array();
 			foreach ($members as $member)
-				$values[] = array((int) $_POST['award'], $member, $date_received, 1);
+				$values[] = array($award_id, $member, $date_received, 1);
 
 			AwardsAddMembers($values);
 
@@ -665,7 +750,7 @@ class Awards_Controller extends Action_Controller
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_assign_mass'],
+			'description' => $txt['awards_description_assignmass'],
 		);
 	}
 
@@ -676,7 +761,7 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_view_assigned()
 	{
-		global $context, $scripturl, $txt, $sourcedir, $modSettings;
+		global $context, $scripturl, $txt, $modSettings;
 
 		// An award must be selected.
 		$id = (int) $_REQUEST['a_id'];
@@ -684,7 +769,7 @@ class Awards_Controller extends Action_Controller
 			fatal_lang_error('awards_error_no_award');
 
 		// Load in our helper functions
-		require_once($sourcedir . '/AwardsSubs.php');
+		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// Removing the award from some members?
 		if (isset($_POST['unassign']))
@@ -706,7 +791,7 @@ class Awards_Controller extends Action_Controller
 		// Load the awards info for this award
 		$context['award'] = AwardsLoadAward($id);
 
-		// build the listoption array to display the data
+		// Build the listoption array to display the data
 		$listOptions = array(
 			'id' => 'view_assigned',
 			'title' => $txt['awards_showmembers'] . ': ' . $context['award']['award_name'],
@@ -766,6 +851,7 @@ class Awards_Controller extends Action_Controller
 				'check' => array(
 					'header' => array(
 						'value' => '<input type="checkbox" id="checkAllMembers" onclick="invertAll(this, this.form);" class="input_check" />',
+						'class' => 'centertext'
 					),
 					'data' => array(
 						'sprintf' => array(
@@ -774,7 +860,7 @@ class Awards_Controller extends Action_Controller
 								'uniq_id' => false,
 							),
 						),
-						'style' => 'text-align: center',
+						'class' => 'centertext',
 					),
 				),
 			),
@@ -786,8 +872,7 @@ class Awards_Controller extends Action_Controller
 			'additional_rows' => array(
 				array(
 					'position' => 'below_table_data',
-					'value' => '<input type="submit" name="unassign" class="button_submit" value="' . $txt['awards_unassign'] . '" accesskey="u" onclick="return confirm(\'' . $txt['awards_removemember_yn'] . '\');" />',
-					'style' => 'text-align: right;',
+					'value' => '<input type="submit" name="unassign" class="right_submit" value="' . $txt['awards_unassign'] . '" accesskey="u" onclick="return confirm(\'' . $txt['awards_removemember_yn'] . '\');" />',
 				),
 			),
 		);
@@ -799,7 +884,7 @@ class Awards_Controller extends Action_Controller
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_view_assigned'],
+			'description' => $txt['awards_description_viewassigned'],
 		);
 
 		// Create the list.
@@ -809,14 +894,12 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * This is where you handle the settings for the Addon
-	 * awardsDir is the directly in which the badges are saved.
+	 *
+	 * - awardsDir is the directory in which the awards/badges are saved.
 	 */
 	public function action_settings()
 	{
-		global $context, $txt, $boarddir;
-
-		// Must have manage not just assign permission for this action
-		isAllowedTo('manage_awards');
+		global $context, $txt;
 
 		$context['sub_template'] = 'settings';
 		$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_settings'];
@@ -831,8 +914,8 @@ class Awards_Controller extends Action_Controller
 			$_POST['awards_dir'] = str_replace(array('\\', '/'), '', $_POST['awards_dir']);
 
 			// Try to create a new dir if it doesn't exists.
-			if (!is_dir($boarddir . '/' . $_POST['awards_dir']) && trim($_POST['awards_dir']) != '')
-				if (!mkdir($boarddir . '/' . $_POST['awards_dir'], 0755))
+			if (!is_dir(BOARDDIR . '/' . $_POST['awards_dir']) && trim($_POST['awards_dir']) != '')
+				if (!mkdir(BOARDDIR . '/' . $_POST['awards_dir'], 0755))
 					$context['awards_mkdir_fail'] = true;
 
 			// Now save these in the modSettings array
@@ -853,14 +936,11 @@ class Awards_Controller extends Action_Controller
 	}
 
 	/**
-	 * Edits existing categories
+	 * Edits existing categories or adds new ones
 	 */
 	public function action_edit_category()
 	{
 		global $context, $txt;
-
-		// Must have manage not just assign permission for this action
-		isAllowedTo('manage_awards');
 
 		// Editing
 		if (isset($_REQUEST['a_id']))
@@ -916,9 +996,9 @@ class Awards_Controller extends Action_Controller
 
 		$context['sub_template'] = 'edit_category';
 		$context[$context['admin_menu_name']]['tab_data'] = array(
-			'title' => $txt['awards'],
-			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_edit_category'],
+			'title' => $txt['awards_category'],
+			'help' => $txt['awards_category_help'],
+			'description' => isset($_REQUEST['a_id']) ? $txt['awards_description_editcategory'] : $txt['awards_description_addcategory'],
 		);
 	}
 
@@ -930,9 +1010,6 @@ class Awards_Controller extends Action_Controller
 	public function action_list_categories()
 	{
 		global $context, $txt;
-
-		// Must have manage not just assign permission for this action
-		isAllowedTo('manage_awards');
 
 		// Define $categories
 		$context['categories'] = AwardsLoadAllCategories();
@@ -1031,7 +1108,7 @@ class Awards_Controller extends Action_Controller
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_request_award'],
+			'description' => $txt['awards_description_requests'],
 		);
 
 		// Denied or approved ... the choice is yours
