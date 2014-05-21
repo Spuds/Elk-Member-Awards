@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
+<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
+	<id>spuds:MemberAwards</id>
+	<version>1.0</version>
+
+	<!-- These are the edits to the templates.  If you are using a custom theme they might not work at all! -->
+	<!-- If that happens, find something closely resembling it the items in the search operation, and do the necessary -->
+	<!-- edits yourself.  -->
+	<file name="THEMEDIR/GenericMessages.template.php">
+		<operation>
+			<search position="before"><![CDATA[
+	return $poster_div;]]></search>
+			<add><![CDATA[
+	// Member Awards
+	if (!empty($modSettings['awards']) && !empty($message['member']['awards']))
+	{
+		require_once (SOURCEDIR . '/AwardsIntegration.php');
+		injectProfileAwards($poster_div, $message);
+	}
+]]></add>
+		</operation>
+	</file>
+
+	<file name="THEMEDIR/Display.template.php">
+		<operation>
+			<search position="before"><![CDATA[		// Show the member's signature?
+		if (!empty($message['member']['signature']) && empty($options['show_no_signatures']) && $context['signature_enabled'])
+			echo '
+						<div class="signature" id="msg_', $message['id'], '_signature"', $ignoring ? ' style="display:none;"' : '', '>', $message['member']['signature'], '</div>';]]></search>
+			<add><![CDATA[
+		// Show their signature awards?
+		if (!empty($context['award']['signature']))
+			echo $context['award']['signature'];
+]]></add>
+		</operation>
+	</file>
+</modification>
