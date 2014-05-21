@@ -18,9 +18,9 @@ elseif (!defined('ELK'))
 if ((ELK == 'SSI') && !$user_info['is_admin'])
 	die('Admin priveleges required.');
 
-global $modSettings, $db_prefix;
-
 $db = database();
+
+global $db_prefix, $modSettings;
 
 // Settings to create new mod settings...
 $mod_settings = array(
@@ -257,7 +257,8 @@ $tables[] = array(
 $columns = array();
 
 // Now on to the tables ... if they don't exist create them and if they do exist update them if required.
-$current_tables = $db->list_tables(false, '%awards_%');
+$dbtbl = db_table();
+$current_tables = $db->db_list_tables(false, '%awards_%');
 $real_prefix = preg_match('~^(`?)(.+?)\\1\\.(.*?)$~', $db_prefix, $match) === 1 ? $match[3] : $db_prefix;
 
 // Loop through each defined table and do whats needed, update existing or add as new
@@ -267,13 +268,13 @@ foreach ($tables as $table)
 	if (in_array($real_prefix . $table['table_name'], array_map('strtolower', $current_tables)))
 	{
 		foreach ($table['columns'] as $column)
-			$db->add_column($db_prefix . $table['table_name'], $column);
+			$dbtbl->db_add_column($db_prefix . $table['table_name'], $column);
 
 		foreach ($table['indexes'] as $index)
-			$db->add_index($db_prefix . $table['table_name'], $index, array(), 'ignore');
+			$dbtbl->db_add_index($db_prefix . $table['table_name'], $index, array(), 'ignore');
 	}
 	else
-		$db->create_table($db_prefix . $table['table_name'], $table['columns'], $table['indexes'], $table['parameters'], $table['if_exists'], $table['error']);
+		$dbtbl->db_create_table($db_prefix . $table['table_name'], $table['columns'], $table['indexes'], $table['parameters'], $table['if_exists'], $table['error']);
 }
 
 // And for good measure, lets add a default category
@@ -306,5 +307,5 @@ foreach ($mod_settings as $new_setting => $new_value)
 }
 
 // Done
-if(ELK == 'SSI')
+if(ELK === 'SSI')
 	echo 'Database changes are complete!';
