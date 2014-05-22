@@ -133,6 +133,8 @@ $txt['awards_viewing_category'] = 'Viewing Category';
 
 // Settings page
 $txt['awards_basic_settings'] = 'Set the Award Modification Options';
+$txt['awards_enabled'] = 'Enable Awards';
+$txt['awards_enabled_desc'] = 'This is the master setting that enables the awards for the site.';
 $txt['awards_badges_dir'] = 'Awards Directory';
 $txt['awards_badges_dir_desc'] = 'This is the directory where awards are stored - just the name without the trailing slash.';
 $txt['awards_favorite'] = 'Multiple Favorite Awards';

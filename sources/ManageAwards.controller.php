@@ -921,6 +921,7 @@ class Awards_Controller extends Action_Controller
 			// Now save these in the modSettings array
 			updateSettings(
 				array(
+					'awards_enabled' => isset($_POST['awards_enabled']) ? 1 : 0,
 					'awards_dir' => Util::htmlspecialchars($_POST['awards_dir'], ENT_QUOTES),
 					'awards_favorites' => isset($_POST['awards_favorites']) ? 1 : 0,
 					'awards_in_post' => isset($_POST['awards_in_post']) ? (int) $_POST['awards_in_post'] : 5,
