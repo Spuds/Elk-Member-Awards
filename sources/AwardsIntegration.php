@@ -193,6 +193,7 @@ function iamd_member_awards($new_loaded_ids, $set)
 	if ($modSettings['awards_in_post'] > 0 && $set !== 'minimal')
 	{
 		require_once(SUBSDIR . '/AwardsManage.subs.php');
+		loadCSSFile('awards.css');
 		AwardsLoad($new_loaded_ids);
 		AwardsAutoCheck($new_loaded_ids);
 	}
@@ -269,7 +270,6 @@ function injectProfileAwards(&$poster_div, $message)
 					<a href="' . $scripturl . $award['more'] . '">
 						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
 					</a> ';
-				$awards++;
 			}
 			// Signature
 			elseif ($award['location'] == 3)
@@ -293,7 +293,7 @@ function injectProfileAwards(&$poster_div, $message)
 			: 'award_poster_3');
 
 			$award_output = '
-				<li>
+				<li class="listlevel1">
 					<fieldset class="' . $style . '">';
 
 			// Title for the above awards "box"
@@ -308,7 +308,7 @@ function injectProfileAwards(&$poster_div, $message)
 				</li>';
 
 			// Insert the award output in the approriate spot, right above the dropdown
-			$find = '<ul class="menulevel2" id="msg_' . $message['id'];
+			$find = '<li class="listlevel1 poster_avatar">';
 			$replace = $award_output . $find;
 			$poster_div = awards_str_replace_once($find, $replace, $poster_div);
 		}
@@ -346,7 +346,7 @@ function injectProfileAwards(&$poster_div, $message)
 		if (!empty($awards_link[3]))
 		{
 			// Only allow the number set
-			array_splice($awards_link[1], $modSettings['awards_in_post']);
+			array_splice($awards_link[3], $modSettings['awards_in_post']);
 
 			// Style for the sigs?
 			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_signature_1'
@@ -364,7 +364,7 @@ function injectProfileAwards(&$poster_div, $message)
 								<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_signature_title'] . '</a>
 							</legend>';
 
-			$award_output .= implode('', $awards_link[1]) . '
+			$award_output .= implode('', $awards_link[3]) . '
 						</fieldset>
 					</div>';
 
@@ -374,10 +374,9 @@ function injectProfileAwards(&$poster_div, $message)
 		}
 
 		// Give them a link to see all the awards
-		$poster_div .= '
-				<li>
-					<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/award.png" alt="' . $txt['awards'] . '" title="' . $txt['awards'] . '" border="0" />' : $txt['awards']) . '</a>
-				</li>';
+		$find = '<ol>';
+		$replace = $find . '<li><a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '"><img src="' . $settings['images_url'] . '/award.png" alt="' . $txt['awards'] . '" title="' . $txt['awards'] . '" /></a></li>';
+		$poster_div = awards_str_replace_once($find, $replace, $poster_div);
 	}
 }
 

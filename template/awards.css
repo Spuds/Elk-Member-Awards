@@ -1,44 +1,31 @@
 .award_poster_1 {
-	border: 1px;
-	border-style: solid;
-	border-color: #CCC;
-	padding: 2px 2px 2px 5px;
-	margin-right: 15px;
+	border: 1px #CCC solid;
+    margin: 0 0 10px 15px;
+    padding: 0 4px 2px;
+	text-align: left;
 }
 .award_poster_2 {
-	border: 0;
+	border: 0 #CCC solid;
 	border-top: 1px;
-	border-style: solid;
-	border-color: #CCC;
-	padding: 2px 2px 2px 5px;
-	margin-right: 15px;
+	margin: 0 0 10px 15px;
+    padding: 0 4px 2px;
+	text-align: left;
 }
 .award_poster_3 {
-	border: 0px;
-	border-style: solid;
-	border-color: #CCC;
+	border: 0px #CCC solid;
 	padding: 0 0;
 }
-
 .award_signature_1 {
-	border: 1px;
-	border-style: solid;
-	border-color: #CCC;
+	border: 1px #CCC solid;
 	padding: 2px 2px 2px 5px;
-	margin-right: 15px;
 }
 .award_signature_2 {
-	border: 0;
+	border: 0 #CCC solid;
 	border-top: 1px;
-	border-style: solid;
-	border-color: #CCC;
 	padding: 2px 2px 2px 5px;
-	margin-right:15px;
 }
 .award_signature_3 {
-	border: 0px;
-	border-style: solid;
-	border-color: #CCC;
+	border: 0px #ccc solid;
 	padding: 0 0;
 }
 .table_grid a img.icon {
