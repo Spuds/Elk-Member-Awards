@@ -85,8 +85,6 @@ function ipa_member_awards(&$profile_areas)
  * User Info Hook, integrate_user_info, called from Load.php
  *
  * - Used to add items to the $user_info array
- *
- * @param mixed[] $profile_areas
  */
 function iui_member_awards()
 {
