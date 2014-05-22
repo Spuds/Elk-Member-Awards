@@ -32,22 +32,24 @@ function ipa_member_awards(&$profile_areas)
 	if ($user_info['is_guest'])
 		return;
 
-	elk_array_insert($profile_areas, 'info', array(
+	$profile_areas = elk_array_insert($profile_areas, 'info', array(
 		'member_awards' => array(
 			'title' => $txt['awards'],
 			'areas' => array(
 				'showAwards' => array(
 					'label' => $txt['showAwards'],
-					'file' => 'AwardsProfile.php',
-					'function' => 'showAwards',
+					'file' => 'AwardsProfile.controller.php',
+					'controller' => 'Awards_Controller',
+					'function' => 'action_showAwards',
 					'permission' => array(
 						'own' => 'profile_view_own',
 						'any' => 'profile_view_any',
 					),
 				),
 				'membersAwards' => array(
-					'file' => 'AwardsProfile.php',
-					'function' => 'membersAwards',
+					'file' => 'AwardsProfile.controller.php',
+					'controller' => 'Awards_Controller',
+					'function' => 'action_membersAwards',
 					'hidden' => (isset($_GET['area']) && $_GET['area'] !== "membersAwards"),
 					'permission' => array(
 						'own' => 'profile_view_own',
@@ -56,17 +58,19 @@ function ipa_member_awards(&$profile_areas)
 				),
 				'listAwards' => array(
 					'label' => $txt['listAwards'],
-					'file' => 'AwardsProfile.php',
-					'function' => 'listAwards',
+					'file' => 'AwardsProfile.controller.php',
+					'controller' => 'Awards_Controller',
+					'function' => 'action_listAwards',
 					'permission' => array(
 						'own' => 'profile_view_own',
 						'any' => 'profile_view_any',
 					),
 				),
 				'requestAwards' => array(
-					'file' => 'AwardsProfile.php',
+					'file' => 'AwardsProfile.controller.php',
+					'controller' => 'Awards_Controller',
 					'hidden' => true,
-					'function' => 'requestAwards',
+					'function' => 'action_requestAwards',
 					'permission' => array(
 						'own' => 'profile_view_own',
 						'any' => 'profile_view_any',
@@ -189,7 +193,7 @@ function iamd_member_awards($new_loaded_ids, $set)
 	// I'm sorry, but I've got to stick this award somewhere ...
 	if ($modSettings['awards_in_post'] > 0 && $set !== 'minimal')
 	{
-		require_once(SUBSDIR . '/AwardsManage.php');
+		require_once(SUBSDIR . '/AwardsManage.subs.php');
 		AwardsLoad($new_loaded_ids);
 		AwardsAutoCheck($new_loaded_ids);
 	}
@@ -226,6 +230,16 @@ function iwoa_member_awards(&$allowedActions)
 	return;
 }
 
+/**
+ * Used to place the awards in to the users post profile
+ *
+ * - Directly injects the changes to the generic template which affects the
+ * user poster area in post/pm/etc
+ * - Builds the signature area, used in the display template, just for posts
+ *
+ * @param type $poster_div
+ * @param type $message
+ */
 function injectProfileAwards(&$poster_div, $message)
 {
 	global $txt, $scripturl, $modSettings, $context, $settings;
