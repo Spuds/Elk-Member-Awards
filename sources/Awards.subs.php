@@ -185,7 +185,7 @@ function AwardsCountMembersAwards($memID)
 	while ($row = $db->fetch_assoc($request))
 		$awards[$row['id_award']] = $row['id_award'];
 	$db->free_result($request);
-	$count_awards = count($awards);
+	$count_awards = !empty($awards) ? count($awards) : 0;
 
 	return $count_awards;
 }
@@ -1328,7 +1328,6 @@ function AwardsValidateImage($name, $id)
  * @param int $memID
  * @param int $award_id
  * @param int $makefav
- * @param boolean $single
  */
 function AwardsSetFavorite($memID, $award_id, $makefav)
 {
