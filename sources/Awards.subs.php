@@ -1148,7 +1148,8 @@ function AwardsRemoveMembers($id, $members = array())
 /**
  * Adds an award to a membergroup or a group of individual members
  *
- * @param array $values
+ * @param mixed[] $values
+ * @param boolean $group
  */
 function AwardsAddMembers($values, $group = false)
 {

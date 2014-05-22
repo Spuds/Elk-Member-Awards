@@ -205,6 +205,8 @@ function iamd_member_awards($new_loaded_ids, $set)
  *
  * Called from load.php
  * Used to add items to the $memberContext array
+ *
+ * @param int $user
  */
 function imc_member_awards($user)
 {
@@ -222,7 +224,7 @@ function imc_member_awards($user)
  *
  * - Used to add action view permissions checks to the who's online listing
  *
- * @param mixed[] $actions
+ * @param mixed[] $allowedActions
  */
 function iwoa_member_awards(&$allowedActions)
 {
