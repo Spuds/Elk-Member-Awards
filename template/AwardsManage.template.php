@@ -29,7 +29,8 @@ function template_modify()
 						', ($context['editing'] === true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : $txt['awards_add_award']), '
 					</h3>';
 
-	echo '			<div class="windowbg2">
+	echo '
+					<div class="windowbg2">
 						<div class="content">
 							<fieldset>
 								<legend>', $txt['awards_add_name'], '</legend>
@@ -681,34 +682,38 @@ function template_view_assigned()
 }
 
 /**
- * Template for showing our settings to control the modification
+ * Template for showing our settings to control the addon
  */
 function template_settings()
 {
 	global $context, $txt, $scripturl, $modSettings;
 
+	// Just saved, let them know
 	if (isset($_GET['saved']))
 		echo'
-					<span class="upperframe"><span></span></span>
-					<div class="roundframe">
-						<div id="savestatus">',
-							$txt['awards_saved_settings'], '
-						</div>
-					</div>
-					<span class="lowerframe"><span></span></span>';
+					<div class="infobox">',
+						$txt['awards_saved_settings'], '
+					</div>';
 
+	// On to all the settings!
 	echo '
 					<h3 class="category_header hdicon cat_img_config">
 						', $txt['awards_settings'], '
 					</h3>
 
-					<br class="clear" />
-					<form action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="UTF-8" enctype="multipart/form-data" style="padding:0; margin: 0;">
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+					<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="UTF-8" enctype="multipart/form-data" >
+						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
 						<legend>', $txt['awards_basic_settings'], '</legend>
-						<span class="upperframe"><span></span></span>
 						<div class="roundframe">
 						<dl class="settings">
+							<dt>
+								<label for="awards_enabled">', $txt['awards_enabled'], '</label>:<br />
+								<span class="smalltext">', $txt['awards_enabled_desc'], '</span>
+							</dt>
+							<dd>
+								<input type="checkbox" name="awards_enabled" id="awards_enabled" ', empty($modSettings['awards_enabled']) ? '' : 'checked="checked"', ' />
+							</dd>
+
 							<dt>
 								<label for="awards_dir">', $txt['awards_badges_dir'], '</label>:<br />
 								<span class="smalltext">', $txt['awards_badges_dir_desc'], '</span>
@@ -734,12 +739,10 @@ function template_settings()
 							</dd>
 						</dl>
 						</div>
-						<span class="lowerframe"><span></span></span>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
 						<legend>', $txt['awards_aboveavatar_style'], '</legend>
-						<span class="upperframe"><span></span></span>
 						<div class="roundframe">
 						<dl class="settings">
 							<dt>
@@ -766,12 +769,10 @@ function template_settings()
 							</dd>
 						</dl>
 						</div>
-						<span class="lowerframe"><span></span></span>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
 						<legend>', $txt['awards_belowavatar_style'], '</legend>
-						<span class="upperframe"><span></span></span>
 						<div class="roundframe">
 						<dl class="settings">
 							<dt>
@@ -798,12 +799,10 @@ function template_settings()
 							</dd>
 							</dl>
 						</div>
-						<span class="lowerframe"><span></span></span>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px;">
+						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
 						<legend>', $txt['awards_signature_style'], '</legend>
-						<span class="upperframe"><span></span></span>
 						<div class="roundframe">
 						<dl class="settings">
 							<dt>
@@ -830,12 +829,11 @@ function template_settings()
 							</dd>
 						</dl>
 						</div>
-						<span class="lowerframe"><span></span></span>
 						</fieldset>
 
-						<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 						<hr class="hrcolor" />
-						<div class="righttext">
+						<div class="submitbutton">
+							<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 							<input type="submit" class="button_submit" name="save_settings" value="', $txt['save'], '" accesskey="s" />
 						</div>
 					</form>
@@ -1013,13 +1011,9 @@ function template_request_award()
 	if (empty($context['awards']))
 	{
 		echo '
-			<span class="upperframe"><span></span></span>
-			<div class="roundframe">
-				<div id="requests">',
-					$txt['awards_no_requests'], '
-				</div>
-			</div>
-			<span class="lowerframe"><span></span></span>';
+			<div class="infobox">',
+				$txt['awards_no_requests'], '
+			</div>';
 	}
 	else
 	{
@@ -1031,57 +1025,57 @@ function template_request_award()
 
 		// Start with the form.
 		echo '
-				<form action="', $scripturl, '?action=admin;area=awards;sa=requests" method="post" name="requests" id="requests" accept-charset="UTF-8" enctype="multipart/form-data">';
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=requests" method="post" name="requests" accept-charset="UTF-8" enctype="multipart/form-data">';
 
 		// Loop through the awards
 		foreach ($context['awards'] as $award)
 		{
 			// show this awards info in the header
 			echo '
-					<div class="windowbg">
-						<div class="content" align="center">
-							<img style="padding:0 0 5px 0" src="', $award['img'], '" alt="', $award['award_name'], '" /><br />';
+					<div class="description centertext">
+						<img style="padding:0 0 5px 0" src="', $award['img'], '" alt="', $award['award_name'], '" /><br />';
 
 			// Small image as well?
 			if ($award['img'] != $award['small'])
 				echo '
-							<img style="vertical-align:middle" src="', $award['small'], '" alt="', $award['award_name'], '" /> ';
+						<img style="vertical-align:middle" src="', $award['small'], '" alt="', $award['award_name'], '" /> ';
 
 			echo '
-							<strong>', $award['award_name'], '</strong><br />', $award['description'], '
-						</div>
+						<strong>', $award['award_name'], '</strong><br />', $award['description'], '
 					</div>
 
-					<div class="windowbg2">
+					<div class="windowbg">
 						<div class="content">';
 
 			// Now output the table of members who requested this award
 			echo '
-							<table width="100%" class="table_grid">
+							<table class="table_grid">
 								<thead>
-									<tr class="titlebg">
-										<th scope="col" class="first_th smalltext" width="5%"><input type="checkbox" id="checkAllMembers', $award['id'], '" checked="checked" onclick="invertAll(this, this.form, \'requests[', $award['id'], ']\');" class="check" /></th>
-										<th scope="col" class="smalltext" width="25%">', $txt['who_member'], '</th>
-										<th scope="col" class="last_th smalltext" width="70%">', $txt['awards_comments'], '</th>
+									<tr class="table_head">
+										<th scope="col" class="grid25">', $txt['who_member'], '</th>
+										<th scope="col"', $txt['awards_comments'], '</th>
+										<th scope="col" class="grid8 centertext">
+											<input type="checkbox" id="checkAllMembers', $award['id'], '" checked="checked" onclick="invertAll(this, this.form, \'requests[', $award['id'], ']\');" class="check" />
+										</th>
 									</tr>
 								</thead>
 								<tbody>';
 
-			$alternate = true;
 			foreach ($award['members'] as $id => $member)
 			{
 				echo '
-									<tr class="', $alternate ? 'windowbg2' : 'windowbg', '">
-										<td valign="middle" align="center"><input type="checkbox" name="requests[', $award['id'], '][', $id, ']" value="', $id, '" checked="checked" class="check" /></td>
-										<td valign="top">
+									<tr>
+										<td>
 											', $member['link'], '<span class="floatright">
 											', $member['pm'], '&nbsp;</span>
 										</td>
-										<td valign="top">
+										<td>
 											', $member['comments'], '
 										</td>
+										<td class="centertext">
+											<input type="checkbox" name="requests[', $award['id'], '][', $id, ']" value="', $id, '" checked="checked" class="check" />
+										</td>
 									</tr>';
-				$alternate = !$alternate;
 			}
 
 			echo '
@@ -1094,15 +1088,14 @@ function template_request_award()
 
 		// Submit button
 		echo '
-					<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-					<div class="righttext">
+					<div class="submitbutton">
+						<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 						<input type="submit" class="button_submit" name="reject_selected" value="', $txt['awards_reject_selected'], '" />
 						<input type="submit" class="button_submit" name="approve_selected" value="', $txt['awards_approve_selected'], '" />
 					</div>';
 
 		// close this beast up
 		echo '
-				</form>
-				<br class="clear" />';
+				</form>';
 	}
 }
