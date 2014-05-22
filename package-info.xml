@@ -4,7 +4,7 @@
 	<id>Spuds:MemberAwards</id>
 	<name>Member Awards</name>
 	<version>1.0</version>
-	<type>modification</type>
+	<type>addon</type>
 	<license><![CDATA[
 /**
  * Member Awards
@@ -25,14 +25,14 @@
 		<require-file name="sources/AwardsIntegration.php" destination="SOURCEDIR" />
 		<require-file name="sources/AwardsProfile.controller.php" destination="CONTROLLERDIR" />
 		<require-file name="sources/Awards.subs.php" destination="SUBSDIR" />
-		<require-file name="sources/AwardsManage.php" destination="SUBSDIR" />
+		<require-file name="sources/AwardsManage.subs.php" destination="SUBSDIR" />
 		<require-file name="template/AwardsManage.template.php" destination="THEMEDIR" />
 		<require-file name="template/AwardsProfile.template.php" destination="THEMEDIR" />
 		<require-file name="template/awards.css" destination="THEMEDIR/css" />
 		<require-file name="template/awards.js" destination="THEMEDIR/scripts" />
 		<require-file name="language/AwardsManage.english.php" destination="LANGUAGEDIR/english" />
-		<require-file name="award.gif" destination="IMAGESDIR" />
-		<require-file name="awards.gif" destination="IMAGESDIR/admin" />
+		<require-file name="award.png" destination="IMAGESDIR" />
+		<require-file name="awards.png" destination="IMAGESDIR/admin" />
 		<require-file name="template/awards.js" destination="THEMEDIR/scripts" />
 		<require-dir name="awards" destination="IMAGESDIR" />
 		<hook hook="integrate_admin_areas" file="SOURCEDIR/AwardsIntegration.php" function="iaa_member_awards"/>
@@ -40,7 +40,7 @@
 		<hook hook="integrate_load_permissions" file="SOURCEDIR/AwardsIntegration.php" function="ilp_member_awards"/>
 		<hook hook="integrate_menu_buttons" file="SOURCEDIR/AwardsIntegration.php" function="imb_member_awards"/>
 		<hook hook="integrate_user_info" file="SOURCEDIR/AwardsIntegration.php" function="iui_member_awards"/>
-		<hook hook="integrate_load_member_data" file="SOURCEDIR/AwardsIntegration.php" function="ilmd_member_awards" />
+		<hook hook="integrate_add_member_data" file="SOURCEDIR/AwardsIntegration.php" function="iamd_member_awards" />
 		<hook hook="integrate_member_context" file="SOURCEDIR/AwardsIntegration.php" function="imc_member_awards" />
 		<hook hook="integrate_whos_online_allowed" file="SOURCEDIR/AwardsIntegration.php" function="iwoa_member_awards" />
 		<credits url="www.elkarte.net" license="MPL 1.1" copyright="spuds">Member Awards</credits>
@@ -53,23 +53,23 @@
 		<hook reverse="true" hook="integrate_load_permissions" file="SOURCEDIR/AwardsIntegration.php" function="ilp_member_awards"/>
 		<hook reverse="true" hook="integrate_menu_buttons" file="SOURCEDIR/AwardsIntegration.php" function="imb_member_awards"/>
 		<hook reverse="true" hook="integrate_user_info" file="SOURCEDIR/AwardsIntegration.php" function="iui_member_awards"/>
-		<hook reverse="true" hook="integrate_load_member_data" file="SOURCEDIR/AwardsIntegration.php" function="ilmd_member_awards" />
+		<hook reverse="true" hook="integrate_add_member_data" file="SOURCEDIR/AwardsIntegration.php" function="iamd_member_awards" />
 		<hook reverse="true" hook="integrate_member_context" file="SOURCEDIR/AwardsIntegration.php" function="imc_member_awards" />
 		<hook reverse="true" hook="integrate_whos_online_allowed" file="SOURCEDIR/AwardsIntegration.php" function="iwoa_member_awards" />
 		<modification reverse="true">install_template.xml</modification>
 		<modification reverse="true">language.xml</modification>
 		<remove-file name="ADMINDIR/ManageAwards.controller.php" />
-		<remove-file name="CONTROLLERDIR/Awards.controller.php" />
 		<remove-file name="SOURCEDIR/AwardsIntegration.php" />
 		<remove-file name="CONTROLLERDIR/AwardsProfile.controller.php" />
 		<remove-file name="SUBSDIR/Awards.subs.php" />
+		<remove-file name="SUBSDIR/AwardsManage.subs.php" />
 		<remove-file name="THEMEDIR/AwardsManage.template.php" />
 		<remove-file name="THEMEDIR/AwardsProfile.template.php" />
 		<remove-file name="THEMEDIR/css/awards.css" />
 		<remove-file name="THEMEDIR/scripts/awards.js" />
 		<remove-file name="LANGUAGEDIR/english/AwardsManage.english.php" />
-		<remove-file name="IMAGESDIR/award.gif" />
-		<remove-file name="IMAGESDIR/admin/awards.gif" />
+		<remove-file name="IMAGESDIR/award.png" />
+		<remove-file name="IMAGESDIR/admin/awards.png" />
 		<remove-dir name="IMAGESDIR/awards" />
 	</uninstall>
 </package-info>
