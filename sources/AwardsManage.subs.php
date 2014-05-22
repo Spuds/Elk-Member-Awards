@@ -633,31 +633,9 @@ function AwardsPopularity($memberlist)
  */
 function AwardsDateDiff($time1, $time2)
 {
-	// To try and account for leap years, and php4, we do all this
-	$intervals = array('year', 'month'); // add day if you need it ;)
-	$diffs = array();
-	$times = array();
+	$date1 = new DateTime(date('d-M-Y', $time1));
+	$date2 = new DateTime(date('d-M-Y', $time2));
+	$diff = $date1->diff($date2);
 
-	// Loop thru all intervals
-	foreach ($intervals as $interval)
-	{
-		$diffs[$interval] = 0;
-
-		// Create a temp time from time1 for this 'interval'
-		$ttime = strtotime('+1 ' . $interval, $time1);
-
-		// Loop until temp time is smaller than time2
-		while ($time2 >= $ttime)
-		{
-			$time1 = $ttime;
-			$diffs[$interval]++;
-			$ttime = strtotime('+1 ' . $interval, $time1);
-		}
-	}
-
-	// Build our return array of year, month
-	foreach ($diffs as $interval => $value)
-		$times[$interval] = !empty($value) ? $value : 0;
-
-	return $times['year'] + $times['month'] / 12;
+	return $diff->y + $diff->m;
 }
