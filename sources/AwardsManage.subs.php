@@ -19,7 +19,7 @@ if (!defined('ELK'))
 /**
  * Loads all the awards for the members in the list
  *
- * @param array $new_loaded_ids
+ * @param int[] $new_loaded_ids
  */
 function AwardsLoad($new_loaded_ids)
 {
@@ -32,7 +32,7 @@ function AwardsLoad($new_loaded_ids)
 
 	// Build our database request to load all existing member awards for this group of members, including group awards
 	$request = $db->query('', '
-		SELECT 
+		SELECT
 			am.id_member, am.active, am.id_group,
 			aw.id_award, aw.award_name, aw.description, aw.minifile, aw.award_trigger, aw.award_type, aw.award_location
 		FROM {db_prefix}awards_members AS am
@@ -125,12 +125,12 @@ function AwardsLoad($new_loaded_ids)
  * - Uses the cache when it can
  * - Determines if any members in the list have earned any of the auto awards
  *
- * @param type $new_loaded_ids
+ * @param int[] $new_loaded_ids
  */
 function AwardsAutoCheck($new_loaded_ids)
 {
 	global $modSettings;
-	
+
 	$db = database();
 
 	// See if we already have this in the cache
@@ -147,7 +147,7 @@ function AwardsAutoCheck($new_loaded_ids)
 		// The key is the trigger desc sort, this allows us to use 1 query for that auto award 'type',
 		// all others will be a subset of that
 		$request = $db->query('', '
-			SELECT 
+			SELECT
 				id_award, award_name, award_trigger, award_type
 			FROM {db_prefix}awards
 			WHERE award_type > {int:type}
@@ -249,10 +249,10 @@ function AwardsAutoCheck($new_loaded_ids)
  * - uses the data set in $user_profile by the various award querys (topic, post, timeon, etc)
  * - Returns the member ids, from the supplied list, of any who have reached a threshold
  *
- * @param type $awardids
- * @param type $new_loaded_ids
- * @param type $area
- * @param type $one_to_n
+ * @param int[] $awardids
+ * @param int[] $new_loaded_ids
+ * @param string $area
+ * @param boolean $one_to_n
  */
 function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = false)
 {
@@ -303,9 +303,9 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
  *
  * - Makes sure each member only has 1 of each award
  *
- * @param type $members
- * @param type $award_type
- * @param type $awardids
+ * @param int[] $members
+ * @param string $award_type
+ * @param boolean $awardids
  */
 function AwardsAutoAssign($members, $award_type, $awardids)
 {
@@ -363,8 +363,8 @@ function AwardsAutoAssign($members, $award_type, $awardids)
 /**
  * Returns the number of topics started for each member in memberlist
  *
- * @param type $memberlist
- * @param type $ttl
+ * @param int[] $memberlist
+ * @param int $ttl
  */
 function AwardsTopicsStarted($memberlist, $ttl = 300)
 {
@@ -407,7 +407,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 	{
 		// Number of topics started.
 		$request = $db->query('', '
-			SELECT 
+			SELECT
 				COUNT(*) AS num_topics, id_member_started
 			FROM smf_topics
 			WHERE id_member_started IN ({array_int:memberlist})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -437,7 +437,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 /**
  * Returns the top X posters in $user_profile
  *
- * @param type $limit
+ * @param int $limit
  */
 function AwardsTopPosters_1_N($limit = 10)
 {
@@ -450,7 +450,7 @@ function AwardsTopPosters_1_N($limit = 10)
 	if (($members = cache_get_data('awards_top_posters', 360)) == null)
 	{
 		$request = $db->query('', '
-			SELECT 
+			SELECT
 				id_member, posts
 			FROM {db_prefix}members
 			WHERE posts > {int:no_posts}
@@ -485,7 +485,7 @@ function AwardsTopPosters_1_N($limit = 10)
 /**
  * Returns the top X topic starters in $user_profile
  *
- * @param type $limit
+ * @param int $limit
  */
 function AwardsTopTopicStarter_1_N($limit = 10)
 {
@@ -525,7 +525,7 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 
 	// And now get the top 1-N topic starter.
 	$request = $db->query('top_topic_starters', '
-		SELECT 
+		SELECT
 			id_member
 		FROM {db_prefix}members
 		WHERE id_member IN ({array_int:member_list})
@@ -550,7 +550,7 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 /**
  * Returns the top X time on line members in $user_profile
  *
- * @param type $limit
+ * @param int $limit
  */
 function AwardsTopTimeon_1_N($limit = 10)
 {
@@ -561,7 +561,7 @@ function AwardsTopTimeon_1_N($limit = 10)
 	// The time on line 1-N list will not change that often, so cache it for a bit
 	$temp = cache_get_data('awards_total_time_members', 600);
 	$request = $db->query('', '
-		SELECT 
+		SELECT
 			id_member, total_time_logged_in
 		FROM {db_prefix}members' . (!empty($temp) ? '
 		WHERE id_member IN ({array_int:member_list_cached})' : '') . '
@@ -594,7 +594,7 @@ function AwardsTopTimeon_1_N($limit = 10)
 /**
  * Returns the top X join date based in $user_profile
  *
- * @param type $memberlist
+ * @param int[] $memberlist
  */
 function AwardsSeniority($memberlist)
 {
@@ -610,7 +610,7 @@ function AwardsSeniority($memberlist)
 /**
  * Returns the karma level for the given list of users
  *
- * @param type $memberlist
+ * @param int[] $memberlist
  */
 function AwardsPopularity($memberlist)
 {
@@ -628,8 +628,8 @@ function AwardsPopularity($memberlist)
 /**
  * Utility function to get the x.y years between to dates e.g. 1.5 is 1 year 6 months
  *
- * @param type $time1
- * @param type $time2
+ * @param string $time1
+ * @param string $time2
  */
 function AwardsDateDiff($time1, $time2)
 {

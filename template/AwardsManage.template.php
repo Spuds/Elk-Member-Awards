@@ -634,17 +634,6 @@ function template_assign_mass()
 			</div>
 		</div>';
 
-	// Create a javascript array from our php awards array so we can use it
-	$script = "var awardValues = [";
-	foreach ($context['awards'] as $key => $value)
-	{
-		if ($key < (count($context['awards']) - 1))
-			$script = $script . implode(",", $value) . ',';
-		else
-			$script = $script . implode(",", $value) . "];\n";
-	}
-	$script = $script . "</script>";
-
 	echo '
 		<script type="text/javascript"><!-- // --><![CDATA[
 			function showaward()

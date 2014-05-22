@@ -22,7 +22,7 @@ if (!defined('ELK'))
  * Used to add menu items to the profile area
  * Adds show my & view award options
  *
- * @param array $profile_areas
+ * @param mixed[] $profile_areas
  */
 function ipa_member_awards(&$profile_areas)
 {
@@ -86,7 +86,7 @@ function ipa_member_awards(&$profile_areas)
  *
  * - Used to add items to the $user_info array
  *
- * @param array $profile_areas
+ * @param mixed[] $profile_areas
  */
 function iui_member_awards()
 {
@@ -100,7 +100,7 @@ function iui_member_awards()
  *
  * - Adds the admin menu and all award sub actions as a sub menu
  * - hidden to all but admin, accessable via manage_award permission
- * @param array $admin_areas
+ * @param mixed[] $admin_areas
  */
 function iaa_member_awards(&$admin_areas)
 {
@@ -135,11 +135,11 @@ function iaa_member_awards(&$admin_areas)
  *
  * - Used to add new permisssions
  *
- * @param array $permissionGroups
- * @param array $permissionList
- * @param array $leftPermissionGroups
- * @param array $hiddenPermissions
- * @param array $relabelPermissions
+ * @param mixed[] $permissionGroups
+ * @param mixed[] $permissionList
+ * @param mixed[] $leftPermissionGroups
+ * @param mixed[] $hiddenPermissions
+ * @param mixed[] $relabelPermissions
  */
 function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissionGroups, &$hiddenPermissions, &$relabelPermissions)
 {
@@ -158,7 +158,7 @@ function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissio
  *
  * - Used to add top menu buttons
  *
- * @param type $buttons
+ * @param mixed[] $buttons
  */
 function imb_member_awards(&$buttons)
 {
@@ -175,8 +175,9 @@ function imb_member_awards(&$buttons)
 /**
  * Load Member Data hook, integrate_load_member_data, Called from load.php
  *
- * Used to add columns / tables to the query so additional data can be loaded for a set
- *
+ * - Used to add columns / tables to the query so additional data can be loaded for a set
+ * @param int[] $new_loaded_ids
+ * @param string $set
  */
 function iamd_member_awards($new_loaded_ids, $set)
 {

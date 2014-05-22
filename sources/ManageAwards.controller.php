@@ -151,7 +151,7 @@ class Awards_Controller extends Action_Controller
 	 *
 	 * - Loads all the awards and categories that have been added to the system
 	 */
-	function action_awards_main()
+	public function action_awards_main()
 	{
 		global $context, $scripturl, $txt;
 

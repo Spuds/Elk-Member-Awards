@@ -39,7 +39,6 @@ function AwardsLoadAward($id = -1)
 			'id' => $id
 		)
 	);
-	$award = array();
 	$row = $db->fetch_assoc($request);
 
 	// Check if that award actually exists
@@ -417,6 +416,7 @@ function AwardsAddAward($award_name, $description, $time_added, $category, $awar
 /**
  * Updates an award that already exists in the system
  *
+ * @param int $id
  * @param string $award_name
  * @param string $description
  * @param int $category
@@ -712,6 +712,7 @@ function AwardsLoadMembersCount($id)
 /**
  * Places a member request for an award in to the system queue
  *
+ * @param int $id
  * @param int $date
  * @param string $comments
  * @param boolean $flush
@@ -771,7 +772,7 @@ function AwardsMakeRequest($id, $date, $comments, $flush = true)
 /**
  * Approve or deny a requst by a member for a requestable award
  *
- * @param array $awards
+ * @param int[] $awards
  * @param boolean $approve
  */
 function AwardsApproveDenyRequests($awards, $approve = true)
@@ -872,7 +873,6 @@ function AwardsLoadCategory($id)
 			'id' => $id
 		)
 	);
-	$category = array();
 	$row = $db->fetch_assoc($request);
 
 	// Check if that category exists
@@ -922,7 +922,7 @@ function AwardsLoadAllCategories()
 /**
  * Returns the number of awards in each category
  *
- * @param int $id
+ * @param int|null $id
  */
 function AwardsInCategories($id = null)
 {
@@ -984,7 +984,9 @@ function AwardsCount()
  *
  * @todo combine with AwardsLoadCategoryAwards
  *
- * @param array $awardcheck
+ * @param int $start
+ * @param int $end
+ * @param int[] $awardcheck
  * @return type
  */
 function AwardsListAll($start, $end, $awardcheck = array())
@@ -1116,7 +1118,7 @@ function AwardsDeleteCategory($id)
  * Removes an award by id from all members who received it
  *
  * @param int $id id of the award
- * @param array $members optional array of members to remove the award from
+ * @param int[] $members optional array of members to remove the award from
  */
 function AwardsRemoveMembers($id, $members = array())
 {
@@ -1173,13 +1175,11 @@ function AwardsAddMembers($values, $group = false)
 /**
  * For a given award get the full and mini image filenames associated with it
  *
- * @param int id
+ * @param int $id
  */
 function AwardLoadFiles($id)
 {
 	$db = database();
-
-	$row = array();
 
 	// Lets make sure that we delete the file that we are supposed to and not something harmful
 	$request = $db->query('', '
