@@ -27,25 +27,51 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function pre_dispatch()
 	{
-		global $modSettings;
+		global $modSettings, $user_info;
 
 		// If Member Awards is disabled, we don't go any further
-		if (empty($modSettings['awards_enabled']))
+		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
 			fatal_lang_error('feature_disabled', true);
 
 		// Some things we will need
 		loadLanguage('AwardsManage');
 		loadTemplate('AwardsProfile');
+		loadCSSFile('awards.css');
 
 		require_once(SUBSDIR . '/Awards.subs.php');
+	}
+
+	public function action_index()
+	{
+		global $context;
+
+		// Right now does nothing, but we need it :D
+		$subActions = array(
+			'showAwards' => array($this, 'action_showAwards', 'permission' => array('profile_view_own', 'profile_view_any')),
+			'membersAwards' => array($this, 'action_membersAwards', 'permission' => array('profile_view_own', 'profile_view_any')),
+			'listAwards' => array($this, 'action_listAwards', 'permission' => array('profile_view_own', 'profile_view_any')),
+			'requestAwards' => array($this, 'action_requestAwards', 'permission' => array('profile_view_own', 'profile_view_any')),
+		);
+
+		// Start up the controller, if we ever get here
+		$action = new Action();
+
+		// Default to sub-action 'main'
+		$subAction = $action->initialize($subActions, 'showAwards');
+		$context['sub_action'] = $subAction;
+
+		// Call the right function
+		$action->dispatch($subAction);
 	}
 
 	/**
 	 * Shows an individuals awards by category (awards album)
 	 */
-	public function showAwards($memID)
+	public function action_showAwards()
 	{
 		global $context, $txt, $scripturl;
+
+		$memID = isset($REQUEST['u']) ? (int) $REQUEST['u'] : currentMemberID();
 
 		// Do they want to make a favorite?
 		if (isset($_GET['makeFavorite']) && allowedTo(array('profile_extra_any', 'profile_extra_own')))
@@ -55,7 +81,7 @@ class Awards_Controller extends Action_Controller
 
 			// Clean
 			$award_id = (int) $_GET['id'];
-			$makefav = $_GET['makeFavorite'] > 0 ? 1 : 0;
+			$makefav = !empty($_GET['makeFavorite']) ? 1 : 0;
 
 			// Make it a favorite
 			AwardsSetFavorite($memID, $award_id, $makefav);
@@ -67,17 +93,17 @@ class Awards_Controller extends Action_Controller
 		// Count the number of items in the database for create index
 		$context['count_awards'] = AwardsCountMembersAwards($memID);
 
-	// Calculate the number of results to pull up.
+		// Calculate the number of results to pull up.
 		$max_awards = 25;
 
 		// Construct the page index
-		$context['page_index'] = constructPageIndex($scripturl . '?action=profile;area=showAwards;u=' . $memID, $_REQUEST['start'], $context['count_awards'], $max_awards);
 		$start = isset($_REQUEST['start']) ? (int) $_REQUEST['start'] : 0;
+		$context['page_index'] = constructPageIndex($scripturl . '?action=profile;area=showAwards;u=' . $memID, $start, $context['count_awards'], $max_awards);
 
 		// Load the individual and group awards
 		$context['categories'] = AwardsLoadMembersAwards($start, $max_awards, $memID);
 
-		// And off to the tempate we go
+		// And off to the template we go
 		$context['page_title'] = $txt['profile'] . ' - ' . $txt['awards_title'];
 		$context['sub_template'] = 'awards';
 		$context['allowed_fav'] = ($context['user']['is_owner'] && allowedTo('profile_view_own')) || allowedTo('profile_extra_any');
@@ -85,9 +111,10 @@ class Awards_Controller extends Action_Controller
 
 	/**
 	 * Shows all members that have received an award
-	 * Action from profile when viewing available user awards
+	 *
+	 * - Action from profile when viewing available user awards
 	 */
-	public function membersAwards()
+	public function action_membersAwards()
 	{
 		global $context, $scripturl, $txt;
 
@@ -166,7 +193,7 @@ class Awards_Controller extends Action_Controller
 	/**
 	 * Shows all available awards that they can acheive / request
 	 */
-	public function listAwards()
+	public function action_listAwards()
 	{
 		global $context, $txt, $scripturl, $user_info, $user_profile;
 
@@ -196,9 +223,9 @@ class Awards_Controller extends Action_Controller
 	/**
 	 * Allow a member to request an award and add it to the approval queue
 	 */
-	public function requestAwards()
+	public function action_requestAwards()
 	{
-		global $context, $txt, $user_info, $user_profile;
+		global $context, $txt, $user_info, $user_profile, $modSettings;
 
 		// First step, load the details of the requested award
 		if (!isset($_GET['step']) || $_GET['step'] != 2)
