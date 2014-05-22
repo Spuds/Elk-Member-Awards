@@ -233,7 +233,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 		if (!isset($categories[$row['id_category']]['name']))
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
-				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;id=' . $row['id_category'],
+				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
 				'awards' => array(),
 			);
 
@@ -244,7 +244,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 			'more' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'favorite' => array(
 				'fav' => $row['favorite'],
-				'href' => $scripturl . '?action=profile;area=showAwards;id=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
+				'href' => $scripturl . '?action=profile;area=showAwards;in=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
 				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
 				'allowed' => empty($row['id_group']),
 			),
@@ -1014,7 +1014,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 		if (!isset($categories[$row['id_category']]['name']))
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
-				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;id=' . $row['id_category'],
+				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
 				'awards' => array(),
 			);
 

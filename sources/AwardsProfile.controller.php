@@ -80,7 +80,7 @@ class Awards_Controller extends Action_Controller
 			checkSession('get');
 
 			// Clean
-			$award_id = (int) $_GET['id'];
+			$award_id = (int) $_GET['in'];
 			$makefav = !empty($_GET['makeFavorite']) ? 1 : 0;
 
 			// Make it a favorite
