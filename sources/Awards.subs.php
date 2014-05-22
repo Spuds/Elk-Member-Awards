@@ -246,11 +246,12 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 				'fav' => $row['favorite'],
 				'href' => $scripturl . '?action=profile;area=showAwards;id=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
 				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
+				'allowed' => empty($row['id_group']),
 			),
 			'filename' => $row['filename'],
 			'time' => list ($year, $month, $day) = sscanf($row['date_received'], '%d-%d-%d'),
 			'img' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['filename'],
-			'mini' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['minifile'],
+			'small' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['minifile'],
 		);
 	}
 	$db->free_result($request);
@@ -330,7 +331,7 @@ function AwardsLoadRequestedAwards()
 			'minifile' => $row['minifile'],
 			'description' => $row['description'],
 			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
-			'miniimg' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
+			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'members' => array(),
 		);
 	}
@@ -354,7 +355,7 @@ function AwardsLoadRequestedAwards()
 			'name' => $row['real_name'],
 			'href' => $scripturl . '?action=profile;u=' . $row['id_member'],
 			'link' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
-			'pm' => '<a href="' . $scripturl . '?action=pm;sa=send;u=' . $row['id_member'] . '"><img src="' . $settings['images_url'] . '/icons/pm_read.gif" alt="" /></a>',
+			'pm' => '<a href="' . $scripturl . '?action=pm;sa=send;u=' . $row['id_member'] . '"><img src="' . $settings['images_url'] . '/icons/pm_read.png" alt="" /></a>',
 			'comments' => $row['comments'],
 		);
 	}
@@ -1025,7 +1026,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
 			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
-			'miniimg' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
+			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'view_assigned' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'trigger' => $row['award_trigger'],
 			'award_type' => $row['award_type'],
