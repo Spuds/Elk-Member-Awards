@@ -9,7 +9,7 @@
 	<!-- edits yourself.  -->
 	<file name="THEMEDIR/GenericMessages.template.php">
 		<operation>
-			<search position="before"><![CDATA[
+			<search position="after"><![CDATA[
 	return $poster_div;]]></search>
 			<add><![CDATA[
 	// Member Awards
