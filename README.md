@@ -1,8 +1,8 @@
-##Member Awards v3.0
+##Member Awards v1.0
 ---
 
 **License**  
-o This Modifications Source Code is subject to the terms of the Mozilla Public License version 1.1 (the "License"). You can obtain a copy of the License at [http://mozilla.org/MPL/1.1/.](http://mozilla.org/MPL/1.1/)  
+o This Source Code is subject to the terms of the Mozilla Public License version 1.1 (the "License"). You can obtain a copy of the License at [http://mozilla.org/MPL/1.1/.](http://mozilla.org/MPL/1.1/)  
   
 **Introduction**  
 ---
@@ -10,7 +10,7 @@ A system where members can be given awards to display in their profile and posts
   
 **Features**  
 ---
-* This mod allows users with the permission to upload images that will serve as rewards.
+* This addon allows users with the permission to upload images that will serve as rewards.
 * Award images can be assigned a name as well as how they are to be earned (e.g. Contest, Posts, or the name of a game)
 * Awards can be placed in categories for display grouping and easy maintenance
 * Awards can be defined as assignable so members with assign awards permission can give an award (not define a new award though)
