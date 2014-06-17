@@ -156,7 +156,7 @@ class Awards_Controller extends Action_Controller
 		global $context, $scripturl, $txt;
 
 		// Load dependancies
-		require_once(SUBSDIR . '/List.class.php');
+		require_once(SUBSDIR . '/GenericList.class.php');
 
 		// Load all the categories.
 		$categories = AwardsLoadCategories();
@@ -888,7 +888,7 @@ class Awards_Controller extends Action_Controller
 		);
 
 		// Create the list.
-		require_once(SUBSDIR . '/List.class.php');
+		require_once(SUBSDIR . '/GenericList.class.php');
 		createList($listOptions);
 	}
 

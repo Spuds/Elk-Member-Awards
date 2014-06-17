@@ -122,7 +122,7 @@ class Awards_Controller extends Action_Controller
 		isAllowedTo('view_mlist');
 
 		// Load in our helper functions
-		require_once(SUBSDIR . '/List.class.php');
+		require_once(SUBSDIR . '/GenericList.class.php');
 
 		// Load this awards details
 		$id = (int) $_REQUEST['a_id'];
