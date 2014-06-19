@@ -162,6 +162,10 @@ function imb_member_awards(&$buttons)
 {
 	global $txt, $scripturl;
 
+	// Bit of a cheat but known to happen
+	if (empty($txt['awards']))
+		$txt['awards'] = 'Awards';
+
 	// allows members with manage_awards permission to see a menu item since the admin menu is hidden for them
 	$buttons['mlist']['sub_buttons']['awards'] = array(
 		'title' => $txt['awards'],
@@ -190,7 +194,7 @@ function iamd_member_awards($new_loaded_ids, $set)
 	}
 
 	// I'm sorry, but I've got to stick this award somewhere ...
-	if ($modSettings['awards_in_post'] > 0 && $set !== 'minimal')
+	if ($modSettings['awards_in_post'] > 0 && $set !== 'minimal' && !empty($modSettings['awards_enabled']))
 	{
 		require_once(SUBSDIR . '/AwardsManage.subs.php');
 		loadCSSFile('awards.css');

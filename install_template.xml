@@ -13,7 +13,7 @@
 	return $poster_div;]]></search>
 			<add><![CDATA[
 	// Member Awards
-	if (!empty($modSettings['awards']) && !empty($message['member']['awards']))
+	if (!empty($modSettings['awards_enabled']) && !empty($message['member']['awards']))
 	{
 		require_once (SOURCEDIR . '/AwardsIntegration.php');
 		injectProfileAwards($poster_div, $message);
