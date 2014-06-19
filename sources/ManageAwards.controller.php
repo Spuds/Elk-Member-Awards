@@ -525,12 +525,18 @@ class Awards_Controller extends Action_Controller
 			// Check session.
 			checkSession('post');
 
+			// Well we need this
+			if (empty($_POST['recipient_to']))
+
 			// Make sure that they picked an award and members to assign it to...
 			// but not themselfs, that would be wrong
-			foreach($_POST['recipient_to'] as $recipient)
+			if (empty($_POST['recipient_to']))
 			{
-				if ($recipient != $user_info['id'] || $user_info['is_admin'])
-					$members[] = (int) $recipient;
+				foreach($_POST['recipient_to'] as $recipient)
+				{
+					if ($recipient != $user_info['id'] || $user_info['is_admin'])
+						$members[] = (int) $recipient;
+				}
 			}
 
 			if (empty($members) || empty($_POST['award']))
