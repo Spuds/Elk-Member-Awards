@@ -15,7 +15,7 @@
  * @version 1.0
  */
 ]]></license>
-	<install for="1.0 Alpha - 1.0.99">
+	<install for="1.0 RC1 - 1.0.99">
 		<readme type="file" parsebbc="true">readme.txt</readme>
 		<database>add_settings.php</database>
 		<modification>install_template.xml</modification>
@@ -47,7 +47,7 @@
 		<redirect url="index.php?action=admin;area=awards;sa=main" timeout="5000">redirect.txt</redirect>
 	</install>
 
-	<uninstall for="1.0 Alpha - 1.0.99">
+	<uninstall for="1.0 RC1 - 1.0.99">
 		<hook reverse="true" hook="integrate_admin_areas" file="SOURCEDIR/AwardsIntegration.php" function="iaa_member_awards"/>
 		<hook reverse="true" hook="integrate_profile_areas" file="SOURCEDIR/AwardsIntegration.php" function="ipa_member_awards"/>
 		<hook reverse="true" hook="integrate_load_permissions" file="SOURCEDIR/AwardsIntegration.php" function="ilp_member_awards"/>
