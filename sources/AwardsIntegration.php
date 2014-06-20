@@ -324,8 +324,8 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[1], $modSettings['awards_in_post']);
 
 			// Style for this area?
-			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
-			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
+			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1) ? 'award_poster_1'
+			: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
 			: 'award_poster_3');
 
 			$award_output = '
