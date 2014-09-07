@@ -33,12 +33,18 @@
 	vertical-align: text-bottom;
 }
 .cat_img_award_add:before {
-	background-image: url(../images/awards/award_hd.png);
+	background-image: url(../../images/awards/award_hd.png);
 }
 .secondary_header img.icon {
     padding: 0 4px 4px;
     vertical-align: middle;
 }
 #awardselect select {
-	height: auto;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+	min-width: 100%;
+}
+#awardselect dt {
+	width: 100%;
 }
