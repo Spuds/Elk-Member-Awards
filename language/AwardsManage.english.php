@@ -55,6 +55,12 @@ $txt['awards_error_hack_error'] = 'You are trying to access an area or do someth
 $txt['awards_error_not_requestable'] = 'You have attempted to request an award which is NOT requestable';
 $txt['awards_error_have_already'] = 'You can not request an award that you already have !';
 
+// Used by: Awards Errors
+$txt['cannot_manage_awards'] = 'You aren\'t allowed to manage awards.';
+
+// Used by: Awards Help
+$helptxt['awards'] = 'This area allows you to manage, assign, and categorize awards, as well as change a few settings.';
+
 // Add/edit award
 $txt['awards_add_name'] = 'Award Details';
 $txt['awards_add_type'] = 'Award Type';
@@ -177,6 +183,9 @@ $txt['awards_name'] = 'Award Name';
 $txt['awards_favorite2'] = 'Favorite';
 $txt['awards_details'] = 'Award Details';
 $txt['awards_view_album'] = 'Show Awards';
+$txt['showAwards'] = 'Show My Awards';
+$txt['listAwards'] = 'Show Available Awards';
+$txt['viewingAwards'] = 'Viewing Award:';
 
 // Others
 $txt['awards_showmembers'] = 'Showing Members with the Award';
@@ -191,8 +200,22 @@ $txt['awards_view_album'] = 'View member\'s awards album.';
 $txt['awards_count_badges'] = 'This member has a total of <strong>%1$s</strong> award(s).  The award details are below:';
 $txt['awards_confirm_delete_category'] = 'Are you sure you wish to delete this category?';
 $txt['awards_confirm_delete_award'] = 'Are you sure you wish to delete this award?';
-
 $txt['awards_button_edit'] = 'Edit';
 $txt['awards_button_delete'] = 'Delete';
 $txt['awards_button_assign'] = 'Assign';
 $txt['awards_button_members'] = 'Members';
+
+// Used by: Awards ManagePermissions
+$txt['permissionname_manage_awards'] = 'Manage Awards';
+$txt['permissionhelp_manage_awards'] = 'This permission will allow users to add, edit and assign awards to other members';
+$txt['permissionname_assign_awards'] = 'Assign Awards';
+$txt['permissionhelp_assign_awards'] = 'This permission will allow users to assign awards to other users';
+
+// Used by: Awards Multiple Areas
+$txt['awards'] = 'Awards';
+$txt['awards_desc'] = 'Award Description';
+$txt['awards_view_album'] = 'View member\'s badge album.';
+$txt['awards_modify'] = 'Modify';
+$txt['awards_actions'] = 'Actions';
+$txt['awards_categories'] = 'Categories';
+$txt['whoallow_awards'] = 'Managing <a href="' . $scripturl . '?action=awards">Awards</a>.';

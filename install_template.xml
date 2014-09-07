@@ -5,7 +5,7 @@
 	<version>1.0</version>
 
 	<!-- These are the edits to the templates.  If you are using a custom theme they might not work at all! -->
-	<!-- If that happens, find something closely resembling it the items in the search operation, and do the necessary -->
+	<!-- If that happens, find something closely resembling the items in the search operation, and do the necessary -->
 	<!-- edits yourself.  -->
 	<file name="THEMEDIR/GenericMessages.template.php">
 		<operation>
