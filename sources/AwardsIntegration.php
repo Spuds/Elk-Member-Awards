@@ -32,6 +32,8 @@ function ipa_member_awards(&$profile_areas)
 	if ($user_info['is_guest'])
 		return;
 
+	loadLanguage('awardsManage');
+
 	$profile_areas = elk_array_insert($profile_areas, 'info', array(
 		'member_awards' => array(
 			'title' => $txt['awards'],
@@ -103,6 +105,8 @@ function iui_member_awards()
 function iaa_member_awards(&$admin_areas)
 {
 	global $txt, $modSettings;
+
+	loadLanguage('awardsManage');
 
 	// allow members with this permission to access the menu :P
 	$admin_areas['members']['permission'][] = 'manage_awards';

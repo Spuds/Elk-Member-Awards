@@ -526,11 +526,11 @@ class Awards_Controller extends Action_Controller
 			checkSession('post');
 
 			// Well we need this
-			if (empty($_POST['recipient_to']))
+			$members = array();
 
 			// Make sure that they picked an award and members to assign it to...
 			// but not themselfs, that would be wrong
-			if (empty($_POST['recipient_to']))
+			if (!empty($_POST['recipient_to']))
 			{
 				foreach($_POST['recipient_to'] as $recipient)
 				{
@@ -540,7 +540,7 @@ class Awards_Controller extends Action_Controller
 			}
 
 			if (empty($members) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_members');
+				fatal_lang_error('awards_error_no_members', false);
 
 			// Set a valid date, award.
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
@@ -772,7 +772,7 @@ class Awards_Controller extends Action_Controller
 		// An award must be selected.
 		$id = (int) $_REQUEST['a_id'];
 		if (empty($id) || $id <= 0)
-			fatal_lang_error('awards_error_no_award');
+			fatal_lang_error('awards_error_no_award', false);
 
 		// Load in our helper functions
 		require_once(SUBSDIR . '/Awards.subs.php');
@@ -823,7 +823,13 @@ class Awards_Controller extends Action_Controller
 						'value' => $txt['members'],
 					),
 					'data' => array(
-						'db' => 'member_name',
+						'function' => create_function('$rowData', '
+							global $scripturl;
+
+							if ($rowData["id_member"] > 0)
+								return \'<a href="\' . strtr($scripturl, array(\'%\' => \'%%\')) . \'?action=profile;u=\' . $rowData[\'id_member\'] . \'">\' . $rowData[\'member_name\'] . \'</a>\';
+							return $rowData["member_name"];
+						'),
 					),
 					'sort' => array(
 						'default' => 'm.member_name ',
