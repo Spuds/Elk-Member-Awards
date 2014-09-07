@@ -236,16 +236,17 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
-				fatal_lang_error('awards_error_not_requestable');
+				fatal_lang_error('awards_error_not_requestable', false);
 
 			// Dude allready has this one?
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 			{
 				if ($award['id'] == $id)
-					fatal_lang_error('awards_error_have_already');
+					fatal_lang_error('awards_error_have_already', false);
 			}
 
 			// Set the context values
+			$context['award']['description'] = parse_bbc($context['award']['description']);
 			$context['step'] = 1;
 			$context['page_title'] = $txt['awards_request_award'] . ' - ' . $context['award']['award_name'];
 			$context['sub_template'] = 'awards_request';
@@ -267,12 +268,12 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
-				fatal_lang_error('awards_error_not_requestable');
+				fatal_lang_error('awards_error_not_requestable', false);
 
 			// cant ask for what you have
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 				if ($award['id'] == $id)
-					fatal_lang_error('awards_error_have_already');
+					fatal_lang_error('awards_error_have_already', false);
 
 			// If we made it this far insert /replace it so it can be reviewed.
 			AwardsMakeRequest($id, $date, $comments, true);

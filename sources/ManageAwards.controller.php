@@ -80,7 +80,7 @@ class Awards_Controller extends Action_Controller
 		global $context, $txt, $modSettings;
 
 		$subActions = array(
-			'main' => array($this, 'action_awards_main', 'permission' => array('assign_awards','manage_awards')),
+			'main' => array($this, 'action_awards_main', 'permission' => array('assign_awards', 'manage_awards')),
 			'categories' => array($this, 'action_list_categories', 'permission' => 'manage_awards'),
 			'modify' => array($this, 'action_modify', 'permission' => 'manage_awards'),
 			'assign' => array($this, 'action_assign', 'permission' => array('assign_awards', 'manage_awards')),
@@ -235,7 +235,6 @@ class Awards_Controller extends Action_Controller
 							'default' => 'award_name',
 							'reverse' => 'award_name DESC',
 						),
-
 					),
 					'description' => array(
 						'header' => array(
@@ -315,10 +314,10 @@ class Awards_Controller extends Action_Controller
 
 			// Check if any of the key values where left empty, and if so tell them
 			if (empty($_POST['award_name']))
-				fatal_lang_error('awards_error_empty_badge_name');
+				fatal_lang_error('awards_error_empty_badge_name', false);
 
 			if (empty($_FILES['awardFile']['name']) && $_POST['a_id'] == 0)
-				fatal_lang_error('awards_error_no_file');
+				fatal_lang_error('awards_error_no_file', false);
 
 			// Clean and cast the values
 			$id = (int) $_POST['a_id'];
@@ -629,7 +628,7 @@ class Awards_Controller extends Action_Controller
 			}
 
 			if (empty($membergroups) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_groups');
+				fatal_lang_error('awards_error_no_groups', false);
 
 			// Set the award date
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
@@ -730,7 +729,7 @@ class Awards_Controller extends Action_Controller
 
 			// No members no awards
 			if (empty($_POST['member']) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_members');
+				fatal_lang_error('awards_error_no_members', false);
 
 			// Make sure that they picked an award and group to assign it to...
 			foreach($_POST['member'] as $member)
@@ -962,7 +961,7 @@ class Awards_Controller extends Action_Controller
 
 			// Needs to be an int!
 			if (empty($id) || $id <= 0)
-				fatal_lang_error('awards_error_no_id_category');
+				fatal_lang_error('awards_error_no_id_category', false);
 
 			// Load single category for editing.
 			$context['category'] = AwardsLoadCategory($id);
@@ -992,7 +991,7 @@ class Awards_Controller extends Action_Controller
 
 			// Check if any of the values were left empty
 			if (empty($name))
-				fatal_lang_error('awards_error_empty_category_name');
+				fatal_lang_error('awards_error_empty_category_name', false);
 
 			// Add a new or Update and existing
 			if ($_POST['id_category'] == 0)
@@ -1056,7 +1055,7 @@ class Awards_Controller extends Action_Controller
 		$id = (int) $_REQUEST['a_id'];
 
 		if ($id == 1)
-			fatal_lang_error('awards_error_delete_main_category');
+			fatal_lang_error('awards_error_delete_main_category', false);
 
 		AwardsDeleteCategory($id);
 

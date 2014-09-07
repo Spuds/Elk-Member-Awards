@@ -137,7 +137,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
 			'award_type' => $row['award_type'],
-			'description' => $row['description'],
+			'description' => parse_bbc($row['description']),
 			'time' => standardTime($row['time_added']),
 			'requestable' => $row['award_requestable'],
 			'assignable' => $row['award_assignable'],
@@ -239,7 +239,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 		$categories[$row['id_category']]['awards'][$row['id_award']] = array(
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
-			'description' => $row['description'],
+			'description' => parse_bbc($row['description']),
 			'more' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'favorite' => array(
 				'fav' => $row['favorite'],
@@ -328,7 +328,7 @@ function AwardsLoadRequestedAwards()
 			'award_name' => $row['award_name'],
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
-			'description' => $row['description'],
+			'description' => parse_bbc($row['description']),
 			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
 			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'members' => array(),
@@ -1023,7 +1023,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 		$categories[$row['id_category']]['awards'][] = array(
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
-			'description' => $row['description'],
+			'description' => parse_bbc($row['description']),
 			'time' => standardTime($row['time_added']),
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],

@@ -55,7 +55,7 @@ function AwardsLoad($new_loaded_ids)
 			$group_awards_details[$row['id_group']] = array(
 				'id' => $row['id_award'],
 				'award_name' => $row['award_name'],
-				'description' => $row['description'],
+				'description' => parse_bbc($row['description']),
 				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
 				'minifile' => $row['minifile'],
@@ -72,7 +72,7 @@ function AwardsLoad($new_loaded_ids)
 				'id' => $row['id_award'],
 				'id_group' => $row['id_group'],
 				'award_name' => $row['award_name'],
-				'description' => $row['description'],
+				'description' => parse_bbc($row['description']),
 				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
 				'minifile' => $row['minifile'],
