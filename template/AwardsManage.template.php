@@ -635,7 +635,7 @@ function template_assign_mass()
 		</div>';
 
 	echo '
-		<script type="text/javascript"><!-- // --><![CDATA[
+		<script><!-- // --><![CDATA[
 			function showaward()
 			{
 				awards = ' . $context['awardsjavasciptarray'] . '
