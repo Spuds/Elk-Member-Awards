@@ -32,7 +32,7 @@ function ipa_member_awards(&$profile_areas)
 	if ($user_info['is_guest'])
 		return;
 
-	loadLanguage('awardsManage');
+	loadLanguage('AwardsManage');
 
 	$profile_areas = elk_array_insert($profile_areas, 'info', array(
 		'member_awards' => array(
@@ -106,7 +106,7 @@ function iaa_member_awards(&$admin_areas)
 {
 	global $txt, $modSettings;
 
-	loadLanguage('awardsManage');
+	loadLanguage('AwardsManage');
 
 	// allow members with this permission to access the menu :P
 	$admin_areas['members']['permission'][] = 'manage_awards';
@@ -123,7 +123,8 @@ function iaa_member_awards(&$admin_areas)
 		'subsections' => array(
 			'main' => array($txt['awards_main'], array('assign_awards','manage_awards')),
 			'categories' => array($txt['awards_categories'], 'manage_awards'),
-			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'), 'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
+			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),
+			'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
 			'assigngroup' => array($txt['awards_assign_membergroup'], 'manage_awards'),
 			'assignmass' => array($txt['awards_assign_mass'],'manage_awards'),
 			'requests' => array($txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'), array('assign_awards', 'manage_awards')),
