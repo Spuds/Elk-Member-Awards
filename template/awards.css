@@ -33,13 +33,13 @@
 	vertical-align: text-bottom;
 }
 .cat_img_award_add:before {
-	background-image: url(../../images/awards/award_hd.png);
+	background-image: url(../images/awards/award_hd.png);
 }
 .secondary_header img.icon {
     padding: 0 4px 4px;
     vertical-align: middle;
 }
-#awardselect select {
+#awardselect select, #profile_boards {
     height: auto;
     max-height: none;
     min-height: 0;
@@ -47,4 +47,32 @@
 }
 #awardselect dt {
 	width: 100%;
+}
+
+dl.settings dt a img.award_icon_help {
+	vertical-align: middle;
+	padding-bottom: 2px;
+}
+
+/* The add / select award page */
+#select_award_type .reset
+{
+	margin: 2px 0;
+	overflow: auto;
+}
+#select_award_type .content {
+	-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+	margin: 2px 0.166%;
+	padding: 10px 10px 4px 10px;
+	height: 7em;
+	width: 33%;
+	float: left;
+	overflow: auto;
+}
+#select_award_type .content label:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+#select_award_type .smalltext {
+	margin: 6px;
 }

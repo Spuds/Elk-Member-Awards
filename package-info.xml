@@ -21,6 +21,7 @@
 		<database>add_settings.php</database>
 		<modification>install_template.xml</modification>
 		<create-dir name="awards" destination="BOARDDIR" />
+		<require-dir name="awards" destination="BOARDDIR/awards" />
 		<require-file name="sources/ManageAwards.controller.php" destination="ADMINDIR" />
 		<require-file name="sources/AwardsIntegration.php" destination="SOURCEDIR" />
 		<require-file name="sources/AwardsProfile.controller.php" destination="CONTROLLERDIR" />

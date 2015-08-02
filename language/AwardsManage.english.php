@@ -16,12 +16,24 @@ $txt['awards_description_editcategory'] = 'Edit an existing category name';
 $txt['awards_description_addcategory'] = 'Add a new category name to the awards system';
 $txt['awards_description_deletecategory'] = 'Remove a category from the system';
 $txt['awards_description_viewcategory'] = 'Viewing a category and all awards in that category';
+
+
+$txt['awards_description_profiles'] = 'Viewing all categories in the award system';
+$txt['awards_description_editprofile'] = 'Edit an existing profile name';
+$txt['awards_description_addprofile'] = 'Add a new profile name to the awards system';
+$txt['awards_description_deleteprofile'] = 'Remove a profile from the system';
+$txt['awards_description_viewprofile'] = 'Viewing a profile and all awards in that profile';
+$txt['awards_profile_help'] = 'This is where you add, edit, delete award profiles';
+
+
 $txt['awards_description_requests'] = 'This is where you approve or deny member requests for awards';
 $txt['awards_help'] = 'This is where you add, edit, delete and assign awards.';
 $txt['awards_category_help'] = 'This is where you add, edit, delete award categories';
 $txt['awards_main'] = 'Main';
-$txt['awards_add'] = 'Add';
+$txt['awards_add'] = 'Create';
 $txt['awards_edit'] = 'Edit';
+$txt['awards_categories'] = 'Categories';
+$txt['awards_profiles'] = 'Profiles';
 $txt['awards_assign'] = 'Member Assign';
 $txt['awards_assign_membergroup'] = 'Group Assign';
 $txt['awards_assign_mass'] = 'Multi Assign';
@@ -37,19 +49,29 @@ $txt['awards_error_no_file'] = 'You must select a file to upload!';
 $txt['awards_error_upload_failed'] = 'There was an error uploading the file.  Please check the file and try again.';
 $txt['awards_error_no_id'] = 'You must select an award to edit.';
 $txt['awards_error_no_id_category'] = 'You must select a category to edit.';
+$txt['awards_error_no_id_profile'] = 'You must select a profile to edit.';
 $txt['awards_error_no_award'] = 'The award that you entered does not exist.';
 $txt['awards_error_no_category'] = 'The category that you entered does not exist.';
-$txt['awards_error_empty_badge_name'] = 'You must enter a name for this category!';
-$txt['awards_error_empty_category_name'] = 'You must enter a name for this award!';
-$txt['awards_error_empty_category'] = 'That category doesn\'t have any awards!';
+$txt['awards_error_no_profile'] = 'The profile that you entered does not exist.';
+
+$txt['awards_error_empty_type'] = 'The award type was not specified';
+$txt['awards_error_empty_award_name'] = 'You must enter a name for this category.';
+$txt['awards_error_empty_category_name'] = 'You must enter a name for this award.';
+$txt['awards_error_empty_category'] = 'That category doesn\'t have any awards.';
+$txt['awards_error_empty_profile_name'] = 'You must enter a name for this profile';
+$txt['awards_error_empty_profile'] = 'That profile doesn\'t have any awards.';
+
 $txt['awards_error_empty_description'] = 'You must enter a description for this award!';
 $txt['awards_error_cant_delete'] = 'You are not allowed to delete awards!';
 $txt['awards_error_no_who'] = 'You must select the membergroups that you want to assign an award to.';
 $txt['awards_error_no_members'] = 'You must select a member and/or award in order to continue!';
 $txt['awards_error_no_group'] = 'You must select a group and/or award in order to continue!';
-$txt['awards_error_no_badges'] = 'No Awards have been added';
+$txt['awards_error_no_awards'] = 'No Awards have been added';
 $txt['awards_error_no_categories'] = 'You have not added any categories.';
+$txt['awards_error_no_profiles'] = 'You have not added any profiles.';
 $txt['awards_error_delete_main_category'] = 'You cannot delete category #1 because it is the default category.';
+$txt['awards_error_delete_main_profile'] = 'You cannot delete profile #1 because it is the default profile.';
+
 $txt['awards_error_upload_invalid'] = 'The file you tried to upload did not pass security checks. Please try again with another file.';
 $txt['awards_error_hack_error'] = 'You are trying to access an area or do something you are not permitted to do .... Hacking Attempt';
 $txt['awards_error_not_requestable'] = 'You have attempted to request an award which is NOT requestable';
@@ -82,25 +104,72 @@ $txt['awards_image_placement_below'] = 'Below Post Avatar';
 $txt['awards_image_placement_sig'] = 'With Post Signature';
 $txt['awards_image_placement_off'] = 'Don\'t show in Post Page';
 $txt['awards_type'] = 'Type<br /><span class="smalltext">Type of award, regular and group awards are individually assigned, all others are automatically assigned based on trigger values</span>';
-$txt['awards_trigger'] = 'Trigger Value';
 $txt['awards_group'] = 'Group';
 $txt['awards_group_desc'] = 'Not applicable for group awards, these must be individually assigned to a group';
-$txt['awards_manual'] = 'Regular';
-$txt['awards_manual_desc'] = 'Not applicable for regular awards, these must be individually assigned to a member';
-$txt['awards_post_count'] = 'Post Count';
-$txt['awards_post_count_desc'] = 'Enter the minimum post count a member must have to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
-$txt['awards_top_posters'] = 'Top Posters';
-$txt['awards_top_posters_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten posters receiving the award';
-$txt['awards_topic_count'] = 'Topic Count';
-$txt['awards_topic_count_desc'] = 'Enter the minimum number of topics that a member must have started to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
+
+
+// Built in awards, follows award_ID where ID is set from the AwardsLoadType() function
+$txt['awards_Regular_Award'] = 'Regular Award';
+$txt['awards_Regular_Award_short'] = 'Create awards that are manually assignable to members';
+$txt['awards_Regular_Award_desc'] = 'Regular awards must be individually assigned to a member.  You can optionally define reputation points to give with the award';
+
+$txt['awards_Group_Award'] = 'Group Award';
+$txt['awards_Group_Award_short'] = 'Create awards that are manually assignable to groups';
+$txt['awards_Group_Award_desc'] = 'Group awards must be individually assigned to member groups.  You can optionally define reputation points to give with the award';
+
+$txt['awards_trigger'] = 'Trigger Value';
+$txt['awards_points'] = 'Points Earned';
+$txt['awards_points_desc'] = 'The number of reputation points earned for this award.';
+
+$txt['awards_Post_Count_Award'] = 'Post Count';
+$txt['awards_Post_Count_Award_desc'] = 'Define "post count" based awards.  You may optionally select just certain boards to consider in the post count totals.  You may define multiple post count awards with various levels, but only the highest will be awarded to a member.';
+$txt['awards_Post_Count_Award_short'] = 'Define automatically assigned Post Count based awards';
+$txt['awards_Post_Count_boards'] = 'Board Restrictions';
+$txt['awards_Post_Count_boards_desc'] = 'Only count posts made in these boards (comma separated list)';
+
+$txt['awards_Top_Poster_Award'] = 'Top Posters';
+$txt['awards_Top_Poster_Award_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten posters receiving the award';
+$txt['awards_Top_Poster_Award_short'] = 'Define automatically assigned awards for the (X) top posters';
+
+$txt['awards_Post_Count_Liked_Award'] = 'Liked Posts';
+$txt['awards_Post_Count_Liked_Award_desc'] = 'Enter the number of individual posts with likes that a member must have received to get this award.  The system uses a threshold value to set a minimum post like value.  For example setting a trigger of 10 and a threshold of 2, means the member must have 10 posts with at least 2 likes to get the award.';
+$txt['awards_Post_Count_Liked_Award_short'] = 'Define automatically assigned awards that are based on individual post "like" totals';
+
+$txt['awards_Topic_Count_Award'] = 'Topic Count';
+$txt['awards_Topic_Count_Award_desc'] = 'Enter the minimum number of topics that a member must have started to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
+$txt['awards_Topic_Count_Award_short'] = 'Enter automatically assigned Topic Started based awards';
+
+// Profiles
+$txt['awards_parameter_min_topic_replies'] = 'Only include topics that have received at least these many replies';
+$txt['awards_parameter_min_post_likes'] = 'Only include posts with at least these many likes';
+$txt['awards_parameter_profile_boards'] = 'Only count items started in these boards';
+
+
+// Award parameters, generic values should specific ones not be defined by the award
+$txt['awards_parameter_trigger'] = 'Trigger Value';
+$txt['awards_parameter_trigger_desc'] = 'The minimum value at which this award will activate';
+$txt['awards_parameter_points'] = 'Points Earned';
+$txt['awards_parameter_points_desc'] = 'The number of reputation points earned for this award.';
+$txt['awards_parameter_points_per'] = 'Points Earned Every:';
+$txt['awards_parameter_points_per_desc'] = 'The points are earned every (X), ie 100 posts.  Leave blank to earn the point value when the award is achieved.';
+$txt['awards_parameter_boards'] = 'Boards';
+$txt['awards_parameter_boards_desc'] = 'Only items in these boards are considered';
+
 $txt['awards_top_topic_starters'] = 'Top Topic Starters';
 $txt['awards_top_topic_starters_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten topic starters receiving the award';
+
 $txt['awards_time_online'] = 'Most Time Online';
 $txt['awards_time_online_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten time online members receiving the award';
+
 $txt['awards_member_since'] = 'Member Since';
 $txt['awards_member_since_desc'] = 'Enter the number of years that someone must be a member to receive this award.';
+
 $txt['awards_karma_level'] = 'Karma Level';
 $txt['awards_karma_level_desc'] = 'Enter the minimum Karma Level a member must have to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
+
+$txt['awards_parameter_likes'] = 'Liked threshold';
+$txt['awards_parameter_likes_desc'] = 'Enter the minimum likes a post must have to be counted.  If you define multiple award levels only the highest will be awarded to the member.';
+
 $txt['awards_requestable'] = 'Requestable Award';
 $txt['awards_requestable_desc'] = 'Check this if you want to allow users to request this award.';
 $txt['awards_assignable'] = 'Assignable Award';
@@ -136,6 +205,17 @@ $txt['awards_manage_categories'] = 'Manage Categories';
 $txt['awards_list_categories'] = 'Categories';
 $txt['awards_num_in_category'] = 'Awards in Category';
 $txt['awards_viewing_category'] = 'Viewing Category';
+
+// Add/edit profile
+$txt['awards_add_profile'] = 'Add Profile';
+$txt['awards_edit_profile'] = 'Edit Profile';
+$txt['awards_profile_name'] = 'Profile Name';
+$txt['awards_saved_profile'] = 'Profile Saved!';
+$txt['awards_manage_profiles'] = 'Manage Profiles';
+$txt['awards_list_profiles'] = 'Profiles';
+$txt['awards_num_in_profile'] = 'Awards using profile';
+$txt['awards_viewing_profile'] = 'Viewing profile';
+$txt['awards_profile'] = 'Profiles';
 
 // Settings page
 $txt['awards_basic_settings'] = 'Set the Award Modification Options';
@@ -176,7 +256,7 @@ $txt['awards_request_award'] = 'Request Award';
 $txt['awards_requesting_award'] = 'Requesting Award:';
 $txt['awards_request_comments'] = 'Enter a reason for requesting this award';
 
-// Profile
+// Profile Section
 $txt['awards_image'] = 'Image';
 $txt['awards_mini'] = 'Mini Image';
 $txt['awards_name'] = 'Award Name';
@@ -195,11 +275,14 @@ $txt['awards_no_assigned_members'] = 'There are no members that have received th
 $txt['awards_no_assigned_members2'] = 'There are no members or groups (visible to you), that have received this award.';
 $txt['awards_unassign'] = 'Unassign Award';
 $txt['awards_members_with'] = 'Members with Award';
-$txt['awards_no_badges_member'] = 'You have not received any awards';
+$txt['awards_no_awards_member'] = 'You have not received any awards';
+$txt['awards_no_awards_this_member'] = '%1$s has not received any awards';
 $txt['awards_view_album'] = 'View member\'s awards album.';
 $txt['awards_count_badges'] = 'This member has a total of <strong>%1$s</strong> award(s).  The award details are below:';
 $txt['awards_confirm_delete_category'] = 'Are you sure you wish to delete this category?';
 $txt['awards_confirm_delete_award'] = 'Are you sure you wish to delete this award?';
+$txt['awards_confirm_delete_profile'] = 'Are you sure you wish to delete this profile?  Any awards using it will be moved to the default profile.';
+
 $txt['awards_button_edit'] = 'Edit';
 $txt['awards_button_delete'] = 'Delete';
 $txt['awards_button_assign'] = 'Assign';
@@ -217,5 +300,4 @@ $txt['awards_desc'] = 'Award Description';
 $txt['awards_view_album'] = 'View member\'s badge album.';
 $txt['awards_modify'] = 'Modify';
 $txt['awards_actions'] = 'Actions';
-$txt['awards_categories'] = 'Categories';
 $txt['whoallow_awards'] = 'Managing <a href="' . $scripturl . '?action=awards">Awards</a>.';

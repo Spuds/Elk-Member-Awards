@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.0.1
  *
  */
 
@@ -41,7 +41,7 @@ function ipa_member_awards(&$profile_areas)
 				'showAwards' => array(
 					'label' => $txt['showAwards'],
 					'file' => 'AwardsProfile.controller.php',
-					'controller' => 'Awards_Controller',
+					'controller' => 'Awards_Profile_Controller',
 					'function' => 'action_showAwards',
 					'permission' => array(
 						'own' => 'profile_view_own',
@@ -50,7 +50,7 @@ function ipa_member_awards(&$profile_areas)
 				),
 				'membersAwards' => array(
 					'file' => 'AwardsProfile.controller.php',
-					'controller' => 'Awards_Controller',
+					'controller' => 'Awards_Profile_Controller',
 					'function' => 'action_membersAwards',
 					'hidden' => (isset($_GET['area']) && $_GET['area'] !== "membersAwards"),
 					'permission' => array(
@@ -61,7 +61,7 @@ function ipa_member_awards(&$profile_areas)
 				'listAwards' => array(
 					'label' => $txt['listAwards'],
 					'file' => 'AwardsProfile.controller.php',
-					'controller' => 'Awards_Controller',
+					'controller' => 'Awards_Profile_Controller',
 					'function' => 'action_listAwards',
 					'permission' => array(
 						'own' => 'profile_view_own',
@@ -70,7 +70,7 @@ function ipa_member_awards(&$profile_areas)
 				),
 				'requestAwards' => array(
 					'file' => 'AwardsProfile.controller.php',
-					'controller' => 'Awards_Controller',
+					'controller' => 'Awards_Profile_Controller',
 					'hidden' => true,
 					'function' => 'action_requestAwards',
 					'permission' => array(
@@ -99,7 +99,8 @@ function iui_member_awards()
  * Admin hook, integrate_admin_areas, called from Admin.php
  *
  * - Adds the admin menu and all award sub actions as a sub menu
- * - hidden to all but admin, accessable via manage_award permission
+ * - hidden to all but admin, accessible via manage_award permission
+ *
  * @param mixed[] $admin_areas
  */
 function iaa_member_awards(&$admin_areas)
@@ -112,8 +113,8 @@ function iaa_member_awards(&$admin_areas)
 	$admin_areas['members']['permission'][] = 'manage_awards';
 	$admin_areas['members']['permission'][] = 'assign_awards';
 
-	// our main awards menu area, under the members tab
-	$admin_areas['members']['areas']['awards'] = array(
+	// Our main awards menu area, under the members tab
+	$admin_areas['members']['areas'] = elk_array_insert($admin_areas['members']['areas'], 'viewmembers', array('awards' => array(
 		'label' => $txt['awards'],
 		'file' => 'ManageAwards.controller.php',
 		'controller' => 'Awards_Controller',
@@ -121,22 +122,30 @@ function iaa_member_awards(&$admin_areas)
 		'icon' => 'awards.png',
 		'permission' => array('manage_awards', 'assign_awards'),
 		'subsections' => array(
-			'main' => array($txt['awards_main'], array('assign_awards','manage_awards')),
+			'main' => array($txt['awards_main'], array('assign_awards', 'manage_awards')),
+			'profiles' => array($txt['awards_profiles'], 'manage_awards'),
 			'categories' => array($txt['awards_categories'], 'manage_awards'),
-			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),
+			'modify' => array($txt['awards_modify'], 'manage_awards'),
+			'add' => array($txt['awards_add'], 'manage_awards'),
 			'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
 			'assigngroup' => array($txt['awards_assign_membergroup'], 'manage_awards'),
-			'assignmass' => array($txt['awards_assign_mass'],'manage_awards'),
+			'assignmass' => array($txt['awards_assign_mass'], 'manage_awards'),
 			'requests' => array($txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'), array('assign_awards', 'manage_awards')),
 			'settings' => array($txt['awards_settings'], 'manage_awards'),
-		)
+		))), 'before'
 	);
+
+	// Keep add or modify as the action indicates
+	if (isset($_REQUEST['a_id']))
+		unset($admin_areas['members']['areas']['awards']['subsections']['add']);
+	else
+		unset($admin_areas['members']['areas']['awards']['subsections']['modify']);
 }
 
 /**
  * Permissions hook, integrate_load_permissions, called from ManagePermissions.php
  *
- * - Used to add new permisssions
+ * - Used to add new permissions
  *
  * @param mixed[] $permissionGroups
  * @param mixed[] $permissionList
@@ -149,7 +158,7 @@ function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissio
 	global $context;
 
 	// Permissions hook, integrate_load_permissions, called from ManagePermissions.php
-	// used to add new permisssions ...
+	// used to add new permissions ...
 	$permissionList['membergroup']['manage_awards'] = array(false, 'member_admin', 'administrate');
 	$permissionList['membergroup']['assign_awards'] = array(false, 'member_admin', 'administrate');
 
@@ -183,6 +192,7 @@ function imb_member_awards(&$buttons)
  * Load Member Data hook, integrate_load_member_data, Called from load.php
  *
  * - Used to add columns / tables to the query so additional data can be loaded for a set
+ *
  * @param int[] $new_loaded_ids
  * @param string $set
  */
@@ -269,7 +279,7 @@ function injectProfileAwards(&$poster_div, $message)
 			{
 				$awards_link[2][] = '
 					<a href="' . $scripturl . $award['more'] . '">
-						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="" title="' . $award['title'] . '" />
 					</a> ';
 			}
 			// Below
@@ -297,9 +307,10 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[2], $modSettings['awards_in_post']);
 
 			// Specific style class chosen?
-			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
-			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
-			: 'award_poster_3');
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1)
+				? 'award_poster_1'
+				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
+					: 'award_poster_3');
 
 			$award_output = '
 				<li class="listlevel1">
@@ -329,9 +340,10 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[1], $modSettings['awards_in_post']);
 
 			// Style for this area?
-			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1) ? 'award_poster_1'
-			: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
-			: 'award_poster_3');
+			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1)
+				? 'award_poster_1'
+				: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
+					: 'award_poster_3');
 
 			$award_output = '
 				<li>
@@ -358,17 +370,18 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[3], $modSettings['awards_in_post']);
 
 			// Style for the sigs?
-			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_signature_1'
-			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
-			: 'award_signature_3');
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1)
+				? 'award_signature_1'
+				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
+					: 'award_signature_3');
 
 			$award_output = '
 					<div class="signature">
-						<fieldset class="' .  $style . '">';
+						<fieldset class="' . $style . '">';
 
-				// Title for the signature area?
-				if (isset($modSettings['awards_signature_title']))
-					$award_output .= '
+			// Title for the signature area?
+			if (isset($modSettings['awards_signature_title']))
+				$award_output .= '
 							<legend>
 								<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_signature_title'] . '</a>
 							</legend>';
@@ -404,4 +417,14 @@ function awards_str_replace_once($needle, $replace, $haystack)
 		return $haystack;
 
 	return substr_replace($haystack, $replace, $pos, strlen($needle));
+}
+
+/**
+ * Help hook, integrate_quickhelp, called from help.controller.php
+ * Used to add in additional help languages for use in the admin quickhelp
+ */
+function awards_integrate_quickhelp()
+{
+	// Load the Awards Help file.
+	loadLanguage('AwardsHelp');
 }

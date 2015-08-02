@@ -137,6 +137,12 @@ $tables[] = array(
 			'null' => false
 		),
 		array(
+			'name' => 'award_function',
+			'type' => 'varchar',
+			'size' => 256,
+			'null' => false
+		),
+		array(
 			'name' => 'description',
 			'type' => 'varchar',
 			'size' => 256,
@@ -167,6 +173,12 @@ $tables[] = array(
 			'default' => 0
 		),
 		array(
+			'name' => 'award_param',
+			'type' => 'varchar',
+			'size' => 256,
+			'null' => false
+		),
+		array(
 			'name' => 'award_type',
 			'type' => 'tinyint',
 			'size' =>  2,
@@ -186,6 +198,13 @@ $tables[] = array(
 			'size' => 4,
 			'null' => false,
 			'default' => 1
+		),
+		array(
+			'name' => 'id_profile',
+			'type' => 'tinyint',
+			'size' => 4,
+			'null' => false,
+			'default' => 0
 		),
 		array(
 			'name' => 'award_requestable',
@@ -253,6 +272,44 @@ $tables[] = array(
 	'parameters' => array(),
 );
 
+$tables[] = array(
+	'table_name' => 'awards_profiles',
+	'columns' => array(
+		array(
+			'name' => 'id_profile',
+			'type' => 'mediumint',
+			'size' => 8,
+			'null' => false,
+			'auto' => true
+		),
+		array(
+			'name' => 'type',
+			'type' => 'tinyint',
+			'size' => 4,
+			'null' => false
+		),
+		array(
+			'name' => 'name',
+			'type' => 'tinytext',
+			'null' => false
+		),
+		array(
+			'name' => 'parameters',
+			'type' => 'text',
+			'null' => false
+		),
+	),
+	'indexes' => array(
+		array(
+			'type' => 'primary',
+			'columns' => array('id_profile')
+		),
+	),
+	'if_exists' => 'ignore',
+	'error' => 'fatal',
+	'parameters' => array(),
+);
+
 // Settings to create new columns in existing tables
 $columns = array();
 
@@ -277,7 +334,7 @@ foreach ($tables as $table)
 		$dbtbl->db_create_table($db_prefix . $table['table_name'], $table['columns'], $table['indexes'], $table['parameters'], $table['if_exists'], $table['error']);
 }
 
-// And for good measure, lets add a default category
+// And for good measure, lets add a default category and profile
 $rows = array();
 $rows[] = array(
 	'method' => 'ignore',
@@ -292,6 +349,25 @@ $rows[] = array(
 	),
 	'keys' => array(
 		'id_category'
+	)
+);
+$rows[] = array(
+	'method' => 'ignore',
+	'table_name' => '{db_prefix}awards_profiles',
+	'columns' => array(
+		'name' => 'string',
+		'id_profile' => 'int',
+		'type' => 'int',
+		'parameters' => 'string'
+	),
+	'data' => array(
+		'Default',
+		0,
+		0,
+		''
+	),
+	'keys' => array(
+		'id_profile'
 	)
 );
 

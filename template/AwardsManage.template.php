@@ -11,6 +11,45 @@ function template_main()
 	}
 }
 
+/**
+ * Used to select one of our defined awards
+ */
+function template_award_select_type()
+{
+	global $context, $scripturl, $txt;
+
+	echo '
+	<div id="select_award_type">
+		<h3 class="category_header">
+			', $txt['awards_add_type'], '
+		</h3>
+		<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=modify" method="post" accept-charset="UTF-8">
+			<ul class="reset">';
+
+	// For every award defined in the system
+	foreach($context['award_types'] as $index => $type)
+	{
+		echo '
+				<li class="content">
+						<input type="radio" name="selected_type[]" id="award_', $type['function'], '" value="', $type['function'], '" class="input_radio" />
+						<strong><label ', 'for="block_', $type['function'], '">', $txt['awards_' . $type['id']], '</label></strong>
+						<p class="smalltext">', $txt['awards_' . $type['id'] . '_short'], '</p>
+				</li>';
+	}
+
+	echo '
+			</ul>
+			<div class="submitbutton">
+				<input type="submit" name="select_type" value="', $txt['awards_add_award'], '" class="button_submit" />
+				<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+			</div>
+		</form>
+	</div>';
+}
+
+/**
+ * Used to enter the details of a new award or to modify those of an existing one
+ */
 function template_modify()
 {
 	global $context, $txt, $scripturl;
@@ -18,6 +57,7 @@ function template_modify()
 	echo '
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=modify" method="post" name="award" accept-charset="UTF-8" enctype="multipart/form-data">';
 
+	// Show them it saved, if it just did
 	if (isset($_GET['saved']))
 		echo'
 					<div class="infobox">',
@@ -25,12 +65,14 @@ function template_modify()
 					</div>';
 
 	echo '
-					<h3 class="category_header hdicon cat_img_award_add ">
-						', ($context['editing'] === true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : $txt['awards_add_award']), '
+					<h3 class="category_header hdicon cat_img_award_add">',
+						$context['editing'] === true
+							? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name']
+							: $txt['awards_add_award'] . ' (' .  $context['award']['award_function']  . ')', '
 					</h3>';
 
+	// Start with award details, like name, description, category, etc
 	echo '
-					<div class="windowbg2">
 						<div class="content">
 							<fieldset>
 								<legend>', $txt['awards_add_name'], '</legend>
@@ -63,44 +105,32 @@ function template_modify()
 										</select>
 									</dd>
 								</dl>
-							</fieldset>
+							</fieldset>';
 
+	// Now the award type, chosen from the add screen, enter the parameters as the award class defines
+	echo '
 							<fieldset>
+							<div class="infobox">', $context['award']['desc'], '</div>
 								<legend>', $txt['awards_add_type'], '</legend>
 								<dl class="settings">
 									<dt>
-										<label for="id_type">', $txt['awards_type'], '</label>:
+										', $txt['awards_type'], ':
 									</dt>
 									<dd>
-										<select name="id_type" id="id_type">';
+										', $context['award']['award_function'], '
+									</dd>';
 
-	// our awards type list selection
-	foreach ($context['award_types'] as $type)
-		echo '
-											<option value="', $type['id'], '"', (isset($context['award']['type']) && $type['id'] == $context['award']['type']) ? ' selected="selected"' : '', '>', $type['name'], '</option>';
+	// Display the setup parameters for this Award
+	template_show_award_options();
 
-	echo '
-										</select>
-									</dd>
 
-									<dt>
-										<label for="awardTrigger">', $txt['awards_trigger'], '</label>:
-										<br />
-										<span id="awardTrigger_desc" class="smalltext" ></span>';
-
-	// The descriptions for them, hidden and used by javascript to fill in the awardTrigger_desc span
-	foreach ($context['award_types'] as $desc)
-		echo '
-										<span id="trigger_desc_', $desc['id'], '" style="display:none">', $desc['desc'], '</span>';
 
 	echo '
-									</dt>
-									<dd>
-										<input type="text" name="awardTrigger" id="awardTrigger" value="', $context['award']['trigger'], '" size="30" class="input_text"/>
-									</dd>
 								</dl>
-							</fieldset>
+							</fieldset>';
 
+	// And now the images to use for display
+	echo '
 							<fieldset>
 								<legend>', $txt['awards_add_image'], '</legend>
 								<dl class="settings">
@@ -144,7 +174,7 @@ function template_modify()
 									<dd>
 										<select name="award_location" id="award_location">';
 
-	// our awards type list selection
+	// The awards location list selection
 	foreach ($context['award_placements'] as $type)
 		echo '
 											<option value="', $type['id'], '"', (isset($context['award']['location']) && $type['id'] == $context['award']['location']) ? ' selected="selected"' : '', '>', $type['name'], '</option>';
@@ -153,8 +183,10 @@ function template_modify()
 										</select>
 									</dd>
 								</dl>
-							</fieldset>
+							</fieldset>';
 
+	// Special options, like the award is requestable or assignable
+	echo '
 							<fieldset>
 								<legend>', $txt['awards_extras'], '</legend>
 								<dl class="settings">
@@ -177,12 +209,103 @@ function template_modify()
 
 							<div class="submitbutton">
 								<input type="hidden" name="a_id" value="', $context['award']['id'], '" />
+								<input type="hidden" name="id_func" value="', $context['award']['award_function'], '" />
 								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
 								<input type="submit" class="button_submit" name="award_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_submit'], '" accesskey="s" />
 							</div>
 						</div>
-					</div>
 				</form>';
+}
+
+/**
+ * Helper template for displaying award and profile options.
+ */
+function template_show_award_options()
+{
+	global $context, $txt, $helptxt, $scripturl, $settings;
+
+	foreach ($context['award']['options'] as $name => $type)
+	{
+		echo '
+									<dt>';
+
+		// Any help for the parameter?
+		if (!empty($helptxt['award_' . $context['award']['award_function'] . '_' . $name]))
+			echo '
+										<a class="help" href="', $scripturl, '?action=quickhelp;help=award_', $context['award']['award_function'], '_', $name, '" onclick="return reqOverlayDiv(this.href);">
+											<img class="award_icon_help" src="', $settings['images_url'], '/helptopics.png" alt="', $txt['help'], '" />
+										</a>';
+
+		// Use a specific or generic name for this field
+		$temp = isset($txt['awards_' . $context['award']['award_function'] . '_' . $name])
+			? $txt['awards_' . $context['award']['award_function'] . '_' . $name]
+			: $txt['awards_parameter_' . $name];
+
+		echo '
+										<label for="', $name, '">', $temp, ':</label>
+									</dt>
+									<dd>';
+
+		if ($type == 'boards' || $type == 'board_select')
+		{
+			echo '
+										<input type="hidden" name="parameters[', $name, ']" value="" />';
+
+			if ($type == 'boards')
+				echo '
+										<select name="parameters[', $name, '][]" id="', $name, '" size="7" multiple="multiple">';
+			else
+				echo '
+										<select name="parameters[', $name, '][]" id="', $name, '">';
+
+			foreach ($context['award']['board_options'][$name] as $option)
+				echo '
+											<option value="', $option['value'], '"', ($option['selected']
+					? ' selected="selected"' : ''), ' >', $option['text'], '</option>';
+
+			echo '
+										</select>';
+		}
+		elseif ($type == 'int')
+			echo '
+										<input type="text" name="parameters[', $name, ']" id="', $name, '" value="', !empty($context['award']['parameters'][$name])
+				? $context['award']['parameters'][$name] : '', '" size="7" class="input_text" />';
+		elseif ($type == 'check')
+			echo '
+										<input type="checkbox" name="parameters[', $name, ']" id="', $name, '"', !empty($context['award']['parameters'][$name])
+				? ' checked="checked"' : '', ' class="input_check" />';
+		elseif ($type == 'select')
+		{
+			$options = explode('|', $txt['award_param_' . $context['award']['type'] . '_' . $name . '_options']);
+
+			echo '
+										<select name="parameters[', $name, ']" id="', $name, '">';
+
+			foreach ($options as $key => $option)
+				echo '
+											<option value="', $key, '"', $context['award']['parameters'][$name] == $key
+					? ' selected="selected"' : '', '>', $option, '</option>';
+
+			echo '
+										</select>';
+		}
+		elseif (is_array($type))
+		{
+			echo '
+										<select name="parameters[', $name, ']" id="', $name, '">';
+
+			foreach ($type as $key => $option)
+				echo '
+											<option value="', $key, '"', $context['award']['parameters'][$name] == $key
+					? ' selected="selected"' : '', '>', $option, '</option>';
+
+			echo '
+										</select>';
+		}
+
+		echo '
+									</dd>';
+	}
 }
 
 /**
@@ -653,21 +776,15 @@ function template_view_assigned()
 	global $context;
 
 	echo '
-	<span class="upperframe"><span></span></span>
 	<div class="roundframe">
 		<div id="award">
 			<img style="vertical-align:middle;padding:0 5px" src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" />
 			<img style="vertical-align:middle;padding:0 5px" src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" />
 			- <strong>', $context['award']['award_name'], '</strong> - ', $context['award']['description'], '
 		</div>
-	</div>
-	<span class="lowerframe"><span></span></span>
-	<br class="clear" />';
+	</div>';
 
 	template_show_list('view_assigned');
-
-	echo '
-	<br class="clear" />';
 }
 
 /**
@@ -839,30 +956,28 @@ function template_edit_category()
 	echo '
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=editcategory" method="post" name="category" id="category" accept-charset="UTF-8">
 					<h3 class="category_header">
-						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? $txt['awards_saved_category'] : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
+						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? '<strong>' . $txt['awards_saved_category'] . '</strong>' : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
 					</h3>
-					<div class="windowbg">
-						<div class="content">
-							<dl class="settings">
-								<dt>
-									<label for="category_name">', $txt['awards_category_name'], '</label>:
-								</dt>
-								<dd>
-									<input type="text" name="category_name" id="category_name" value="', $context['category']['name'], '" size="30" />
-								</dd>
-							</dl>
-							<div class="submitbutton">
-								<input type="hidden" name="id_category" value="', $context['category']['id'], '" />
-								<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
-								<input type="submit" class="button_submit" name="category_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_category'], '" accesskey="s" />
-							</div>
+					<div class="content">
+						<dl class="settings">
+							<dt>
+								<label for="category_name">', $txt['awards_category_name'], '</label>:
+							</dt>
+							<dd>
+								<input type="text" name="category_name" id="category_name" value="', $context['category']['name'], '" size="30" />
+							</dd>
+						</dl>
+						<div class="submitbutton">
+							<input type="hidden" name="id_category" value="', $context['category']['id'], '" />
+							<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+							<input type="submit" class="button_submit" name="category_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_category'], '" accesskey="s" />
 						</div>
 					</div>
 				</form>';
 }
 
 /**
- * Show all of the categorys in the system with modificaiton options
+ * Show all of the category's in the system with edit options
  */
 function template_list_categories()
 {
@@ -956,7 +1071,7 @@ function template_view_category()
 		// Check if there are any awards
 		if (empty($context['awards']))
 			echo '
-						<tr class="windowbg2">
+						<tr>
 							<td colspan="4">', $txt['awards_error_empty_category'], '</td>
 						</tr>';
 		else
@@ -1086,5 +1201,179 @@ function template_request_award()
 		// close this beast up
 		echo '
 				</form>';
+	}
+}
+
+/**
+ * Template for showing our profile editing panel
+ */
+function template_edit_profile()
+{
+	global $context, $txt, $scripturl;
+
+	echo '
+				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=editprofile" method="post" name="profile" id="profile" accept-charset="UTF-8">
+					<h3 class="category_header">
+						', ($context['editing'] == true ? $txt['awards_edit_profile'] : $txt['awards_add_profile']), '
+					</h3>
+					<div class="content">
+						<dl class="settings">
+							<dt>
+								<label for="profile_name">', $txt['awards_profile_name'], '</label>
+							</dt>
+							<dd>
+								<input type="text" name="profile_name" id="profile_name" value="', $context['profile']['name'], '" size="30" />
+							</dd>';
+
+
+	template_show_award_options();
+
+
+	echo '
+
+						</dl>
+						<div class="submitbutton">
+							<input type="hidden" name="id_profile" value="', $context['profile']['id'], '" />
+							<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+							<input type="submit" class="button_submit" name="profile_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_profile'], '" accesskey="s" />
+						</div>
+					</div>
+				</form>';
+}
+
+/**
+ * Show all of the profile's in the system with edit options
+ */
+function template_list_profiles()
+{
+	global $context, $txt, $settings, $scripturl;
+
+	// Show them it saved, if it just did
+	if (isset($_GET['saved']))
+		echo'
+					<div class="infobox">',
+						$txt['awards_saved_profile'], '
+					</div>';
+
+	echo '
+			<form id="admin_form_wrapper" accept-charset="UTF-8" method="post" action="', $scripturl, '?action=admin;area=awards;sa=editprofile">
+				<h3 class="category_header hdicon cat_img_database">
+					', $txt['awards_list_profiles'], '
+				</h3>
+				<table class="table_grid">
+					<thead>
+						<tr class="table_head">
+							<th class="grid20" scope="col">', $txt['awards_actions'], '</th>
+							<th scope="col">', $txt['awards_profile_name'], '</th>
+							<th class="grid20 centertext" scope="col">', $txt['awards_num_in_profile'], '</th>
+						</tr>
+					</thead>
+					<tbody>';
+
+	// Check if there are any Profiles
+	if (empty($context['profiles']))
+		echo '
+						<tr>
+							<td colspan="3">', $txt['awards_error_no_profiles'], '</td>
+						</tr>';
+	else
+	{
+		foreach ($context['profiles'] as $prof)
+		{
+			echo '
+						<tr class="windowbg">
+							<td>
+								<a href="', $prof['edit'], '" title="', $txt['awards_button_edit'], '">
+									<img class="icon" src="', $settings['images_url'], '/awards/modify.png" alt="' . $txt['awards_button_edit'] . '" />
+								</a> ', ($prof['id'] != 0) ? '
+								<a href="' . $prof['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_profile'] . '\');" title="' . $txt['awards_button_delete'] . '">
+									<img class="icon" src="' . $settings['images_url'] . '/awards/delete.png" alt="' . $txt['awards_button_delete'] . '" />
+								</a>' : '', '
+							</td>
+							<td>
+								<a href="', $prof['view'], '" title="', $prof['name'], '">', $prof['name'], '</a>
+							</td>
+							<td class="centertext">
+								', empty($prof['awards']) ? '0' : '<a href="' . $scripturl . '?action=admin;area=awards;sa=viewprofile;p_id=' . $prof['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $prof['awards'] . '</a>', '
+							</td>
+						</tr>';
+		}
+	}
+
+	echo '
+					</tbody>
+				</table>
+				<div class="submitbutton">
+					<input id="add_profile" class="button_submit" type="submit" value="', $txt['awards_add_profile'], '" name="add_profile" />
+				</div>
+			</form>';
+}
+
+/**
+ * View a single profile list with all its awards
+ */
+function template_view_profile()
+{
+	global $context, $txt;
+
+	if (empty($context['profile']))
+	{
+		echo '
+			<div class="roundframe">
+				<div id="welcome">',
+		$txt['awards_error_no_profile'], '
+				</div>
+			</div>';
+	}
+	else
+	{
+		echo '
+				<h3 class="category_header">
+					', $context['profile'], '
+				</h3>
+				<table class="table_grid">
+					<thead>
+						<tr class="table_head">
+							<th class="centertext" scope="col">', $txt['awards_image'], '</th>
+							<th class="centertext" scope="col">', $txt['awards_mini'], '</th>
+							<th scope="col">', $txt['awards_name'], '</th>
+							<th scope="col" class="centertext">', $txt['awards_description'], '</th>
+						</tr>
+					</thead>
+					<tbody>';
+
+		// Check if there are any awards
+		if (empty($context['awards']))
+			echo '
+						<tr class="windowbg">
+							<td colspan="4">', $txt['awards_error_empty_profile'], '</td>
+						</tr>';
+		else
+		{
+			foreach ($context['awards'] as $award)
+			{
+				echo '
+						<tr class="windowbg">
+							<td>
+								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+							</td>
+							<td>
+								<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+							</td>
+							<td>
+								<a href="', $award['edit'], '">', $award['award_name'], '</a>
+							</td>
+							<td>', $award['description'], '</td>
+						</tr>';
+			}
+		}
+
+		echo '
+					</tbody>
+				</table>';
+
+		// Show the pages
+		echo '
+				<div class="floatleft pagesection">', $txt['pages'], ': ', $context['page_index'], '</div>';
 	}
 }

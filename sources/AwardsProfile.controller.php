@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @name      Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.0.1
  *
  */
 
@@ -20,10 +20,10 @@ if (!defined('ELK'))
  * This is the awards profile controller class.
  * This file handles the profile side of Awards.
  */
-class Awards_Controller extends Action_Controller
+class Awards_Profile_Controller extends Action_Controller
 {
 	/**
-	 * Entry point function for Member Awards profile sections, makes sure its on
+	 * Entry point function for Member Awards profile sections
 	 */
 	public function pre_dispatch()
 	{
@@ -41,6 +41,9 @@ class Awards_Controller extends Action_Controller
 		require_once(SUBSDIR . '/Awards.subs.php');
 	}
 
+	/**
+	 * Default method, determines what section to show, defaults to showAwards
+	 */
 	public function action_index()
 	{
 		global $context;
@@ -69,7 +72,7 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_showAwards()
 	{
-		global $context, $txt, $scripturl;
+		global $context, $txt, $scripturl, $memberContext;
 
 		$memID = isset($REQUEST['u']) ? (int) $REQUEST['u'] : currentMemberID();
 
@@ -104,6 +107,7 @@ class Awards_Controller extends Action_Controller
 		$context['categories'] = AwardsLoadMembersAwards($start, $max_awards, $memID);
 
 		// And off to the template we go
+		$context['award_user'] = $memberContext[$memID]['name'];
 		$context['page_title'] = $txt['profile'] . ' - ' . $txt['awards_title'];
 		$context['sub_template'] = 'awards';
 		$context['allowed_fav'] = ($context['user']['is_owner'] && allowedTo('profile_view_own')) || allowedTo('profile_extra_any');
@@ -191,7 +195,7 @@ class Awards_Controller extends Action_Controller
 	}
 
 	/**
-	 * Shows all available awards that they can acheive / request
+	 * Shows all available awards that they can achieve / request
 	 */
 	public function action_listAwards()
 	{
@@ -209,7 +213,8 @@ class Awards_Controller extends Action_Controller
 
 		// Array of this members awards to prevent a request for something they have
 		$awardcheck = array();
-		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards'] : array();
+		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards']
+			: array();
 		foreach ($awards as $award)
 			$awardcheck[$award['id']] = 1;
 

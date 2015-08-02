@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @name      Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.0.1
  *
  */
 
@@ -34,7 +34,8 @@ function AwardsLoad($new_loaded_ids)
 	$request = $db->query('', '
 		SELECT
 			am.id_member, am.active, am.id_group,
-			aw.id_award, aw.award_name, aw.description, aw.minifile, aw.award_trigger, aw.award_type, aw.award_location
+			aw.id_award, aw.award_name, aw.award_function, aw.description, aw.minifile, aw.award_trigger,
+			aw.award_type, aw.award_param, aw.award_location
 		FROM {db_prefix}awards_members AS am
 			INNER JOIN {db_prefix}awards AS aw ON (aw.id_award = am.id_award)
 		WHERE (am.id_member IN({array_int:members}) OR am.id_member < 0)
@@ -48,40 +49,35 @@ function AwardsLoad($new_loaded_ids)
 	// Fetch the award info just once
 	while ($row = $db->fetch_assoc($request))
 	{
-		// Track group awards separately
+		// Prepare the data
+		$temp = array(
+			'id' => $row['id_award'],
+			'id_group' => $row['id_group'],
+			'award_name' => $row['award_name'],
+			'award_function' => $row['award_function'],
+			'parameters' => unserialize($row['award_param']),
+			'description' => parse_bbc($row['description']),
+			'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
+			'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
+			'minifile' => $row['minifile'],
+			'img' => '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
+			'trigger' => $row['award_trigger'],
+			'award_type' => $row['award_type'],
+			'location' => $row['award_location'],
+			'active' => $row['active']
+		);
+
+		// Track "group" awards separately
 		if ($row['id_member'] < 0)
 		{
 			$group_awards[] = $row['id_group'];
-			$group_awards_details[$row['id_group']] = array(
-				'id' => $row['id_award'],
-				'award_name' => $row['award_name'],
-				'description' => parse_bbc($row['description']),
-				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
-				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
-				'minifile' => $row['minifile'],
-				'img' => '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
-				'trigger' => $row['award_trigger'],
-				'award_type' => $row['award_type'],
-				'location' => $row['award_location'],
-				'active' => $row['active']
-			);
+			$group_awards_details[$row['id_group']] = $temp;
+			$group_awards_details[$row['id_group']]['title'] = strip_tags($group_awards_details[$row['id_group']]['description']);
 		}
 		else
 		{
-			$user_profile[$row['id_member']]['awards'][$row['id_award']] = array(
-				'id' => $row['id_award'],
-				'id_group' => $row['id_group'],
-				'award_name' => $row['award_name'],
-				'description' => parse_bbc($row['description']),
-				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
-				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
-				'minifile' => $row['minifile'],
-				'img' => '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
-				'trigger' => $row['award_trigger'],
-				'award_type' => $row['award_type'],
-				'location' => $row['award_location'],
-				'active' => $row['active']
-			);
+			$user_profile[$row['id_member']]['awards'][$row['id_award']] = $temp;
+			$user_profile[$row['id_member']]['awards'][$row['id_award']]['title'] = strip_tags($user_profile[$row['id_member']]['awards'][$row['id_award']]['description']);
 
 			// Keep an array of just active awards for this member to make life easier
 			if (!empty($row['active']))
@@ -92,30 +88,45 @@ function AwardsLoad($new_loaded_ids)
 
 	// Are any group awards?
 	if (!empty($group_awards))
-	{
-		// check each member to see if they are a member of a group that has a group awards
-		foreach ($new_loaded_ids as $member_id)
-		{
-			// make an array of this users groups
-			$user_profile[$member_id]['groups'] = array($user_profile[$member_id]['id_group'], $user_profile[$member_id]['id_post_group']);
-			if (!empty($user_profile[$member_id]['additional_groups']))
-				$user_profile[$member_id]['groups'] = array_merge($user_profile[$member_id]['groups'], explode(',', $user_profile[$member_id]['additional_groups']));
+		AwardsLoadGroupAwards($new_loaded_ids, $group_awards, $group_awards_details);
 
-			// See if any of this members groups match a group award
-			$give_group_awards = array_intersect($user_profile[$member_id]['groups'], $group_awards);
-			if (!empty($give_group_awards))
+	return;
+}
+
+/**
+ * Assign group awards to members in those groups
+ *
+ *  - checks to see if the award was individually assigned as well to
+ * avoid double awards
+ *
+ * @param int[] $new_loaded_ids
+ * @param int[] $group_awards
+ * @param array[] $group_awards_details
+ */
+function AwardsLoadGroupAwards($new_loaded_ids, $group_awards, $group_awards_details)
+{
+	global $user_profile;
+
+	// check each member to see if they are a member of a group that has a group awards
+	foreach ($new_loaded_ids as $member_id)
+	{
+		// Make an array of this users groups
+		$user_profile[$member_id]['groups'] = array($user_profile[$member_id]['id_group'], $user_profile[$member_id]['id_post_group']);
+		if (!empty($user_profile[$member_id]['additional_groups']))
+			$user_profile[$member_id]['groups'] = array_merge($user_profile[$member_id]['groups'], explode(',', $user_profile[$member_id]['additional_groups']));
+
+		// See if any of this members groups match a group award
+		$give_group_awards = array_intersect($user_profile[$member_id]['groups'], $group_awards);
+		if (!empty($give_group_awards))
+		{
+			// Woohoo ... a group award for you *IF* it was not assigned individually, you only get it once ;)
+			foreach ($give_group_awards as $groupaward_id)
 			{
-				// Woohoo ... a group award for you *IF* it was not assigned individually, you only get it once ;)
-				foreach ($give_group_awards as $groupaward_id)
-				{
-					if (!isset($user_profile[$member_id]['awards'][$group_awards_details[$groupaward_id]['id']]))
-						$user_profile[$member_id]['awards'][$groupaward_id] = $group_awards_details[$groupaward_id];
-				}
+				if (!isset($user_profile[$member_id]['awards'][$group_awards_details[$groupaward_id]['id']]))
+					$user_profile[$member_id]['awards'][$groupaward_id] = $group_awards_details[$groupaward_id];
 			}
 		}
 	}
-
-	return;
 }
 
 /**
@@ -133,7 +144,7 @@ function AwardsAutoCheck($new_loaded_ids)
 
 	$db = database();
 
-	// See if we already have this in the cache
+	// See if we already have the available auto awards in the cache
 	$autoawards = cache_get_data('awards:autoawards', 4 * 3600);
 	$autoawardsid = cache_get_data('awards:autoawardsid', 4 * 3600);
 	if ($autoawards === null || $autoawardsid === null)
@@ -142,25 +153,24 @@ function AwardsAutoCheck($new_loaded_ids)
 		$autoawards = array();
 		$autoawardsid = array();
 
-		// Load all the defined auto awards .. uses a filesort,
-		// but how many auto award definitions are there, <100? php sort instead?
+		// Load all the defined auto awards
 		// The key is the trigger desc sort, this allows us to use 1 query for that auto award 'type',
 		// all others will be a subset of that
 		$request = $db->query('', '
 			SELECT
-				id_award, award_name, award_trigger, award_type
+				id_award, award_name, award_function, award_trigger, award_param, award_type
 			FROM {db_prefix}awards
-			WHERE award_type > {int:type}
+			WHERE award_type = {int:type}
 			ORDER BY award_type DESC, award_trigger DESC',
 			array(
-				'type' => 1,
+				'type' => 2,
 			)
 		);
 		// Build up the auto awards array
 		while ($row = $db->fetch_assoc($request))
 		{
-			$autoawards[$row['award_type']][] = $row; // holds all the awards information for each award type
-			$autoawardsid[$row['award_type']][] = (int) $row['id_award']; // holds all the possible award id's for a given award type.
+			$autoawards[$row['award_function']][] = $row; // holds all the awards information for each award type
+			$autoawardsid[$row['award_function']][] = (int) $row['id_award']; // holds all the possible award id's for a given award type.
 		}
 		$db->free_result($request);
 
@@ -173,8 +183,17 @@ function AwardsAutoCheck($new_loaded_ids)
 	}
 
 	// Now lets do something with each award type
+	require_once(BOARDDIR . '/awards/AbstractAward.class.php');
+	require_once(SUBSDIR . '/Awards.subs.php');
 	foreach ($autoawards as $award_type => $awardids)
 	{
+		// Start an instance of this award_type class
+		$award = instantiate_award($award_type);
+
+		// Call its main processing function
+		$award->process($awardids, $new_loaded_ids);
+	}
+	/*
 		switch ($award_type)
 		{
 			case 2:
@@ -240,7 +259,7 @@ function AwardsAutoCheck($new_loaded_ids)
 					AwardsAutoAssign($members, $award_type, $autoawardsid[$award_type]);
 				break;
 		}
-	}
+	}*/
 }
 
 /**
@@ -299,68 +318,6 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 }
 
 /**
- * Does the database work of setting an autoaward to a member
- *
- * - Makes sure each member only has 1 of each award
- *
- * @param int[] $members
- * @param string $award_type
- * @param boolean $awardids
- */
-function AwardsAutoAssign($members, $award_type, $awardids)
-{
-	global $user_profile;
-
-	$db = database();
-
-	// init
-	$values = array();
-	$users = array();
-	$remove = array();
-
-	// Set a date
-	$date_received = date('Y') . '-' . date('m') . '-' . date('d');
-
-	// Prepare the database values.
-	foreach ($members as $member => $memberaward)
-	{
-		$values[] = array((int) $memberaward, (int) $member, $date_received, (int) $award_type, 1);
-		$users[] = $member;
-
-		// These are all the awardids, for this award type, that this user should no longer have
-		$remove[$member] = array_diff($awardids, array($memberaward));
-
-		// And this will contain just the specific award_ids that he should no longer have
-		$remove[$member] = array_intersect($user_profile[$member]['awardlist'], $remove[$member]);
-	}
-
-	// First the removals ... Members can only have one active award of each auto 'type'
-	foreach ($members as $member => $dummy)
-	{
-		if (!empty($remove[$member]))
-			$db->query('', '
-				DELETE FROM {db_prefix}awards_members
-				WHERE id_award IN ({array_int:award_list})
-					AND id_member = {int:id_member}',
-				array(
-					'id_member' => $member,
-					'award_list' => $remove[$member],
-				)
-			);
-	}
-
-	// Now the adds, Insert the award data
-	$db->insert('insert', '
-		{db_prefix}awards_members',
-		array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'award_type' => 'int', 'active' => 'int'),
-		$values,
-		array('id_member', 'id_award')
-	);
-
-	return;
-}
-
-/**
  * Returns the number of topics started for each member in memberlist
  *
  * @param int[] $memberlist
@@ -409,8 +366,9 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 		$request = $db->query('', '
 			SELECT
 				COUNT(*) AS num_topics, id_member_started
-			FROM smf_topics
-			WHERE id_member_started IN ({array_int:memberlist})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			FROM {db_prefix}topics
+			WHERE id_member_started IN ({array_int:memberlist})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0
+				? '
 				AND id_board != {int:recycle_board}' : '') . '
 			GROUP BY id_member_started',
 			array(
@@ -537,7 +495,7 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 			'limit' => $limit
 		)
 	);
-	// Make them available for use to use in user_profile
+	// Make them available for use in user_profile
 	$topic_number = 0;
 	while ($row = $db->fetch_assoc($request))
 	{

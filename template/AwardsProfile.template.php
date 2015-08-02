@@ -35,7 +35,7 @@ function template_awards()
 	if (empty($context['categories']))
 		echo '
 					<div class="infobox">',
-						$txt['awards_no_badges_member'], '
+						$context['user']['is_owner'] ? $txt['awards_no_awards_member'] : sprintf($txt['awards_no_awards_this_member'], $context['award_user']), '
 					</div>';
 	else
 	{
@@ -146,7 +146,7 @@ function template_awards_list()
 	if (empty($context['categories']))
 		echo '
 				<div class="infobox">',
-					$txt['awards_error_no_badges'], '
+					$txt['awards_error_no_awards'], '
 				</div>';
 	else
 	{

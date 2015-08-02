@@ -1,7 +1,3 @@
-// Had to make another file for this, because the PM one wants a BCC field
-// This is just a stripped-down version of PersonalMessage.js
-
-// Handle the JavaScript surrounding awards send form.
 function elk_AwardSend(oOptions)
 {
 	this.opt = oOptions;
