@@ -17,14 +17,18 @@ if (!defined('ELK'))
 	die('No access...');
 
 /**
- * Post Count based awards
+ * User info block, shows avatar, group, icons, posts, karma, etc
+ *
+ * @param mixed[] $parameters not used in this block
+ * @param int $id - not used in this block
+ * @param boolean $return_parameters if true returns the configuration options for the block
  */
-class Post_Count_Liked_Award extends Abstract_Award
+class Topic_Count_Award extends Abstract_Award
 {
 	/**
 	 * UNIQUE functional name for this award
 	 */
-	const FUNC = 'Post_Count_Liked';
+	const FUNC = 'Topic_Count';
 
 	/**
 	 * Constructor, used to define award parameters then pass over to the abstract common
@@ -45,28 +49,26 @@ class Post_Count_Liked_Award extends Abstract_Award
 	}
 
 	/**
-	 * Main processing function for checking award worthiness
+	 * Process an award for use.
 	 *
-	 * @param int[] $new_loaded_ids
-	 *
-	 * @return array
+	 * @param int[] $new_loaded_ids id's of members to check
 	 */
 	public function process($new_loaded_ids)
 	{
 		// Load and prepare
 		$this->_prep_and_group();
 
-		// For each grouping of boards
+		// For each grouping of profiles
 		foreach ($this->profile_group as $key => $profile_group)
 		{
-			// Set the funckey :P Allows for multiple of this "award_type" based on board groups
+			// Set the function key Allows for multiple award_type via profile groups
 			$area = self::FUNC . '_' . $key;
 
 			// See what we can fulfill from the cache
 			$this->award_cache_fetch($new_loaded_ids, $area);
 
-			// Get the totals for the remaining
-			$this->post_count_liked_board_group($key);
+			// Get the post count for the remaining ids
+			$this->_topic_count_profile_group($key);
 
 			// Save this for a while
 			$this->award_cache_save($this->remaining_ids, $area);
@@ -75,9 +77,8 @@ class Post_Count_Liked_Award extends Abstract_Award
 			$this->members = array();
 			$this->_check_members($profile_group, $area);
 
-			// Assign it to anyone that has earn this funckey award
-			if (!empty($this->members))
-				$this->assign($this->members, $area, $this->profile_award_ids[$key]);
+			// Anyone earn this funckey award
+			$this->assign($area, $this->profile_award_ids[$key]);
 		}
 
 		// Maintain the cache
@@ -85,29 +86,24 @@ class Post_Count_Liked_Award extends Abstract_Award
 	}
 
 	/**
-	 * Expands the serialized award parameters and places it back in place
-	 * - Groups same profile awards together
-	 * - Requires that the query returns awards sorted by trigger value
+	 * Expands the serialized award parameters and places it back for usage
+	 *  - Groups like profile awards together
+	 *  - Requires that the query returns awards sorted by trigger value
 	 */
-	protected function _prep_and_group()
+	public function _prep_and_group()
 	{
 		// Nothing special here, so use the abstract method
 		parent::_prep_and_group();
 	}
 
 	/**
-	 * Determines the number of posts of a member that have >= min_post_likes as defined
-	 * by a profile
+	 * Returns the post count for the specified users from the specified boards
 	 *
-	 * - Only posts from specific boards are considered, based on those in the profile
-	 * - If the profile defines a min_topic_replies, only liked messages in topics with > x
-	 * replies are considered
-	 *
-	 * @param string $key profile ID for this group of awards
+	 * @param int $key key of the profile to use for parameters
 	 */
-	private function post_count_liked_board_group($key)
+	private function _topic_count_profile_group($key)
 	{
-		global $user_profile;
+		global $user_profile, $modSettings;
 
 		if (empty($this->remaining_ids))
 			return;
@@ -117,44 +113,29 @@ class Post_Count_Liked_Award extends Abstract_Award
 		$like_threshold = $this->profiles[$key]['parameters']['like_threshold'];
 		$min_topic_replies = $this->profiles[$key]['parameters']['min_topic_replies'];
 
-		// Total likes, per message, for these members for posts on these boards
+		// Number of topics started.
 		$request = $this->_db->query('', '
 			SELECT
-				COUNT(*) AS likes, m.id_member
-			FROM {db_prefix}messages as m
-				INNER JOIN {db_prefix}message_likes AS lk ON lk.id_msg = m.id_msg
-				LEFT JOIN {db_prefix}topics AS t on t.id_topic = m.id_topic
-			WHERE id_poster IN ({array_int:members})' . ($boards === 'all' ? '' : '
-				AND m.id_board IN ({array_int:board_list})') . ($min_topic_replies < 1 ? '' : '
-				AND t.num_replies > {int:min_topic_replies}') . '
-			GROUP BY lk.id_poster, lk.id_msg
-			HAVING COUNT(*) > {int:like_threshold}',
+				COUNT(*) AS num_topics, id_member_started
+			FROM {db_prefix}topics
+			WHERE id_member_started IN ({array_int:members})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+				AND id_board != {int:recycle_board}' : '') . ($boards === 'all' ? '' : '
+				AND id_board IN ({array_int:board_list})') . ($min_topic_replies < 1 ? '' : '
+				AND num_replies > {int:min_topic_replies}') . ($like_threshold < 1 ? '' : '
+				AND num_likes > {int:$ike_threshold}') . '
+			GROUP BY id_member_started',
 			array(
+				'recycle_board' => $modSettings['recycle_board'],
 				'board_list' => explode('|', $boards),
 				'members' => $this->remaining_ids,
-				'like_threshold' => $like_threshold - 1,
 				'min_topic_replies' => $min_topic_replies - 1,
+				'like_threshold' => $like_threshold - 1,
 			)
 		);
-		$members = array();
-		// The query returns, in descending order, the like count total per post
+		// Load them in to user_profile
 		while ($row = $this->_db->fetch_assoc($request))
-		{
-			if (isset($members[$row['id_member']]))
-				$members[$row['id_member']]++;
-			else
-				$members[$row['id_member']] = 1;
-		}
+			$user_profile[$row['id_member_started']][self::FUNC . '_' . $key] = $row['num_topics'];
 		$this->_db->free_result($request);
-
-		// Finally load the total found in to the appropriate user_profiles
-		foreach ($this->remaining_ids as $id)
-		{
-			if (isset($members[$id]))
-				$user_profile[$id][self::FUNC . '_' . $key] = $members[$id];
-			else
-				$user_profile[$id][self::FUNC . '_' . $key] = 0;
-		}
 	}
 
 	/**

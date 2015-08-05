@@ -21,82 +21,62 @@ if (!defined('ELK'))
  */
 class Post_Count_Award extends Abstract_Award
 {
+	/**
+	 * UNIQUE functional name for this award
+	 */
 	const FUNC = 'Post_Count';
 
-	protected $members = array();
-	protected $awardids = array();
-	protected $board_group = array();
-	protected $board_award_ids = array();
-
 	/**
-	 * Constructor, used to define award parameters
+	 * Constructor, used to define award parameters then pass over to the abstract common
 	 *
 	 * @param Database|null $db
+	 * @param array[]|null $awardids array of award information containing all of a specific type
+	 * @param array[]|null $autoawardsprofiles array of profiles in the system
 	 */
-	public function __construct($db = null)
+	public function __construct($db = null, $awardids = null, $autoawardsprofiles = null)
 	{
 		$this->award_parameters = array(
 			'trigger' => 'int',
 			'points' => 'int',
 			'points_per' => 'int',
-			'boards' => 'boards',
 		);
 
-		parent::__construct($db);
+		parent::__construct($db, $awardids, $autoawardsprofiles);
 	}
 
 	/**
 	 * Main processing function for checking award worthiness
 	 *
-	 * @param int[] $awardids
 	 * @param int[] $new_loaded_ids
 	 *
 	 * @return array
 	 */
-	public function process($awardids, $new_loaded_ids)
+	public function process($new_loaded_ids)
 	{
-		global $user_profile;
-
 		// Load and prepare
-		$this->awardids = $awardids;
 		$this->_prep_and_group();
 
-		// For each grouping of boards
-		foreach ($this->board_group as $key => $board_group)
+		// For each grouping of profiles
+		foreach ($this->profile_group as $key => $profile_group)
 		{
-			// Set the funckey :P Allows for multiple award_type via board groups .. post_count_all post_count_1|5 etc
+			// Set the funckey :P Allows for multiple award_type via profile groups .. post_count_0 post_count_1 etc
 			$area = self::FUNC . '_' . $key;
 
 			// See what we can fulfill from the cache
 			$this->award_cache_fetch($new_loaded_ids, $area);
 
-			// Get the post count for the remaining
-			$this->_post_count_board_group($this->remaining_ids, $key);
+			// Get the post count for the remaining ids
+			$this->_post_count_profile_group($key);
 
 			// Save this for a while
 			$this->award_cache_save($this->remaining_ids, $area);
 
 			// See if any members have earned it
 			$this->members = array();
-			foreach ($new_loaded_ids as $member_id)
-			{
-				// Check each award level (trigger) for that group, they are sorted high to low
-				foreach ($board_group as $award)
-				{
-					if (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] >= $award['award_trigger']))
-					{
-						// Give this member a cupcake, if they don't already have it, and stop looking for them
-						if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
-							$this->members[$member_id] = (int) $award['id_award'];
+			$this->_check_members($profile_group, $area);
 
-						break;
-					}
-				}
-			}
-
-			// Anyone earn this funckey award?
-			if (!empty($this->members))
-				$this->assign($this->members, $area, $this->board_award_ids[$award['award_param']['boards']]);
+			// Anyone earn this funckey award
+			$this->assign($area, $this->profile_award_ids[$key]);
 		}
 
 		// Maintain the cache
@@ -105,44 +85,33 @@ class Post_Count_Award extends Abstract_Award
 
 	/**
 	 * Expands the serialized award parameters and places it back for usage
-	 * Groups like "include board" awards together
-	 * Requires that the query returns awards sorted by trigger value
+	 *  - Groups like profile awards together
+	 *  - Requires that the query returns awards sorted by trigger value
 	 */
-	private function _prep_and_group()
+	protected function _prep_and_group()
 	{
-		// For all the awards of this type
-		foreach ($this->awardids as $key => $award)
-		{
-			// Expand out the award params
-			$this->awardids[$key]['award_param'] = unserialize(($award['award_param']));
-
-			// The triggers arrive in high to low order, but we need to "sort/group" by board groups as well
-			if (empty($this->awardids[$key]['award_param']['boards']))
-				$this->awardids[$key]['award_param']['boards'] = 'all';
-
-			// Group the awards by board groups like all or 5|1|7
-			$this->board_group[$this->awardids[$key]['award_param']['boards']][] = $this->awardids[$key];
-			$this->board_award_ids[$this->awardids[$key]['award_param']['boards']][] = $this->awardids[$key]['id_award'];
-		}
+		// Nothing special here, so use the abstract method
+		parent::_prep_and_group();
 	}
 
 	/**
 	 * Returns the post count for the specified users from the specified boards
 	 *
-	 * @param int[] $new_loaded_ids
-	 * @param string $key string of boards to counts posts from X|X\X
+	 * @param int $key key of the profile to use for parameters
 	 */
-	private function _post_count_board_group($new_loaded_ids, $key)
+	private function _post_count_profile_group($key)
 	{
 		global $user_profile;
 
-		if (empty($new_loaded_ids))
+		if (empty($this->remaining_ids))
 			return;
 
+		$boards = $this->profiles[$key]['parameters']['boards'];
+
 		// All boards is just their current post count
-		if ($key == 'all')
+		if ($boards == 'all')
 		{
-			foreach ($new_loaded_ids as $member_id)
+			foreach ($this->remaining_ids as $member_id)
 				$user_profile[$member_id][self::FUNC . '_' . $key] = $user_profile[$member_id]['posts'];
 		}
 		// Some boards means we have some work
@@ -156,8 +125,8 @@ class Post_Count_Award extends Abstract_Award
 					AND id_member IN ({array_int:members})
 				GROUP BY id_member',
 				array(
-					'board_list' => explode('|', $key),
-					'members' => $new_loaded_ids
+					'board_list' => explode('|', $boards),
+					'members' => $this->remaining_ids
 				)
 			);
 			while ($row = $this->_db->fetch_assoc($request))
@@ -165,5 +134,17 @@ class Post_Count_Award extends Abstract_Award
 
 			$this->_db->free_result($request);
 		}
+	}
+
+	/**
+	 * Loops on a set of member id's and checks if they have reached the award trigger level
+	 *
+	 * @param array[] $profile_group profile group containing the awards we are comparing against
+	 * @param string $area unique award_profile key like topic_count_0
+	 */
+	protected function _check_members($profile_group, $area)
+	{
+		// Nothing special here, so use the abstract method
+		parent::_check_members($profile_group, $area);
 	}
 }

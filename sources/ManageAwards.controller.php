@@ -250,6 +250,18 @@ class Awards_Controller extends Action_Controller
 							'reverse' => 'award_function DESC',
 						),
 					),
+					'profile_name' => array(
+						'header' => array(
+							'value' => $txt['awards_profile_name'],
+						),
+						'data' => array(
+							'db' => 'profile_name',
+						),
+						'sort' => array(
+							'default' => 'profile_name',
+							'reverse' => 'profile_name DESC',
+						),
+					),
 					'description' => array(
 						'header' => array(
 							'value' => $txt['awards_desc'],
@@ -271,20 +283,28 @@ class Awards_Controller extends Action_Controller
 							'function' => function($row) {
 								global $txt, $settings;
 
-								$result = ((allowedTo('manage_awards')) ? '<a href="' . $row['edit'] . '" title="' . $txt['awards_button_edit'] . '"><img src="' . $settings['images_url'] . '/awards/modify.png" alt="" /></a>
-											<a href="'  . $row['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_award'] . '\');" title="' . $txt['awards_button_delete'] . '"><img src="' . $settings['images_url'] . '/awards/delete.png" alt="" /></a>
-											<br />' : '');
+								$result = ((allowedTo('manage_awards')) ? '
+									<a href="' . $row['edit'] . '" title="' . $txt['awards_button_edit'] . '">
+										<img src="' . $settings['images_url'] . '/awards/modify.png" alt="" />
+									</a>
+									<a href="'  . $row['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_award'] . '\');" title="' . $txt['awards_button_delete'] . '">
+										<img src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
+									</a>' : '');
 
 								if (($row['award_type'] <= 1) && (allowedTo('manage_awards') || (allowedTo('assign_awards') && !empty($row['assignable']))))
 									$result .= '
-											<a href="' . $row['assign'] . '" title="' . $txt['awards_button_assign'] . '"><img src="' . $settings['images_url'] . '/awards/assign.png" alt="" /></a>';
+											<a href="' . $row['assign'] . '" title="' . $txt['awards_button_assign'] . '">
+												<img src="' . $settings['images_url'] . '/awards/assign.png" alt="" />
+											</a>';
 
 								$result .= '
-											<a href="' . $row['view_assigned'] . '" title="' . $txt['awards_button_members'] . '"><img src="' . $settings['images_url'] . '/awards/user.png" alt="" /></a>';
+											<a href="' . $row['view_assigned'] . '" title="' . $txt['awards_button_members'] . '">
+												<img src="' . $settings['images_url'] . '/awards/user.png" alt="" />
+											</a>';
 
 								return $result;
 							},
-							'class' => 'grid8 centertext',
+							'class' => 'grid10 centertext',
 						),
 					),
 				),
@@ -342,8 +362,9 @@ class Awards_Controller extends Action_Controller
 		if (isset($_POST['award_save']))
 			$this->_award_save();
 
-		// Not saving so we must be adding or modifying, load the categories
+		// Not saving so we must be adding or modifying, load the categories and profiles
 		$context['categories'] = AwardsLoadCategories('ASC', true);
+		$context['profiles'] = AwardsLoadProfiles('ASC', true);
 
 		// Load the data for editing/viewing an existing award
 		if (isset($_REQUEST['a_id']))
@@ -368,6 +389,7 @@ class Awards_Controller extends Action_Controller
 				'award_name' => '',
 				'description' => '',
 				'category' => 1,
+				'profile' => 0,
 				'award_type' => 1,
 				'award_location' => 1,
 				'assignable' => 0,
@@ -432,6 +454,7 @@ class Awards_Controller extends Action_Controller
 			'award_name' => strtr(Util::htmlspecialchars($_POST['award_name'], ENT_QUOTES), array("\r" => '', "\n" => '', "\t" => '')),
 			'description' => strtr(Util::htmlspecialchars($_POST['description'], ENT_QUOTES), array("\r" => '', "\n" => '', "\t" => '')),
 			'category' => isset($_POST['id_category']) ? (int) $_POST['id_category'] : 0,
+			'profile' => isset($_POST['id_profile']) ? (int) $_POST['id_profile'] : 0,
 			'time_added' => time(),
 			'award_location' => isset($_POST['award_location']) ? (int) $_POST['award_location'] : 0,
 			'award_requestable' => isset($_POST['award_requestable']) ? 1 : 0,
@@ -461,7 +484,7 @@ class Awards_Controller extends Action_Controller
 			$award_db = AwardsLoadAward($id);
 
 			// Trigger value changed on an auto award, this invalidates all (auto) awards earned with this award ID
-			if ((!$award->manually_assigned()) && ($award_db['trigger'] != $parameters['trigger']))
+			if ((!$award->manually_assigned()) && ($award_db['trigger'] != $parameters['trigger'] || $award_db['profile'] != $_POST['id_profile']))
 				AwardsRemoveMembers($id);
 
 			// Make the updates to the award
@@ -488,9 +511,8 @@ class Awards_Controller extends Action_Controller
 			}
 		}
 
-		// Awards were changed, flush the cache
-		cache_put_data('awards:autoawards', null, 60);
-		cache_put_data('awards:autoawardsid', null, 60);
+		// Awards were changed, flush the cache(s)
+		AwardsCacheMaintenance($award::FUNC);
 
 		// Back to the admin panel
 		redirectexit('action=admin;area=awards;sa=modify;saved=1;a_id=' . $id);
@@ -504,7 +526,7 @@ class Awards_Controller extends Action_Controller
 	 */
 	private function _board_select_helper()
 	{
-		global $boards, $context;
+		global $boards, $context, $modSettings;
 
 		foreach ($context['award']['options'] as $name => $type)
 		{
@@ -517,6 +539,10 @@ class Awards_Controller extends Action_Controller
 					require_once(SUBSDIR . '/Boards.subs.php');
 					getBoardTree();
 				}
+
+				// Don't want the recycle board for awards
+				if (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0)
+					unset($boards[$modSettings['recycle_board']]);
 
 				// Merge the array
 				if (!isset($context['award']['parameters'][$name]))
@@ -883,7 +909,7 @@ class Awards_Controller extends Action_Controller
 		$context['award'] = AwardsLoadAward($id);
 		$context['award']['description'] = parse_bbc($context['award']['description']);
 
-		// Build the listoption array to display the data
+		// Build the list option array to display the data
 		$listOptions = array(
 			'id' => 'view_assigned',
 			'title' => $txt['awards_showmembers'] . ': ' . $context['award']['award_name'],
@@ -909,13 +935,14 @@ class Awards_Controller extends Action_Controller
 						'value' => $txt['members'],
 					),
 					'data' => array(
-						'function' => create_function('$rowData', '
+						'function' => function($rowData) {
 							global $scripturl;
 
-							if ($rowData["id_member"] > 0)
-								return \'<a href="\' . strtr($scripturl, array(\'%\' => \'%%\')) . \'?action=profile;u=\' . $rowData[\'id_member\'] . \'">\' . $rowData[\'member_name\'] . \'</a>\';
-							return $rowData["member_name"];
-						'),
+							if ($rowData['id_member'] > 0)
+								return '<a href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=' . $rowData['id_member'] . '">' . $rowData['member_name'] . '</a>';
+
+							return $rowData['member_name'];
+						},
 					),
 					'sort' => array(
 						'default' => 'm.member_name ',
@@ -1312,11 +1339,8 @@ class Awards_Controller extends Action_Controller
 		// Editing
 		if (isset($_REQUEST['p_id']))
 		{
-			$id = (int) $_REQUEST['p_id'];
-
 			// Needs to be an int!
-			if (empty($id) || $id <= 0)
-				fatal_lang_error('awards_error_no_id_profile', false);
+			$id = (int) $_REQUEST['p_id'];
 
 			// Load single profile for editing.
 			$context['profile'] = AwardsLoadProfile($id);
@@ -1326,7 +1350,6 @@ class Awards_Controller extends Action_Controller
 			$this->_board_select_helper();
 
 			$context['award']['award_function'] = 'profile';
-
 			$context['editing'] = true;
 			$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_edit_profile'];
 		}
@@ -1368,6 +1391,9 @@ class Awards_Controller extends Action_Controller
 				AwardsSaveProfile($name, $parameters);
 			else
 				AwardsSaveProfile($name, $parameters, $p_id);
+
+			// Profiles were changed, flush the cache(s)
+			AwardsCacheMaintenance(null, $p_id);
 
 			// Redirect back.
 			redirectexit('action=admin;area=awards;sa=profiles;saved=1');

@@ -31,7 +31,7 @@ function AwardsLoadAward($id = -1)
 	$request = $db->query('', '
 		SELECT
 			id_award, award_name, award_function, description, id_category, time_added, filename, minifile,
-			award_trigger, award_param, award_type, award_location, award_requestable, award_assignable
+			award_trigger, award_param, award_type, award_location, award_requestable, award_assignable, id_profile
 		FROM {db_prefix}awards
 		WHERE id_award = {int:id}
 		LIMIT 1',
@@ -40,9 +40,10 @@ function AwardsLoadAward($id = -1)
 		)
 	);
 	$row = $db->fetch_assoc($request);
+	$db->free_result($request);
 
 	// Check if that award actually exists
-	if (count($row['id_award']) != 1)
+	if (count($row['id_award']) !== 1)
 		fatal_lang_error('awards_error_no_award');
 
 	$award = array(
@@ -51,6 +52,7 @@ function AwardsLoadAward($id = -1)
 		'award_function' => $row['award_function'],
 		'description' => $row['description'],
 		'category' => $row['id_category'],
+		'profile' => $row['id_profile'],
 		'time' => standardTime($row['time_added']),
 		'trigger' => $row['award_trigger'],
 		'type' => $row['award_type'],
@@ -63,9 +65,6 @@ function AwardsLoadAward($id = -1)
 		'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
 		'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 	);
-
-	// Free results
-	$db->free_result($request);
 
 	return $award;
 }
@@ -83,7 +82,8 @@ function AwardsCountCategoryAwards($cat)
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT COUNT(id_award)
+		SELECT
+			COUNT(id_award)
 		FROM {db_prefix}awards
 		WHERE id_category = {int:cat}',
 		array(
@@ -108,25 +108,26 @@ function AwardsCountCategoryAwards($cat)
  */
 function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 {
-	global $context, $scripturl, $modSettings;
+	global $context, $scripturl, $modSettings, $txt;
 
 	$db = database();
 
 	// Select the awards and their categories.
 	$request = $db->query('', '
 		SELECT
-			a.id_category, a.id_award, a.award_function, a.award_name, a.description, a.time_added, a.filename, a.minifile, a.award_type,
-			a.award_requestable, a.award_assignable, a.award_trigger, a.award_param,
-			c.category_name
+			a.id_category, a.id_award, a.award_function, a.award_name, a.description, a.time_added, a.filename,
+			a.minifile, a.award_type, a.award_requestable, a.award_assignable, a.award_trigger, a.award_param, a.id_profile,
+			c.category_name, p.name AS profile_name
 		FROM {db_prefix}awards AS a
 			LEFT JOIN {db_prefix}awards_categories AS c ON (c.id_category = a.id_category)
+			LEFT JOIN {db_prefix}awards_profiles AS p ON (p.id_profile = a.id_profile)
 		WHERE a.id_category = {int:cat}
 		ORDER BY {raw:sort}
 		LIMIT {int:start}, {int:end}',
 		array(
 			'start' => $start,
 			'end' => $items_per_page,
-			'sort' => 'a.award_function, ' . $sort,
+			'sort' => 'a.award_function, p.name, ' . $sort,
 			'cat' => $cat,
 		)
 	);
@@ -140,6 +141,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 			'award_name' => $row['award_name'],
 			'award_function' => $row['award_function'],
 			'parameters' => unserialize($row['award_param']),
+			'profile_name' => ($row['award_type'] == 1) ? $txt['not_applicable'] : $row['profile_name'],
 			'award_type' => $row['award_type'],
 			'description' => parse_bbc($row['description']),
 			'time' => standardTime($row['time_added']),
@@ -174,7 +176,8 @@ function AwardsCountMembersAwards($memID)
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT id_award, id_group, active
+		SELECT
+			id_award, id_group, active
 		FROM {db_prefix}awards_members
 		WHERE (id_member = {int:mem}' . (!empty($cur_profile['groups']) ? '
 				OR (id_member < 0 AND id_group IN ({array_int:groups}))' : '') . ')
@@ -185,6 +188,7 @@ function AwardsCountMembersAwards($memID)
 			'active' => 1
 		)
 	);
+	$awards = array();
 	// load/count them this way as they may have been assigned an award individually or via group
 	while ($row = $db->fetch_assoc($request))
 		$awards[$row['id_award']] = $row['id_award'];
@@ -209,7 +213,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 	// Load the individual and group awards
 	$request = $db->query('', '
 		SELECT
-			aw.id_award, aw.award_name, aw.description, aw.filename, aw.minifile,
+			aw.id_award, aw.award_name, aw.description, aw.filename, aw.minifile, aw.id_category,
 			am.id_member, am.date_received, am.favorite, am.id_group,
 			c.category_name, c.id_category
 		FROM {db_prefix}awards AS aw
@@ -274,7 +278,8 @@ function AwardsLoadAssignableAwards()
 
 	// Select the awards (NON-auto) that can be assigned by this member
 	$request = $db->query('', '
-		SELECT id_award, award_name, award_function, award_param, filename, minifile, description, award_assignable
+		SELECT
+			id_award, award_name, award_function, award_param, filename, minifile, description, award_assignable
 		FROM {db_prefix}awards
 		WHERE award_type <= {int:type}' . ((allowedTo('manage_awards')) ? '' : ' AND award_assignable = {int:assign}') . '
 		ORDER BY award_name ASC',
@@ -314,7 +319,8 @@ function AwardsLoadRequestedAwards()
 
 	// Select all the requestable awards so we have the award specifics
 	$request = $db->query('', '
-		SELECT a.id_award, a.award_name, a.filename, a.minifile, a.description
+		SELECT
+			a.id_award, a.award_name, a.filename, a.minifile, a.description
 		FROM {db_prefix}awards as a
 			LEFT JOIN {db_prefix}awards_members as am ON (a.id_award = am.id_award)
 		WHERE a.award_type <= {int:type}
@@ -347,7 +353,8 @@ function AwardsLoadRequestedAwards()
 
 	// Now get just the members awaiting approval
 	$request = $db->query('', '
-		SELECT mem.real_name, mem.id_member,
+		SELECT
+			mem.real_name, mem.id_member,
 			am.id_award, am.comments
 		FROM {db_prefix}awards_members AS am
 			LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = am.id_member)
@@ -390,6 +397,7 @@ function AwardsAddAward($award_values, $parameters)
 			'description' => 'string',
 			'time_added' => 'int',
 			'id_category' => 'int',
+			'id_profile' => 'int',
 			'award_type' => 'int',
 			'award_trigger' => 'int',
 			'award_param' => 'string',
@@ -403,6 +411,7 @@ function AwardsAddAward($award_values, $parameters)
 			$award_values['description'],
 			$award_values['time_added'],
 			$award_values['category'],
+			$award_values['profile'],
 			$award_values['award_type'],
 			$parameters['trigger'],
 			serialize($parameters),
@@ -438,6 +447,7 @@ function AwardsUpdateAward($id, $award_values, $parameters)
 			award_function = {string:award_function},
 			description = {string:award_desc},
 			id_category = {int:category},
+			id_profile = {int:profile},
 			award_type = {int:awardtype},
 			award_trigger = {int:trigger},
 			award_param = {string:parameters},
@@ -451,6 +461,7 @@ function AwardsUpdateAward($id, $award_values, $parameters)
 			'award_desc' => $award_values['description'],
 			'id_award' => $id,
 			'category' => $award_values['category'],
+			'profile' => $award_values['profile'],
 			'awardtype' => $award_values['award_type'],
 			'trigger' => isset($parameters['trigger']) ? $parameters['trigger'] : 0,
 			'parameters' => serialize($parameters),
@@ -575,7 +586,8 @@ function AwardsLoadGroupMembers()
 	if (!empty($_POST['who']) && in_array(3, $_POST['who']))
 	{
 		$request = $db->query('', '
-			SELECT DISTINCT mem.id_member, mem.real_name
+			SELECT
+				DISTINCT mem.id_member, mem.real_name
 			FROM ({db_prefix}members AS mem, {db_prefix}moderators AS mods)
 			WHERE mem.id_member = mods.id_member
 			ORDER BY mem.real_name ASC',
@@ -591,7 +603,8 @@ function AwardsLoadGroupMembers()
 	if (!empty($_POST['who']) && in_array(0, $_POST['who']))
 	{
 		$request = $db->query('', '
-			SELECT mem.id_member, mem.real_name
+			SELECT
+				mem.id_member, mem.real_name
 			FROM {db_prefix}members AS mem
 			WHERE mem.id_group = {int:id_group}
 			ORDER BY mem.real_name ASC',
@@ -610,10 +623,11 @@ function AwardsLoadGroupMembers()
 	{
 		// Select the members.
 		$request = $db->query('', '
-			SELECT id_member, real_name
+			SELECT
+				id_member, real_name
 			FROM ({db_prefix}members AS mem, {db_prefix}membergroups AS mg)
 			WHERE (mg.id_group = mem.id_group OR FIND_IN_SET(mg.id_group, mem.additional_groups) OR mg.id_group = mem.id_post_group)
-			AND mg.id_group IN ({array_int:who})
+				AND mg.id_group IN ({array_int:who})
 			ORDER BY real_name ASC',
 			array(
 				'who' => $_POST['who'],
@@ -696,7 +710,8 @@ function AwardsLoadMembersCount($id)
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT COUNT(*)
+		SELECT
+			COUNT(*)
 		FROM {db_prefix}awards_members
 		WHERE id_award = {int:award}
 			AND active = {int:active}',
@@ -756,7 +771,8 @@ function AwardsMakeRequest($id, $date, $comments, $flush = true)
 	{
 		// Get the number of unapproved requests so the awards team knows about it.
 		$request = $db->query('', '
-			SELECT COUNT(*)
+			SELECT
+				COUNT(*)
 			FROM {db_prefix}awards_members
 			WHERE active = {int:active}',
 			array(
@@ -832,13 +848,15 @@ function AwardsLoadCategories($sort = 'DESC', $multi = false)
 
 	// Load all the categories.
 	$request = $db->query('', '
-		SELECT id_category, category_name
+		SELECT
+			id_category, category_name
 		FROM {db_prefix}awards_categories
 		ORDER BY category_name {raw:sort}',
 		array(
 			'sort' => $sort,
 		)
 	);
+	$categories = array();
 	while ($row = $db->fetch_assoc($request))
 	{
 		// return the data as key names or arrays
@@ -935,7 +953,8 @@ function AwardsInCategories($id = null)
 	{
 		// Count the number of awards in each category
 		$request = $db->query('', '
-			SELECT id_category, COUNT(*) AS num_awards
+			SELECT
+				id_category, COUNT(*) AS num_awards
 			FROM {db_prefix}awards
 			GROUP BY id_category'
 		);
@@ -947,7 +966,8 @@ function AwardsInCategories($id = null)
 	{
 		// Count the number of awards in a specific category
 		$request = $db->query('', '
-			SELECT COUNT(*)
+			SELECT
+				COUNT(*)
 			FROM {db_prefix}awards
 			WHERE id_category = {int:id}',
 			array(
@@ -971,7 +991,8 @@ function AwardsCount()
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT COUNT(*)
+		SELECT
+			COUNT(*)
 		FROM {db_prefix}awards',
 		array()
 	);
@@ -998,9 +1019,10 @@ function AwardsListAll($start, $end, $awardcheck = array())
 
 	$db = database();
 
-	// Select the awards and their categories.
+	// Select the awards with categories
 	$request = $db->query('', '
-		SELECT 	a.id_category, a.id_award, a.award_name, a.description, a.time_added, a.filename, a.minifile, a.award_type,
+		SELECT
+			a.id_category, a.id_award, a.award_name, a.description, a.time_added, a.filename, a.minifile, a.award_type,
 			a.award_requestable, a.award_assignable, a.award_trigger,
 			c.category_name
 		FROM {db_prefix}awards AS a
@@ -1190,7 +1212,8 @@ function AwardLoadFiles($id)
 
 	// Lets make sure that we delete the file that we are supposed to and not something harmful
 	$request = $db->query('', '
-		SELECT filename, minifile
+		SELECT
+			filename, minifile
 		FROM {db_prefix}awards
 		WHERE id_award = {int:id}',
 		array(
@@ -1427,9 +1450,9 @@ function AwardsLoadType($function = null)
 }
 
 /**
- * Loads all the categories in the system
+ * Loads all the profiles in the system
  *
- * - Returns an array of categories and links
+ * - Returns an array of profiles and links
  */
 function AwardsLoadAllProfiles()
 {
@@ -1439,7 +1462,8 @@ function AwardsLoadAllProfiles()
 
 	// Load all the profiles in the db.
 	$request = $db->query('', '
-		SELECT id_profile, type, name, parameters
+		SELECT
+			id_profile, type, name, parameters
 		FROM {db_prefix}awards_profiles'
 	);
 	$profiles = array();
@@ -1462,7 +1486,52 @@ function AwardsLoadAllProfiles()
 }
 
 /**
- * Loads in the details of a profile
+ * Loads all of the profiles in the system
+ *
+ * - Returns array of profiles with key of name and value of id
+ *
+ * @param string $sort order to return the profiles
+ * @param boolean $multi if true will return an array of arrays
+ */
+function AwardsLoadProfiles($sort = 'DESC')
+{
+	$db = database();
+
+	// Load all the categories.
+	$request = $db->query('', '
+		SELECT
+			id_profile, name, parameters
+		FROM {db_prefix}awards_profiles
+		ORDER BY name {raw:sort}',
+		array(
+			'sort' => $sort,
+		)
+	);
+	$profiles = array();
+	while ($row = $db->fetch_assoc($request))
+	{
+		// return the data as key names or arrays
+		$profiles[$row['id_profile']] = array(
+			'id' => $row['id_profile'],
+			'name' => $row['name'],
+			'parameters' => unserialize($row['parameters'])
+		);
+
+		// make sure we set the parameters once
+		if (empty($profiles[$row['id_profile']]['parameters']['boards']))
+			$profiles[$row['id_profile']]['parameters']['boards'] = 'all';
+		if (empty($profiles[$row['id_profile']]['parameters']['like_threshold']))
+			$profiles[$row['id_profile']]['parameters']['like_threshold'] = 0;
+		if (empty($profiles[$row['id_profile']]['parameters']['min_topic_replies']))
+			$profiles[$row['id_profile']]['parameters']['min_topic_replies'] = 0;
+	}
+	$db->free_result($request);
+
+	return $profiles;
+}
+
+/**
+ * Loads in the details of a single profile
  *
  * @param int $id
  */
@@ -1510,7 +1579,8 @@ function AwardsInProfiles($id = null)
 	{
 		// Count the number of awards in each profile
 		$request = $db->query('', '
-			SELECT id_profile, COUNT(*) AS num_awards
+			SELECT
+				id_profile, COUNT(*) AS num_awards
 			FROM {db_prefix}awards
 			GROUP BY id_profile'
 		);
@@ -1522,7 +1592,8 @@ function AwardsInProfiles($id = null)
 	{
 		// Count the number of awards in a specific profile
 		$request = $db->query('', '
-			SELECT COUNT(*)
+			SELECT
+				COUNT(*)
 			FROM {db_prefix}awards
 			WHERE id_profile = {int:id}',
 			array(
@@ -1613,11 +1684,51 @@ function AwardsDeleteProfile($id)
 }
 
 /**
+ * Utility function to clear cache data
+ * - Called when a profile changes
+ * - Called when a award changes
+ *
+ * @param string|null $awid award functional name
+ * @param int|null $prid profile id
+ */
+function AwardsCacheMaintenance($awid = null, $prid = null)
+{
+	$db = database();
+
+	// No need to be selective, just reset any areas that may have been affected
+	cache_put_data('awards:autoawards', null, 60);
+	cache_put_data('awards:autoawardsid', null, 60);
+	cache_put_data('awards:autoawardsprofiles', null, 60);
+
+	$where = '';
+	if (isset($awid, $prid))
+		$where = 'area_key LIKE {string:area_key} OR area_key LIKE {string:profile_key}';
+	elseif (isset($awid))
+		$where = 'area_key LIKE {string:area_key}';
+	elseif (isset($prid))
+		$where = 'area_key LIKE {string:profile_key}';
+
+	if (!empty($where))
+		$db->query('', '
+			DELETE FROM {db_prefix}awards_cache
+			WHERE ' . $where,
+			array(
+				'profile_key' => '%_' . (int) $prid,
+				'area_key' => $awid . '_%'
+			)
+		);
+}
+
+/**
  * A shortcut that takes care of instantiating the award and returning the instance
  *
  * @param string $name The name of the award (without "_Award" at the end)
+ * @param array[]|null $awardids
+ * @param array[]|null $autoawardsprofiles
+ *
+ * @return mixed
  */
-function instantiate_award($name)
+function instantiate_award($name, $awardids = null, $autoawardsprofiles = null)
 {
 	static $instances = array(), $db = null;
 
@@ -1632,7 +1743,7 @@ function instantiate_award($name)
 		$class = $name . '_Award';
 
 		// Let er rip tatter chip
-		$instances[$name] = new $class($db);
+		$instances[$name] = new $class($db, $awardids, $autoawardsprofiles);
 	}
 
 	$instance = $instances[$name];

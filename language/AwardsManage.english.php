@@ -20,12 +20,12 @@ $txt['awards_description_viewcategory'] = 'Viewing a category and all awards in 
 
 $txt['awards_description_profiles'] = 'Viewing all categories in the award system';
 $txt['awards_description_editprofile'] = 'Edit an existing profile name';
-$txt['awards_description_addprofile'] = 'Add a new profile name to the awards system';
+$txt['awards_description_addprofile'] = 'Add a new profile name to the awards system.  Profiles can only be used with automatically assigned awards.';
 $txt['awards_description_deleteprofile'] = 'Remove a profile from the system';
 $txt['awards_description_viewprofile'] = 'Viewing a profile and all awards in that profile';
-$txt['awards_profile_help'] = 'This is where you add, edit, delete award profiles';
-
-
+$txt['awards_profile_help'] = 'This is where you add, edit, delete award profiles.  Profiles can be used to group award
+parameters so they are applied to specific awards.  Profiles can only used on automatically assigned awards. For example
+if you wanted to have various levels of top count awards, but only wanted to include specific boards in that topic count.';
 $txt['awards_description_requests'] = 'This is where you approve or deny member requests for awards';
 $txt['awards_help'] = 'This is where you add, edit, delete and assign awards.';
 $txt['awards_category_help'] = 'This is where you add, edit, delete award categories';

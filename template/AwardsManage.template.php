@@ -71,7 +71,7 @@ function template_modify()
 							: $txt['awards_add_award'] . ' (' .  $context['award']['award_function']  . ')', '
 					</h3>';
 
-	// Start with award details, like name, description, category, etc
+	// Start with award details, like name, description, category, profile, etc
 	echo '
 						<div class="content">
 							<fieldset>
@@ -104,10 +104,23 @@ function template_modify()
 	echo '
 										</select>
 									</dd>
+									<dt>
+										<label for="id_profile">', $txt['awards_profile'], '</label>:
+									</dt>
+									<dd>
+										<select name="id_profile" id="id_profile">';
+
+	foreach ($context['profiles'] as $profile)
+		echo '
+											<option value="', $profile['id'], '"', ($profile['id'] == $context['award']['profile']) ? ' selected="selected"' : '', '>', $profile['name'], '</option>';
+
+	echo '
+										</select>
+									</dd>
 								</dl>
 							</fieldset>';
 
-	// Now the award type, chosen from the add screen, enter the parameters as the award class defines
+	// Now the award type, chosen from the add screen, enter the parameters as the chosen award class defines
 	echo '
 							<fieldset>
 							<div class="infobox">', $context['award']['desc'], '</div>
@@ -122,8 +135,6 @@ function template_modify()
 
 	// Display the setup parameters for this Award
 	template_show_award_options();
-
-
 
 	echo '
 								</dl>

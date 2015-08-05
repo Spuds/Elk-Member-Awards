@@ -90,7 +90,7 @@ function ipa_member_awards(&$profile_areas)
  */
 function iui_member_awards()
 {
-	global $user_info;
+	global $user_info, $user_settings;
 
 	$user_info['awards'] = isset($user_settings['awards']) ? $user_settings['awards'] : array();
 }

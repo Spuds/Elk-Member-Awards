@@ -27,33 +27,24 @@ class Group_Award extends Abstract_Award
 	 * Constructor, used to define award parameters
 	 *
 	 * @param Database|null $db
+	 * @param array[]|null $awardids array of award information containing all of a specific type
+	 * @param array[]|null $autoawardsprofiles array of profiles in the system
 	 */
-	public function __construct($db = null)
+	public function __construct($db = null, $awardids = null, $autoawardsprofiles = null)
 	{
 		$this->award_parameters = array(
 			'points' => 'int',
 		);
 
-		parent::__construct($db);
+		parent::__construct($db, $awardids, $autoawardsprofiles);
 	}
 
 	/**
 	 * Initializes an award for use.
 	 *
-	 * @param mixed[] $parameters
-	 * @param int $id
-	 */
-	public function setup($parameters, $id)
-	{
-	}
-
-	/**
-	 * Initializes an award for use.
-	 *
-	 * @param array[] $awardids trigger sorted rows of a specific award type
 	 * @param int[] $new_loaded_ids id's of members to check
 	 */
-	public function process($awardids, $new_loaded_ids)
+	public function process($new_loaded_ids)
 	{
 	}
 

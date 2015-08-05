@@ -147,7 +147,9 @@ function AwardsAutoCheck($new_loaded_ids)
 	// See if we already have the available auto awards in the cache
 	$autoawards = cache_get_data('awards:autoawards', 4 * 3600);
 	$autoawardsid = cache_get_data('awards:autoawardsid', 4 * 3600);
-	if ($autoawards === null || $autoawardsid === null)
+	$autoawardsprofiles = cache_get_data('awards:autoawardsprofiles', 4 * 3600);
+
+	if ($autoawards === null || $autoawardsid === null || $autoawardsprofiles === null)
 	{
 		// Init
 		$autoawards = array();
@@ -158,7 +160,7 @@ function AwardsAutoCheck($new_loaded_ids)
 		// all others will be a subset of that
 		$request = $db->query('', '
 			SELECT
-				id_award, award_name, award_function, award_trigger, award_param, award_type
+				id_award, award_name, award_function, award_trigger, award_param, award_type, id_profile
 			FROM {db_prefix}awards
 			WHERE award_type = {int:type}
 			ORDER BY award_type DESC, award_trigger DESC',
@@ -169,16 +171,24 @@ function AwardsAutoCheck($new_loaded_ids)
 		// Build up the auto awards array
 		while ($row = $db->fetch_assoc($request))
 		{
-			$autoawards[$row['award_function']][] = $row; // holds all the awards information for each award type
-			$autoawardsid[$row['award_function']][] = (int) $row['id_award']; // holds all the possible award id's for a given award type.
+			// holds all the awards information for each award type
+			$autoawards[$row['award_function']][] = $row;
+
+			// holds all the possible award id's for a given award type.
+			require_once(SUBSDIR . '/Awards.subs.php');
+			$autoawardsid[$row['award_function']][] = (int) $row['id_award'];
 		}
 		$db->free_result($request);
+
+		// And the profiles
+		$autoawardsprofiles = AwardsLoadProfiles();
 
 		// Save it for 4 hours, really could be longer since it only changes when a new auto award is added / edited.
 		if (!empty($modSettings['cache_enable']))
 		{
 			cache_put_data('awards:autoawards', $autoawards, 4 * 3600);
 			cache_put_data('awards:autoawardsid', $autoawardsid, 4 * 3600);
+			cache_put_data('awards:autoawardsprofiles', $autoawardsprofiles, 4 * 3600);
 		}
 	}
 
@@ -188,22 +198,16 @@ function AwardsAutoCheck($new_loaded_ids)
 	foreach ($autoawards as $award_type => $awardids)
 	{
 		// Start an instance of this award_type class
-		$award = instantiate_award($award_type);
+		$award = instantiate_award($award_type, $awardids, $autoawardsprofiles);
 
 		// Call its main processing function
-		$award->process($awardids, $new_loaded_ids);
+		$award->process($new_loaded_ids);
 	}
 	/*
 		switch ($award_type)
 		{
 			case 2:
-				// Post count based awards
-				$members = AwardsAutoAssignMembers($awardids, $new_loaded_ids, 'posts');
 
-				// If we found new awards to assign, do so
-				if (!empty($members))
-					AwardsAutoAssign($members, $award_type, $autoawardsid[$award_type]);
-				break;
 			case 3:
 				// Top posters 1-N
 				AwardsTopPosters_1_N($awardids[0]['award_trigger']);

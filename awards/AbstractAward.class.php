@@ -44,6 +44,36 @@ abstract class Abstract_Award
 	public $ttl = 300;
 
 	/**
+	 * Holds all award profiles in the system
+	 * @var array
+	 */
+	public $profiles = array();
+
+	/**
+	 * Holds all awards of the specific type
+	 * @var array
+	 */
+	public $awards = array();
+
+	/**
+	 * members that have been determined to have achieved this award
+	 * @var array
+	 */
+	public $members = array();
+
+	/**
+	 * Holds the sorted awards by trigger and profile
+	 * @var array
+	 */
+	public $profile_group = array();
+
+	/**
+	 * Holds the sorted awardid's by trigger and profile
+	 * @var array
+	 */
+	public $profile_award_ids = array();
+
+	/**
 	 * Database object
 	 * @var object
 	 */
@@ -59,19 +89,23 @@ abstract class Abstract_Award
 	 * Class constructor, makes db available
 	 *
 	 * @param Database|null $db
+	 * @param array[] $awardids array of award information containing all of a specific type
+	 * @param array[] $autoawardsprofiles array of profiles in the system
 	 */
-	public function __construct($db = null)
+	public function __construct($db = null, $awardids, $autoawardsprofiles)
 	{
+		// Load data for abstract class use
 		$this->_db = $db;
+		$this->awards = $awardids;
+		$this->profiles = $autoawardsprofiles;
 	}
 
 	/**
 	 * Does the actual award calculations and determinations
 	 *
-	 * @param array[] $awardids trigger sorted rows of a specific award type
 	 * @param int[] $new_loaded_ids id's of members to check
 	 */
-	abstract public function process($awardids, $new_loaded_ids);
+	abstract public function process($new_loaded_ids);
 
 	/**
 	 * Does the database work of setting an autoaward to a member
@@ -80,13 +114,15 @@ abstract class Abstract_Award
 	 * - handles the adding of new / update cache info
 	 * - handles the cache maintenance
 	 *
-	 * @param int[] $members
 	 * @param string $award_type
 	 * @param int[] $awardids
 	 */
-	public function assign($members, $award_type, $awardids)
+	public function assign($award_type, $awardids)
 	{
 		global $user_profile;
+
+		if (empty($this->members))
+			return;
 
 		// init
 		$values = array();
@@ -97,7 +133,7 @@ abstract class Abstract_Award
 		$date_received = date('Y') . '-' . date('m') . '-' . date('d');
 
 		// Prepare the database values.
-		foreach ($members as $member => $memberaward)
+		foreach ($this->members as $member => $memberaward)
 		{
 			$values[] = array((int) $memberaward, (int) $member, $date_received, (int) $award_type, 1);
 			$users[] = $member;
@@ -110,7 +146,7 @@ abstract class Abstract_Award
 		}
 
 		// First the removals ... Members can only have one active award of each auto 'type'
-		foreach ($members as $member => $dummy)
+		foreach ($this->members as $member => $dummy)
 		{
 			if (!empty($remove[$member]))
 				$this->_db->query('', '
@@ -304,5 +340,52 @@ abstract class Abstract_Award
 			$data,
 			array('area_key')
 		);
+	}
+
+	/**
+	 * Expands the serialized award parameters and places it back for usage
+	 *  - Groups like profile awards together
+	 *  - Requires that the query returns awards sorted by trigger value
+	 */
+	protected function _prep_and_group()
+	{
+		// For all the awards of this type / function
+		foreach ($this->awards as $key => $award)
+		{
+			// Expand out the award params
+			if (!is_array($this->awards[$key]['award_param']))
+				$this->awards[$key]['award_param'] = unserialize($award['award_param']);
+
+			// The triggers arrive in high to low order, but we need to "sort/group" by profiles as well
+			$this->profile_group[$this->awards[$key]['id_profile']][] = $this->awards[$key];
+			$this->profile_award_ids[$this->awards[$key]['id_profile']][] = $this->awards[$key]['id_award'];
+		}
+	}
+
+	/**
+	 * loops on a set of member id's and checks if they have reached the award trigger level
+	 *
+	 * @param array[] $profile_group profile group containing the awards we are comparing against
+	 * @param string $area unique award_profile key like topic_count_0
+	 */
+	protected function _check_members($profile_group, $area)
+	{
+		global $user_profile;
+
+		foreach ($this->remaining_ids as $member_id)
+		{
+			// Check each award level (trigger) for that group, they are sorted high to low
+			foreach ($profile_group as $award)
+			{
+				if (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] >= $award['award_trigger']))
+				{
+					// Give this member a cupcake, if they don't already have it, and stop looking for more
+					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+						$this->members[$member_id] = (int) $award['id_award'];
+
+					break;
+				}
+			}
+		}
 	}
 }
