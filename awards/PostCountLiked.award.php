@@ -77,7 +77,7 @@ class Post_Count_Liked_Award extends Abstract_Award
 
 			// Assign it to anyone that has earn this funckey award
 			if (!empty($this->members))
-				$this->assign($this->members, $area, $this->profile_award_ids[$key]);
+				$this->assign($area, $this->profile_award_ids[$key]);
 		}
 
 		// Maintain the cache

@@ -89,8 +89,8 @@ abstract class Abstract_Award
 	 * Class constructor, makes db available
 	 *
 	 * @param Database|null $db
-	 * @param array[] $awardids array of award information containing all of a specific type
-	 * @param array[] $autoawardsprofiles array of profiles in the system
+	 * @param array[]|null $awardids array of award information containing all of a specific type
+	 * @param array[]|null $autoawardsprofiles array of profiles in the system
 	 */
 	public function __construct($db = null, $awardids, $autoawardsprofiles)
 	{

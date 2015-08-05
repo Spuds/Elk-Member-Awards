@@ -1491,7 +1491,6 @@ function AwardsLoadAllProfiles()
  * - Returns array of profiles with key of name and value of id
  *
  * @param string $sort order to return the profiles
- * @param boolean $multi if true will return an array of arrays
  */
 function AwardsLoadProfiles($sort = 'DESC')
 {

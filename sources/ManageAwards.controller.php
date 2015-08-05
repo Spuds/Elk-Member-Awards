@@ -364,7 +364,7 @@ class Awards_Controller extends Action_Controller
 
 		// Not saving so we must be adding or modifying, load the categories and profiles
 		$context['categories'] = AwardsLoadCategories('ASC', true);
-		$context['profiles'] = AwardsLoadProfiles('ASC', true);
+		$context['profiles'] = AwardsLoadProfiles('ASC');
 
 		// Load the data for editing/viewing an existing award
 		if (isset($_REQUEST['a_id']))
