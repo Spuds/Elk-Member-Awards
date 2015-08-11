@@ -96,8 +96,8 @@ abstract class Abstract_Award
 	{
 		// Load data for abstract class use
 		$this->_db = $db;
-		$this->awards = $awardids;
-		$this->profiles = $autoawardsprofiles;
+		$this->awards = $awardids === null ? array() : $awardids;
+		$this->profiles = $autoawardsprofiles === null ? array() : $autoawardsprofiles;
 	}
 
 	/**
@@ -108,7 +108,7 @@ abstract class Abstract_Award
 	abstract public function process($new_loaded_ids);
 
 	/**
-	 * Does the database work of setting an autoaward to a member
+	 * Does the database work of setting an auto award to a member
 	 *
 	 * - Makes sure each member only has 1 of each award
 	 * - handles the adding of new / update cache info
@@ -186,7 +186,7 @@ abstract class Abstract_Award
 	 */
 	public function manually_assigned()
 	{
-		return $this->award_type() !== self::AUTOMATIC;
+		return $this->award_type() !== $this->award_type();
 	}
 
 	/**
@@ -262,17 +262,18 @@ abstract class Abstract_Award
 	 *
 	 * @param int[] $new_loaded_ids member list to load
 	 * @param string $key the award key to load
+	 * @param bool $nth fetch as a 1 to N award
 	 */
-	public function award_cache_fetch($new_loaded_ids, $key)
+	public function award_cache_fetch($new_loaded_ids, $key, $nth = false)
 	{
 		global $user_profile;
 
 		$request = $this->_db->query('', '
 			SELECT
-				area_key, time, value, id_member
+				id_member, area_key, time, value
 			FROM {db_prefix}awards_cache
-			WHERE id_member IN ({array_int:members})
-				AND area_key = {string:area_key}
+			WHERE area_key = {string:area_key}' . ($nth ? '' : '
+				AND id_member IN ({array_int:members})') . '
 				AND time > {int:time}',
 			array(
 				'members' => $new_loaded_ids,
@@ -284,12 +285,13 @@ abstract class Abstract_Award
 		while ($row = $this->_db->fetch_assoc($request))
 		{
 			// Keep track of who we loaded
-			$found[$row['id_member']] = 1;
+			$found[$row['id_member']] = $row['value'];
 			$user_profile[$row['id_member']][$key] = $row['value'];
 		}
+		$this->_db->free_result($request);
 
 		// Members that have no data or no current data in the cache
-		$this->remaining_ids = array_diff($new_loaded_ids, array_keys($found));
+		$this->remaining_ids = $nth ? $found : array_diff($new_loaded_ids, array_keys($found));
 	}
 
 	/**
@@ -336,7 +338,7 @@ abstract class Abstract_Award
 		// And add it
 		$this->_db->insert('replace',
 			'{db_prefix}awards_cache',
-			array('id_member' => 'int', 'area_key' => 'string', 'time' => 'int', 'value' => 'int',),
+			array('id_member' => 'int', 'area_key' => 'string', 'time' => 'int', 'value' => 'string'),
 			$data,
 			array('area_key')
 		);
@@ -363,7 +365,7 @@ abstract class Abstract_Award
 	}
 
 	/**
-	 * loops on a set of member id's and checks if they have reached the award trigger level
+	 * Loops on a array of member id's and determines if they have reached the award trigger level
 	 *
 	 * @param array[] $profile_group profile group containing the awards we are comparing against
 	 * @param string $area unique award_profile key like topic_count_0
@@ -377,12 +379,18 @@ abstract class Abstract_Award
 			// Check each award level (trigger) for that group, they are sorted high to low
 			foreach ($profile_group as $award)
 			{
-				if (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] >= $award['award_trigger']))
+				// Standard limit based awards
+				if (!$this->one_to_n() && isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] >= $award['award_trigger']))
 				{
-					// Give this member a cupcake, if they don't already have it, and stop looking for more
 					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
 						$this->members[$member_id] = (int) $award['id_award'];
-
+					break;
+				}
+				// 1 to N award then, the trigger is the number to give out
+				elseif (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] <= $award['award_trigger']))
+				{
+					if (isset($user_profile[$member_id]['awardlist']) && !in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+						$this->members[$member_id] = (int) $award['id_award'];
 					break;
 				}
 			}

@@ -149,6 +149,10 @@ function AwardsAutoCheck($new_loaded_ids)
 	$autoawardsid = cache_get_data('awards:autoawardsid', 4 * 3600);
 	$autoawardsprofiles = cache_get_data('awards:autoawardsprofiles', 4 * 3600);
 
+	// Like will need these
+	require_once(BOARDDIR . '/awards/AbstractAward.class.php');
+	require_once(SUBSDIR . '/Awards.subs.php');
+
 	if ($autoawards === null || $autoawardsid === null || $autoawardsprofiles === null)
 	{
 		// Init
@@ -193,8 +197,6 @@ function AwardsAutoCheck($new_loaded_ids)
 	}
 
 	// Now lets do something with each award type
-	require_once(BOARDDIR . '/awards/AbstractAward.class.php');
-	require_once(SUBSDIR . '/Awards.subs.php');
 	foreach ($autoawards as $award_type => $awardids)
 	{
 		// Start an instance of this award_type class

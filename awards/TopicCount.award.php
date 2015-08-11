@@ -78,7 +78,7 @@ class Topic_Count_Award extends Abstract_Award
 			$this->_check_members($profile_group, $area);
 
 			// Anyone earn this funckey award
-			$this->assign($area, $this->profile_award_ids[$key]);
+			$this->assign($this->award_type(), $this->profile_award_ids[$key]);
 		}
 
 		// Maintain the cache
@@ -90,7 +90,7 @@ class Topic_Count_Award extends Abstract_Award
 	 *  - Groups like profile awards together
 	 *  - Requires that the query returns awards sorted by trigger value
 	 */
-	public function _prep_and_group()
+	protected function _prep_and_group()
 	{
 		// Nothing special here, so use the abstract method
 		parent::_prep_and_group();

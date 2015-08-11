@@ -109,41 +109,43 @@ $txt['awards_group_desc'] = 'Not applicable for group awards, these must be indi
 
 
 // Built in awards, follows award_ID where ID is set from the AwardsLoadType() function
-$txt['awards_Regular_Award'] = 'Regular Award';
-$txt['awards_Regular_Award_short'] = 'Create awards that are manually assignable to members';
-$txt['awards_Regular_Award_desc'] = 'Regular awards must be individually assigned to a member.  You can optionally define reputation points to give with the award';
+$txt['awards_Regular'] = 'Regular Award';
+$txt['awards_Regular_short'] = 'Create awards that are manually assignable to members';
+$txt['awards_Regular_desc'] = 'Regular awards must be individually assigned to a member.  You can optionally define reputation points to give with the award';
 
-$txt['awards_Group_Award'] = 'Group Award';
-$txt['awards_Group_Award_short'] = 'Create awards that are manually assignable to groups';
-$txt['awards_Group_Award_desc'] = 'Group awards must be individually assigned to member groups.  You can optionally define reputation points to give with the award';
+$txt['awards_Group'] = 'Group Award';
+$txt['awards_Group_short'] = 'Create awards that are manually assignable to groups';
+$txt['awards_Group_desc'] = 'Group awards must be individually assigned to member groups.  You can optionally define reputation points to give with the award';
 
+/*
+$txt['awards_limit'] = 'Number of awards';
 $txt['awards_trigger'] = 'Trigger Value';
 $txt['awards_points'] = 'Points Earned';
 $txt['awards_points_desc'] = 'The number of reputation points earned for this award.';
+*/
 
-$txt['awards_Post_Count_Award'] = 'Post Count';
-$txt['awards_Post_Count_Award_desc'] = 'Define "post count" based awards.  You may optionally select just certain boards to consider in the post count totals.  You may define multiple post count awards with various levels, but only the highest will be awarded to a member.';
-$txt['awards_Post_Count_Award_short'] = 'Define automatically assigned Post Count based awards';
+$txt['awards_Post_Count'] = 'Post Count';
+$txt['awards_Post_Count_desc'] = 'Define "post count" based awards.  You may optionally select just certain boards to consider in the post count totals.  You may define multiple post count awards with various levels, but only the highest will be awarded to a member.';
+$txt['awards_Post_Count_short'] = 'Define automatically assigned Post Count based awards';
 $txt['awards_Post_Count_boards'] = 'Board Restrictions';
 $txt['awards_Post_Count_boards_desc'] = 'Only count posts made in these boards (comma separated list)';
 
-$txt['awards_Top_Poster_Award'] = 'Top Posters';
-$txt['awards_Top_Poster_Award_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten posters receiving the award';
-$txt['awards_Top_Poster_Award_short'] = 'Define automatically assigned awards for the (X) top posters';
+$txt['awards_Top_Poster'] = 'Top Posters';
+$txt['awards_Top_Poster_desc'] = 'Enter the number of members to receive this award in the limit field.  For example entering 10 will result in the top ten posters receiving the award.  Note: only the board restrictions are used from the chosen profile.';
+$txt['awards_Top_Poster_short'] = 'Define automatically assigned awards for the (X) top posters';
 
-$txt['awards_Post_Count_Liked_Award'] = 'Liked Posts';
-$txt['awards_Post_Count_Liked_Award_desc'] = 'Enter the number of individual posts with likes that a member must have received to get this award.  The system uses a threshold value to set a minimum post like value.  For example setting a trigger of 10 and a threshold of 2, means the member must have 10 posts with at least 2 likes to get the award.';
-$txt['awards_Post_Count_Liked_Award_short'] = 'Define automatically assigned awards that are based on individual post "like" totals';
+$txt['awards_Post_Count_Liked'] = 'Liked Posts';
+$txt['awards_Post_Count_Liked_desc'] = 'Enter the number of individual posts with likes that a member must have received to get this award.  The system uses a threshold value to set a minimum post like value.  For example setting a trigger of 10 and a threshold of 2, means the member must have 10 posts with at least 2 likes to get the award.';
+$txt['awards_Post_Count_Liked_short'] = 'Define automatically assigned awards that are based on individual post "like" totals';
 
-$txt['awards_Topic_Count_Award'] = 'Topic Count';
-$txt['awards_Topic_Count_Award_desc'] = 'Enter the minimum number of topics that a member must have started to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
-$txt['awards_Topic_Count_Award_short'] = 'Enter automatically assigned Topic Started based awards';
+$txt['awards_Topic_Count'] = 'Topic Count';
+$txt['awards_Topic_Count_desc'] = 'Enter the minimum number of topics that a member must have started to receive this award.  If you define multiple award levels only the highest will be awarded to the member.';
+$txt['awards_Topic_Count_short'] = 'Enter automatically assigned Topic Started based awards';
 
 // Profiles
 $txt['awards_parameter_min_topic_replies'] = 'Only include topics that have received at least these many replies';
 $txt['awards_parameter_min_post_likes'] = 'Only include posts with at least these many likes';
 $txt['awards_parameter_profile_boards'] = 'Only count items started in these boards';
-
 
 // Award parameters, generic values should specific ones not be defined by the award
 $txt['awards_parameter_trigger'] = 'Trigger Value';
@@ -156,7 +158,7 @@ $txt['awards_parameter_boards'] = 'Boards';
 $txt['awards_parameter_boards_desc'] = 'Only items in these boards are considered';
 
 $txt['awards_top_topic_starters'] = 'Top Topic Starters';
-$txt['awards_top_topic_starters_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten topic starters receiving the award';
+$txt['awards_top_topic_starters_desc'] = 'Enter the number of members to receive this award in the limit field.  For example entering 10 will result in the top ten topic starters receiving the award.  Only board restrictions are used from the chosen profile.';
 
 $txt['awards_time_online'] = 'Most Time Online';
 $txt['awards_time_online_desc'] = 'Enter the number of members to receive this award.  For example entering 10 will result in the top ten time online members receiving the award';

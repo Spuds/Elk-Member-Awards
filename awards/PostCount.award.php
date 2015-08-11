@@ -59,7 +59,7 @@ class Post_Count_Award extends Abstract_Award
 		// For each grouping of profiles
 		foreach ($this->profile_group as $key => $profile_group)
 		{
-			// Set the funckey :P Allows for multiple award_type via profile groups .. post_count_0 post_count_1 etc
+			// Set the area key, allowing for multiple award_type via profile groups .. post_count_0 post_count_1 etc
 			$area = self::FUNC . '_' . $key;
 
 			// See what we can fulfill from the cache
@@ -75,8 +75,8 @@ class Post_Count_Award extends Abstract_Award
 			$this->members = array();
 			$this->_check_members($profile_group, $area);
 
-			// Anyone earn this funckey award
-			$this->assign($area, $this->profile_award_ids[$key]);
+			// Anyone earn this area award
+			$this->assign($this->award_type(), $this->profile_award_ids[$key]);
 		}
 
 		// Maintain the cache

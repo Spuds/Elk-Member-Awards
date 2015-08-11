@@ -1393,7 +1393,7 @@ function AwardsSetFavorite($memID, $award_id, $makefav)
 }
 
 /**
- * Fetches all the available awards in the system
+ * Fetches all, or a specific, award(s) in the system
  *
  * - If supplied a name gets just that functions id
  * - Returns the functions in the order found in the file system
@@ -1426,15 +1426,10 @@ function AwardsLoadType($function = null)
 	foreach ($fs as $item)
 	{
 		// Convert file names to class names, PostCount.award.pbp => Post_Count_Award
-		$class = str_replace('.award.php', '_Award', trim(preg_replace('/((?<=)\p{Lu}(?=\p{Ll}))/', '_$1', $item->getFilename()), '_'));
-
-		// Load the file, make sure we can access it
-		require_once($item->getPathname());
-		if (!class_exists($class))
-			continue;
+		$class = str_replace('.award.php', '', trim(preg_replace('/((?<=)\p{Lu}(?=\p{Ll}))/', '_$1', $item->getFilename()), '_'));
 
 		// Instance of the award
-		$award = new $class;
+		$award = instantiate_award($class);
 
 		// Add it to our list
 		$return[] = array(
@@ -1742,10 +1737,11 @@ function instantiate_award($name, $awardids = null, $autoawardsprofiles = null)
 		$class = $name . '_Award';
 
 		// Let er rip tatter chip
-		$instances[$name] = new $class($db, $awardids, $autoawardsprofiles);
+		if (class_exists($class))
+			$instances[$name] = new $class($db, $awardids, $autoawardsprofiles);
 	}
 
-	$instance = $instances[$name];
+	$instance = isset($instances[$name]) ? $instances[$name] : null;
 
 	return $instance;
 }
