@@ -11,12 +11,18 @@
 
 // If we have found SSI.php and we are outside of ELK, then we are running standalone.
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('ELK'))
+{
 	require_once(dirname(__FILE__) . '/SSI.php');
+}
 elseif (!defined('ELK'))
+{
 	die('<b>Error:</b> Cannot install - please verify you put this file in the same place as ELK\'s SSI.php.');
+}
 
 if ((ELK == 'SSI') && !$user_info['is_admin'])
+{
 	die('Admin priveleges required.');
+}
 
 $db = database();
 
@@ -25,7 +31,7 @@ global $db_prefix, $modSettings;
 // Settings to create new mod settings...
 $mod_settings = array(
 	'awards_dir' => 'awards',
-	'awards_favorites' =>  1,
+	'awards_favorites' => 1,
 	'awards_in_post' => 1,
 	'awards_avatar_format' => 1,
 	'awards_signature_format' => 1,
@@ -84,7 +90,7 @@ $tables[] = array(
 		array(
 			'name' => 'award_type',
 			'type' => 'tinyint',
-			'size' =>  2,
+			'size' => 2,
 			'null' => false,
 			'default' => 0
 		),
@@ -104,7 +110,7 @@ $tables[] = array(
 	'indexes' => array(
 		array(
 			'type' => 'unique',
-			'columns' => array( 'id_member', 'id_award')
+			'columns' => array('id_member', 'id_award')
 		),
 		array(
 			'type' => 'index',
@@ -181,14 +187,14 @@ $tables[] = array(
 		array(
 			'name' => 'award_type',
 			'type' => 'tinyint',
-			'size' =>  2,
+			'size' => 2,
 			'null' => false,
 			'default' => 0
 		),
 		array(
 			'name' => 'award_location',
 			'type' => 'tinyint',
-			'size' =>  1,
+			'size' => 1,
 			'null' => false,
 			'default' => 0
 		),
@@ -228,7 +234,7 @@ $tables[] = array(
 		),
 		array(
 			'type' => 'index',
-			'columns' => array('award_type','award_trigger')
+			'columns' => array('award_type', 'award_trigger')
 		),
 		array(
 			'type' => 'index',
@@ -310,6 +316,47 @@ $tables[] = array(
 	'parameters' => array(),
 );
 
+$tables[] = array(
+	'table_name' => 'awards_cache',
+	'columns' => array(
+		array(
+			'name' => 'id_member',
+			'type' => 'mediumint',
+			'size' => 8,
+			'null' => false,
+			'default' => 0
+		),
+		array(
+			'name' => 'area_key',
+			'type' => 'varchar',
+			'size' => 255,
+			'null' => false
+		),
+		array(
+			'name' => 'time',
+			'type' => 'int',
+			'size' => 10,
+			'null' => false,
+			'default' => 0
+		),
+		array(
+			'name' => 'value',
+			'type' => 'varchar',
+			'size' => 255,
+			'null' => false
+		),
+	),
+	'indexes' => array(
+		array(
+			'type' => 'primary',
+			'columns' => array('area_key')
+		),
+	),
+	'if_exists' => 'ignore',
+	'error' => 'fatal',
+	'parameters' => array(),
+);
+
 // Settings to create new columns in existing tables
 $columns = array();
 
@@ -325,13 +372,19 @@ foreach ($tables as $table)
 	if (in_array($real_prefix . $table['table_name'], array_map('strtolower', $current_tables)))
 	{
 		foreach ($table['columns'] as $column)
+		{
 			$dbtbl->db_add_column($db_prefix . $table['table_name'], $column);
+		}
 
 		foreach ($table['indexes'] as $index)
+		{
 			$dbtbl->db_add_index($db_prefix . $table['table_name'], $index, array(), 'ignore');
+		}
 	}
 	else
+	{
 		$dbtbl->db_create_table($db_prefix . $table['table_name'], $table['columns'], $table['indexes'], $table['parameters'], $table['if_exists'], $table['error']);
+	}
 }
 
 // And for good measure, lets add a default category and profile
@@ -373,15 +426,21 @@ $rows[] = array(
 
 // Add rows to any existing tables
 foreach ($rows as $row)
+{
 	$db->insert($row['method'], $row['table_name'], $row['columns'], $row['data'], $row['keys']);
+}
 
 // Update/add mod settings if applicable
 foreach ($mod_settings as $new_setting => $new_value)
 {
 	if (!isset($modSettings[$new_setting]))
+	{
 		updateSettings(array($new_setting => $new_value));
+	}
 }
 
 // Done
-if(ELK === 'SSI')
+if (ELK === 'SSI')
+{
 	echo 'Database changes are complete!';
+}
