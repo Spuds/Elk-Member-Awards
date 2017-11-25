@@ -54,7 +54,7 @@ function template_awards()
 								<th scope="col" class="grid17">', $txt['awards_name'], '</th>
 								<th scope="col" class="grid17">', $txt['awards_date'], '</th>
 								<th scope="col">', $txt['awards_details'], '</th>
-								<th scope="col" class"centertext" class="grid8">', $txt['awards_favorite2'], '</th>
+								<th scope="col" class="centertext grid8">', $txt['awards_favorite2'], '</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -63,7 +63,7 @@ function template_awards()
 			foreach ($category['awards'] as $award)
 			{
 				echo '
-							<tr class="windowbg">
+							<tr>
 								<td class="centertext">
 									<a href="', $award['more'], '">
 										<img src="', $award['img'], '" alt="', $award['award_name'], '" />
@@ -171,7 +171,7 @@ function template_awards_list()
 			foreach ($category['awards'] as $award)
 			{
 				echo '
-						<tr class="windowbg">
+						<tr>
 							<td align="center">
 								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
 							</td>

@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * User info block, shows avatar, group, icons, posts, karma, etc
@@ -106,7 +108,9 @@ class Topic_Count_Award extends Abstract_Award
 		global $user_profile, $modSettings;
 
 		if (empty($this->remaining_ids))
+		{
 			return;
+		}
 
 		// Profile value shortcuts
 		$boards = $this->profiles[$key]['parameters']['boards'];
@@ -134,7 +138,9 @@ class Topic_Count_Award extends Abstract_Award
 		);
 		// Load them in to user_profile
 		while ($row = $this->_db->fetch_assoc($request))
+		{
 			$user_profile[$row['id_member_started']][self::FUNC . '_' . $key] = $row['num_topics'];
+		}
 		$this->_db->free_result($request);
 	}
 

@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Abstract Award
@@ -33,54 +35,63 @@ abstract class Abstract_Award
 
 	/**
 	 * ID's that were not found in the award cache
+	 *
 	 * @var array
 	 */
 	public $remaining_ids = array();
 
 	/**
 	 * TTL in seconds for a cache entry
+	 *
 	 * @var int
 	 */
 	public $ttl = 300;
 
 	/**
 	 * Holds all award profiles in the system
+	 *
 	 * @var array
 	 */
 	public $profiles = array();
 
 	/**
 	 * Holds all awards of the specific type
+	 *
 	 * @var array
 	 */
 	public $awards = array();
 
 	/**
 	 * members that have been determined to have achieved this award
+	 *
 	 * @var array
 	 */
 	public $members = array();
 
 	/**
 	 * Holds the sorted awards by trigger and profile
+	 *
 	 * @var array
 	 */
 	public $profile_group = array();
 
 	/**
 	 * Holds the sorted awardid's by trigger and profile
+	 *
 	 * @var array
 	 */
 	public $profile_award_ids = array();
 
 	/**
 	 * Database object
+	 *
 	 * @var object
 	 */
 	protected $_db = null;
 
 	/**
 	 * Award parameters
+	 *
 	 * @var array
 	 */
 	protected $award_parameters = array();
@@ -122,7 +133,9 @@ abstract class Abstract_Award
 		global $user_profile;
 
 		if (empty($this->members))
+		{
 			return;
+		}
 
 		// init
 		$values = array();
@@ -149,6 +162,7 @@ abstract class Abstract_Award
 		foreach ($this->members as $member => $dummy)
 		{
 			if (!empty($remove[$member]))
+			{
 				$this->_db->query('', '
 					DELETE FROM {db_prefix}awards_members
 					WHERE id_award IN ({array_int:award_list})
@@ -158,6 +172,7 @@ abstract class Abstract_Award
 						'award_list' => $remove[$member],
 					)
 				);
+			}
 		}
 
 		// Now the adds, Insert the award data
@@ -172,7 +187,7 @@ abstract class Abstract_Award
 	/**
 	 * Checks if the award is a 1ton (top X) award
 	 *
-	 * @return string[]
+	 * @return string[]|boolean
 	 */
 	public function one_to_n()
 	{
@@ -182,7 +197,7 @@ abstract class Abstract_Award
 	/**
 	 * Checks if the award is an automatically assigned award
 	 *
-	 * @return string[]
+	 * @return string[]|boolean
 	 */
 	public function manually_assigned()
 	{
@@ -193,7 +208,7 @@ abstract class Abstract_Award
 	 * Returns the type of award, by default they are assumed automatically determined
 	 * set to GROUP or MANUAL in the award class files to override
 	 *
-	 * @return string[]
+	 * @return int
 	 */
 	public function award_type()
 	{
@@ -214,11 +229,15 @@ abstract class Abstract_Award
 			foreach ($type_parameters as $name => $type)
 			{
 				if (isset($_POST['parameters'][$name]))
+				{
 					$this->_prepare_parameters($type, $name);
+				}
 			}
 		}
 		else
+		{
 			$_POST['parameters']['trigger'] = 0;
+		}
 
 		return $_POST['parameters'];
 	}
@@ -241,14 +260,22 @@ abstract class Abstract_Award
 	 */
 	private function _prepare_parameters($type, $name)
 	{
-		if ($type == 'boards' || $type == 'board_select')
+		if ($type === 'boards' || $type === 'board_select')
+		{
 			$_POST['parameters'][$name] = is_array($_POST['parameters'][$name]) ? implode('|', $_POST['parameters'][$name]) : $_POST['parameters'][$name];
-		elseif ($type == 'int' || $type == 'select')
+		}
+		elseif ($type === 'int' || $type === 'select')
+		{
 			$_POST['parameters'][$name] = (int) $_POST['parameters'][$name];
-		elseif ($type == 'text' || $type == 'textarea' || is_array($type))
+		}
+		elseif ($type === 'text' || $type === 'textarea' || is_array($type))
+		{
 			$_POST['parameters'][$name] = Util::htmlspecialchars($_POST['parameters'][$name], ENT_QUOTES);
-		elseif ($type == 'check')
+		}
+		elseif ($type === 'check')
+		{
 			$_POST['parameters'][$name] = !empty($_POST['parameters'][$name]) ? 1 : 0;
+		}
 	}
 
 	/**
@@ -323,7 +350,9 @@ abstract class Abstract_Award
 		global $user_profile;
 
 		if (empty($new_loaded_ids))
+		{
 			return;
+		}
 
 		$data = array();
 		$time = time();
@@ -332,7 +361,9 @@ abstract class Abstract_Award
 		foreach ($new_loaded_ids as $member)
 		{
 			if (isset($user_profile[$member][$key]))
+			{
 				$data[] = array($member, $key, $time, $user_profile[$member][$key]);
+			}
 		}
 
 		// And add it
@@ -356,7 +387,9 @@ abstract class Abstract_Award
 		{
 			// Expand out the award params
 			if (!is_array($this->awards[$key]['award_param']))
+			{
 				$this->awards[$key]['award_param'] = unserialize($award['award_param']);
+			}
 
 			// The triggers arrive in high to low order, but we need to "sort/group" by profiles as well
 			$this->profile_group[$this->awards[$key]['id_profile']][] = $this->awards[$key];
@@ -383,14 +416,18 @@ abstract class Abstract_Award
 				if (!$this->one_to_n() && isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] >= $award['award_trigger']))
 				{
 					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+					{
 						$this->members[$member_id] = (int) $award['id_award'];
+					}
 					break;
 				}
 				// 1 to N award then, the trigger is the number to give out
 				elseif (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] <= $award['award_trigger']))
 				{
 					if (isset($user_profile[$member_id]['awardlist']) && !in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+					{
 						$this->members[$member_id] = (int) $award['id_award'];
+					}
 					break;
 				}
 			}

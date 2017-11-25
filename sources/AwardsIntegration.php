@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Profile Menu Hook, integrate_profile_areas, called from Profile.controller.php
@@ -30,7 +32,9 @@ function ipa_member_awards(&$profile_areas)
 
 	// No need to show these profile option to guests, perhaps a view_awards permissions should be added?
 	if ($user_info['is_guest'])
+	{
 		return;
+	}
 
 	loadLanguage('AwardsManage');
 
@@ -137,9 +141,13 @@ function iaa_member_awards(&$admin_areas)
 
 	// Keep add or modify as the action indicates
 	if (isset($_REQUEST['a_id']))
+	{
 		unset($admin_areas['members']['areas']['awards']['subsections']['add']);
+	}
 	else
+	{
 		unset($admin_areas['members']['areas']['awards']['subsections']['modify']);
+	}
 }
 
 /**
@@ -178,13 +186,15 @@ function imb_member_awards(&$buttons)
 
 	// Bit of a cheat but known to happen
 	if (empty($txt['awards']))
+	{
 		$txt['awards'] = 'Awards';
+	}
 
 	// allows members with manage_awards permission to see a menu item since the admin menu is hidden for them
 	$buttons['mlist']['sub_buttons']['awards'] = array(
 		'title' => $txt['awards'],
 		'href' => $scripturl . '?action=admin;area=awards;sa=main',
-		'show' => (allowedTo('manage_awards') || allowedto('assign_awards')),
+		'show' => (allowedTo('manage_awards') || allowedTo('assign_awards')),
 	);
 }
 
@@ -232,7 +242,9 @@ function imc_member_awards($user)
 
 	// @todo reference needed here?, like &$user_profile[$user]['awards']
 	if ($context['loadMemberContext_set'] !== 'minimal')
+	{
 		$memberContext[$user]['awards'] = $user_profile[$user]['awards'];
+	}
 }
 
 /**
@@ -318,10 +330,12 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Title for the above awards "box"
 			if (isset($modSettings['awards_aboveavatar_title']))
+			{
 				$award_output .= '
 						<legend>
 							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_aboveavatar_title'] . '</a>
 						</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[2]) . '
 					</fieldset>
@@ -350,10 +364,12 @@ function injectProfileAwards(&$poster_div, $message)
 					<fieldset class="' . $style . '">';
 
 			if (isset($modSettings['awards_belowavatar_title']))
+			{
 				$award_output .= '
 						<legend>
 							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_belowavatar_title'] . '</a>
 						</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[1]) . '
 					</fieldset>
@@ -381,10 +397,12 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Title for the signature area?
 			if (isset($modSettings['awards_signature_title']))
+			{
 				$award_output .= '
 							<legend>
 								<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_signature_title'] . '</a>
 							</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[3]) . '
 						</fieldset>
@@ -414,7 +432,9 @@ function awards_str_replace_once($needle, $replace, $haystack)
 	// Looks for the first occurrence of $needle in $haystack and replaces it with $replace
 	$pos = strpos($haystack, $needle);
 	if ($pos === false)
+	{
 		return $haystack;
+	}
 
 	return substr_replace($haystack, $replace, $pos, strlen($needle));
 }

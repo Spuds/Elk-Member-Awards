@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Top Poster Award
@@ -101,6 +103,7 @@ class Top_Poster_Award extends Abstract_Award
 
 			// This is the best case, simple member table lookup
 			if ($boards === 'all')
+			{
 				$request = $this->_db->query('', '
 				SELECT
 					id_member, posts
@@ -113,8 +116,10 @@ class Top_Poster_Award extends Abstract_Award
 						'limit' => $this->awards[$key]['award_trigger'],
 					)
 				);
+			}
 			// Otherwise its to the message table, and its not the nicest query
 			else
+			{
 				$request = $this->_db->query('', '
 				SELECT
 					COUNT(*) AS posts, id_member
@@ -128,6 +133,7 @@ class Top_Poster_Award extends Abstract_Award
 						'board_list' => $boards
 					)
 				);
+			}
 
 			// Run the query to get the top posters
 			$poster_number = 1;
@@ -142,6 +148,7 @@ class Top_Poster_Award extends Abstract_Award
 
 	/**
 	 * Override default method to indicate this a 1 to N award
+	 *
 	 * @return bool
 	 */
 	public function one_to_n()
@@ -161,7 +168,9 @@ class Top_Poster_Award extends Abstract_Award
 		{
 			// Expand out the award params
 			if (!is_array($this->awards[$key]['award_param']))
+			{
 				$this->awards[$key]['award_param'] = unserialize($award['award_param']);
+			}
 
 			// The triggers arrive in high to low order, but we need to "sort/group" by profiles as well
 			$this->profile_group[$this->awards[$key]['id_profile']][] = $this->awards[$key];

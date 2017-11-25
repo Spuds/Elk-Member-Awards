@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * This is the awards profile controller class.
@@ -31,7 +33,9 @@ class Awards_Profile_Controller extends Action_Controller
 
 		// If Member Awards is disabled, we don't go any further
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
+		{
 			fatal_lang_error('feature_disabled', true);
+		}
 
 		// Some things we will need
 		loadLanguage('AwardsManage');
@@ -216,7 +220,9 @@ class Awards_Profile_Controller extends Action_Controller
 		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards']
 			: array();
 		foreach ($awards as $award)
+		{
 			$awardcheck[$award['id']] = 1;
+		}
 
 		// Select the awards and their categories.
 		$context['categories'] = AwardsListAll($start, $maxAwards, $awardcheck);
@@ -241,13 +247,17 @@ class Awards_Profile_Controller extends Action_Controller
 
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
+			{
 				fatal_lang_error('awards_error_not_requestable', false);
+			}
 
 			// Dude allready has this one?
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 			{
 				if ($award['id'] == $id)
+				{
 					fatal_lang_error('awards_error_have_already', false);
+				}
 			}
 
 			// Set the context values
@@ -273,12 +283,18 @@ class Awards_Profile_Controller extends Action_Controller
 
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
+			{
 				fatal_lang_error('awards_error_not_requestable', false);
+			}
 
 			// cant ask for what you have
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
+			{
 				if ($award['id'] == $id)
+				{
 					fatal_lang_error('awards_error_have_already', false);
+				}
+			}
 
 			// If we made it this far insert /replace it so it can be reviewed.
 			AwardsMakeRequest($id, $date, $comments, true);

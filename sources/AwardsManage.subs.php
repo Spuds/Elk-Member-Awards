@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Loads all the awards for the members in the list
@@ -81,14 +83,18 @@ function AwardsLoad($new_loaded_ids)
 
 			// Keep an array of just active awards for this member to make life easier
 			if (!empty($row['active']))
+			{
 				$user_profile[$row['id_member']]['awardlist'][] = $row['id_award'];
+			}
 		}
 	}
 	$db->free_result($request);
 
 	// Are any group awards?
 	if (!empty($group_awards))
+	{
 		AwardsLoadGroupAwards($new_loaded_ids, $group_awards, $group_awards_details);
+	}
 
 	return;
 }
@@ -113,7 +119,9 @@ function AwardsLoadGroupAwards($new_loaded_ids, $group_awards, $group_awards_det
 		// Make an array of this users groups
 		$user_profile[$member_id]['groups'] = array($user_profile[$member_id]['id_group'], $user_profile[$member_id]['id_post_group']);
 		if (!empty($user_profile[$member_id]['additional_groups']))
+		{
 			$user_profile[$member_id]['groups'] = array_merge($user_profile[$member_id]['groups'], explode(',', $user_profile[$member_id]['additional_groups']));
+		}
 
 		// See if any of this members groups match a group award
 		$give_group_awards = array_intersect($user_profile[$member_id]['groups'], $group_awards);
@@ -123,7 +131,9 @@ function AwardsLoadGroupAwards($new_loaded_ids, $group_awards, $group_awards_det
 			foreach ($give_group_awards as $groupaward_id)
 			{
 				if (!isset($user_profile[$member_id]['awards'][$group_awards_details[$groupaward_id]['id']]))
+				{
 					$user_profile[$member_id]['awards'][$groupaward_id] = $group_awards_details[$groupaward_id];
+				}
 			}
 		}
 	}
@@ -150,7 +160,7 @@ function AwardsAutoCheck($new_loaded_ids)
 	$autoawardsprofiles = cache_get_data('awards:autoawardsprofiles', 4 * 3600);
 
 	// Like will need these
-	require_once(BOARDDIR . '/awards/AbstractAward.class.php');
+	require_once(SUBSDIR . '/awards/AbstractAward.class.php');
 	require_once(SUBSDIR . '/Awards.subs.php');
 
 	if ($autoawards === null || $autoawardsid === null || $autoawardsprofiles === null)
@@ -287,7 +297,9 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 
 	// 1-n awards need to be ascending order, others use the default descending order
 	if ($one_to_n)
+	{
 		$awardids = array_reverse($awardids);
+	}
 
 	// For all the members in this request
 	foreach ($new_loaded_ids as $member_id)
@@ -302,7 +314,9 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 				{
 					// Give this member a cupcake, if they don't already have it, and stop looking for more
 					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+					{
 						$members[$member_id] = (int) $award['id_award'];
+					}
 					break;
 				}
 			}
@@ -313,7 +327,9 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 				{
 					// Give this member a hoho, if they don't already have it, and stop looking for more
 					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
+					{
 						$members[$member_id] = (int) $award['id_award'];
+					}
 					break;
 				}
 			}
@@ -352,7 +368,9 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 			{
 				// See if this member entry, found in the cache is still valid
 				if ($awards_topic_started[$member]['update'] >= (time() - $ttl))
+				{
 					$user_profile[$member]['num_topics'] = $awards_topic_started[$member]['num_topics'];
+				}
 				else
 				{
 					// Its a stale entry in the cache, add it to our lookup and drop if from the cache array
@@ -361,7 +379,9 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 				}
 			}
 			else
+			{
 				$temp[] = $member;
+			}
 		}
 	}
 
@@ -439,11 +459,15 @@ function AwardsTopPosters_1_N($limit = 10)
 	}
 
 	if (empty($members))
+	{
 		$members = array(0 => 0);
+	}
 
 	// Load them up so we can see if the kids have won a new toy
 	foreach ($members as $id_member => $poster_number)
+	{
 		$user_profile[$id_member]['top_posters'] = $poster_number;
+	}
 }
 
 /**
@@ -476,7 +500,9 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 		);
 		$members = array();
 		while ($row = $db->fetch_assoc($request))
+		{
 			$members[$row['id_member_started']] = $row['hits'];
+		}
 		$db->free_result($request);
 
 		// save this one for the next few mins ....
@@ -485,7 +511,9 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 
 	// Need to have something ....
 	if (empty($members))
+	{
 		$members = array(0 => 0);
+	}
 
 	// And now get the top 1-N topic starter.
 	$request = $db->query('top_topic_starters', '
@@ -544,7 +572,9 @@ function AwardsTopTimeon_1_N($limit = 10)
 	{
 		$temp2[] = (int) $row_members['id_member'];
 		if ($time_number++ >= $limit)
+		{
 			continue;
+		}
 
 		$user_profile[$row_members['id_member']]['top_time'] = $time_number;
 	}
@@ -552,7 +582,9 @@ function AwardsTopTimeon_1_N($limit = 10)
 
 	// Cache the ones we found for a bit, just so we don't have to look again.
 	if ($temp !== $temp2)
+	{
 		cache_put_data('awards_total_time_members', $temp2, 600);
+	}
 }
 
 /**
@@ -568,7 +600,9 @@ function AwardsSeniority($memberlist)
 	$now = time();
 
 	foreach ($memberlist as $member)
+	{
 		$user_profile[$member]['join_length'] = AwardsDateDiff($user_profile[$member]['date_registered'], $now);
+	}
 }
 
 /**

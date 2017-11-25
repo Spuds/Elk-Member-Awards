@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Post Count based awards
@@ -109,7 +111,9 @@ class Post_Count_Liked_Award extends Abstract_Award
 		global $user_profile;
 
 		if (empty($this->remaining_ids))
+		{
 			return;
+		}
 
 		// Profile value shortcuts
 		$boards = $this->profiles[$key]['parameters']['boards'];
@@ -140,9 +144,13 @@ class Post_Count_Liked_Award extends Abstract_Award
 		while ($row = $this->_db->fetch_assoc($request))
 		{
 			if (isset($members[$row['id_member']]))
+			{
 				$members[$row['id_member']]++;
+			}
 			else
+			{
 				$members[$row['id_member']] = 1;
+			}
 		}
 		$this->_db->free_result($request);
 
@@ -150,9 +158,13 @@ class Post_Count_Liked_Award extends Abstract_Award
 		foreach ($this->remaining_ids as $id)
 		{
 			if (isset($members[$id]))
+			{
 				$user_profile[$id][self::FUNC . '_' . $key] = $members[$id];
+			}
 			else
+			{
 				$user_profile[$id][self::FUNC . '_' . $key] = 0;
+			}
 		}
 	}
 

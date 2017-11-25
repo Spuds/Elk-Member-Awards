@@ -14,12 +14,15 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Loads an award by ID and places the values in to context
  *
  * @param int $id
+ * @throws \Elk_Exception
  */
 function AwardsLoadAward($id = -1)
 {
@@ -44,7 +47,9 @@ function AwardsLoadAward($id = -1)
 
 	// Check if that award actually exists
 	if (count($row['id_award']) !== 1)
+	{
 		fatal_lang_error('awards_error_no_award');
+	}
 
 	$award = array(
 		'id' => $row['id_award'],
@@ -191,7 +196,9 @@ function AwardsCountMembersAwards($memID)
 	$awards = array();
 	// load/count them this way as they may have been assigned an award individually or via group
 	while ($row = $db->fetch_assoc($request))
+	{
 		$awards[$row['id_award']] = $row['id_award'];
+	}
 	$db->free_result($request);
 
 	return !empty($awards) ? count($awards) : 0;
@@ -237,11 +244,13 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 	while ($row = $db->fetch_assoc($request))
 	{
 		if (!isset($categories[$row['id_category']]['name']))
+		{
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
 				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
 				'awards' => array(),
 			);
+		}
 
 		$categories[$row['id_category']]['awards'][$row['id_award']] = array(
 			'id' => $row['id_award'],
@@ -535,7 +544,9 @@ function AwardsLoadGroups()
 	{
 		// If this group is hidden then it can only exist if the user can moderate it!
 		if ($row['hidden'] && !$row['can_moderate'] && !allowedTo('manage_membergroups'))
+		{
 			continue;
+		}
 
 		$groups[$row['id_group']] = array(
 			'id' => $row['id_group'],
@@ -549,9 +560,13 @@ function AwardsLoadGroups()
 
 		// Keep track of the groups we can see as normal or post count
 		if (!empty($row['is_post_group']))
+		{
 			$group_ids_pc[] = $row['id_group'];
+		}
 		else
+		{
 			$group_ids[] = $row['id_group'];
+		}
 	}
 	$db->free_result($request);
 
@@ -561,7 +576,9 @@ function AwardsLoadGroups()
 	foreach ($group_count as $id_group => $number)
 	{
 		if (isset($groups[$id_group]))
+		{
 			$groups[$id_group] ['member_count'] = $number;
+		}
 	}
 
 	return $groups;
@@ -594,7 +611,9 @@ function AwardsLoadGroupMembers()
 			array()
 		);
 		while ($row = $db->fetch_assoc($request))
+		{
 			$members[$row['id_member']] = $row['real_name'];
+		}
 		$db->free_result($request);
 		unset($_POST['who'][3]);
 	}
@@ -613,7 +632,9 @@ function AwardsLoadGroupMembers()
 			)
 		);
 		while ($row = $db->fetch_assoc($request))
+		{
 			$members[$row['id_member']] = $row['real_name'];
+		}
 		$db->free_result($request);
 		unset($_POST['who'][0]);
 	}
@@ -634,7 +655,9 @@ function AwardsLoadGroupMembers()
 			)
 		);
 		while ($row = $db->fetch_assoc($request))
+		{
 			$members[$row['id_member']] = $row['real_name'];
+		}
 		$db->free_result($request);
 	}
 
@@ -803,6 +826,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 	{
 		// Now for the database.
 		foreach ($awards as $id_award => $member)
+		{
 			$db->query('', '
 				UPDATE {db_prefix}awards_members
 				SET active = {int:active}
@@ -814,12 +838,14 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 					'members' => $awards[$id_award],
 				)
 			);
+		}
 	}
 	// Or Deny
 	else
 	{
 		// Now for the database.
 		foreach ($awards as $id_award => $member)
+		{
 			$db->query('', '
 				DELETE FROM {db_prefix}awards_members
 				WHERE id_award = {int:id_award}
@@ -829,6 +855,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 					'members' => $awards[$id_award],
 				)
 			);
+		}
 	}
 
 	return;
@@ -861,7 +888,9 @@ function AwardsLoadCategories($sort = 'DESC', $multi = false)
 	{
 		// return the data as key names or arrays
 		if (!$multi)
+		{
 			$categories[$row['category_name']] = $row['id_category'];
+		}
 		else
 		{
 			$categories[] = array(
@@ -898,7 +927,9 @@ function AwardsLoadCategory($id)
 
 	// Check if that category exists
 	if (count($row['id_category']) != 1)
+	{
 		fatal_lang_error('awards_error_no_category');
+	}
 
 	$category = array(
 		'id' => $row['id_category'],
@@ -927,6 +958,7 @@ function AwardsLoadAllCategories()
 	);
 	$categories = array();
 	while ($row = $db->fetch_assoc($request))
+	{
 		$categories[$row['id_category']] = array(
 			'id' => $row['id_category'],
 			'name' => $row['category_name'],
@@ -934,6 +966,7 @@ function AwardsLoadAllCategories()
 			'edit' => $scripturl . '?action=admin;area=awards;sa=editcategory;a_id=' . $row['id_category'] . ';' . $context['session_var'] . '=' . $context['session_id'],
 			'delete' => $scripturl . '?action=admin;area=awards;sa=deletecategory;a_id=' . $row['id_category'] . ';' . $context['session_var'] . '=' . $context['session_id'],
 		);
+	}
 
 	$db->free_result($request);
 
@@ -960,7 +993,9 @@ function AwardsInCategories($id = null)
 		);
 		$categories = array();
 		while ($row = $db->fetch_assoc($request))
+		{
 			$categories[$row['id_category']]['awards'] = $row['num_awards'];
+		}
 	}
 	else
 	{
@@ -1039,11 +1074,13 @@ function AwardsListAll($start, $end, $awardcheck = array())
 	while ($row = $db->fetch_assoc($request))
 	{
 		if (!isset($categories[$row['id_category']]['name']))
+		{
 			$categories[$row['id_category']] = array(
 				'name' => $row['category_name'],
 				'view' => $scripturl . '?action=admin;area=awards;sa=viewcategory;in=' . $row['id_category'],
 				'awards' => array(),
 			);
+		}
 
 		$categories[$row['id_category']]['awards'][] = array(
 			'id' => $row['id_award'],
@@ -1154,6 +1191,7 @@ function AwardsRemoveMembers($id, $members = array())
 
 	// If specific members have not been sent, remove it from everyone
 	if (empty($members))
+	{
 		$db->query('', '
 			DELETE FROM {db_prefix}awards_members
 			WHERE id_award = {int:award}',
@@ -1161,8 +1199,10 @@ function AwardsRemoveMembers($id, $members = array())
 				'award' => $id
 			)
 		);
+	}
 	// Or if members were sent, just remove it from this log
 	else
+	{
 		$db->query('', '
 			DELETE FROM {db_prefix}awards_members
 			WHERE id_award = {int:id}
@@ -1171,6 +1211,7 @@ function AwardsRemoveMembers($id, $members = array())
 				'id' => $id,
 			)
 		);
+	}
 }
 
 /**
@@ -1185,20 +1226,24 @@ function AwardsAddMembers($values, $group = false)
 
 	// Insert the data for a set of members
 	if (!$group)
+	{
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
 			array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'active' => 'int'),
 			$values,
 			array('id_member', 'id_award')
 		);
+	}
 	// Insert the data for a group award
 	else
+	{
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
 			array('id_award' => 'int', 'id_member' => 'int', 'id_group' => 'int', 'date_received' => 'string', 'active' => 'int'),
 			$values,
 			array('id_member', 'id_award')
 		);
+	}
 }
 
 /**
@@ -1271,7 +1316,9 @@ function AwardsUpload($id_award)
 
 	// Lets try to CHMOD the awards dir if needed.
 	if (!is_writable(BOARDDIR . '/' . $modSettings['awards_dir']))
+	{
 		@chmod(BOARDDIR . '/' . $modSettings['awards_dir'], 0755);
+	}
 
 	// Did they upload a new award image
 	if ($_FILES['awardFile']['error'] != 4)
@@ -1311,7 +1358,9 @@ function AwardsUpload($id_award)
 	}
 	// No mini just just the regular for it instead
 	elseif (($_FILES['awardFileMini']['error'] == 4) && ($_FILES['awardFile']['error'] != 4))
+	{
 		copy($newName, $miniName);
+	}
 
 	// Update the database with this new image(s) so its available.
 	AwardsAddImage($id_award, $newName, $miniName);
@@ -1331,24 +1380,34 @@ function AwardsValidateImage($name, $id)
 
 	// Check if file was uploaded.
 	if ($award['error'] === 1 || $award['error'] === 2)
+	{
 		fatal_lang_error('awards_error_upload_size');
+	}
 	elseif ($award['error'] !== 0)
+	{
 		fatal_lang_error('awards_error_upload_failed');
+	}
 
 	// Check the extensions
 	$goodExtensions = array('jpg', 'jpeg', 'gif', 'png');
 	if (!in_array(strtolower(substr(strrchr($award['name'], '.'), 1)), $goodExtensions))
+	{
 		fatal_lang_error('awards_error_wrong_extension');
+	}
 
 	// Generally a valid image file?
 	$sizes = @getimagesize($award['tmp_name']);
 	if ($sizes === false)
+	{
 		fatal_lang_error('awards_error_upload_failed');
+	}
 
 	// Now check if it has a potential virus etc.
 	require_once(SUBSDIR . '/Graphics.subs.php');
 	if (!checkImageContents($award['tmp_name'], !empty($modSettings['avatar_paranoid'])))
+	{
 		fatal_lang_error('awards_error_upload_security_failed');
+	}
 }
 
 /**
@@ -1366,6 +1425,7 @@ function AwardsSetFavorite($memID, $award_id, $makefav)
 
 	// Only one allowed, we clear first
 	if (empty($modSettings['awards_favorites']))
+	{
 		$db->query('', '
 			UPDATE {db_prefix}awards_members
 			SET favorite = 0
@@ -1374,6 +1434,7 @@ function AwardsSetFavorite($memID, $award_id, $makefav)
 				'mem' => $memID,
 			)
 		);
+	}
 
 	// Now make this one a fav.
 	$db->query('', '
@@ -1413,12 +1474,12 @@ function AwardsLoadType($function = null)
 	{
 		// Replace dots with nothing to avoid security issues
 		$function = strtr($function, array('.' => ''));
-		$pattern = BOARDDIR . '/awards/' . $function . '.award.php';
+		$pattern = SUBSDIR . '/awards/' . $function . '.award.php';
 	}
 	else
 	{
 		// And a pattern to search for installed award classes
-		$pattern = BOARDDIR . '/awards/*.award.php';
+		$pattern = SUBSDIR . '/awards/*.award.php';
 	}
 
 	// Iterate through the award directory
@@ -1513,11 +1574,17 @@ function AwardsLoadProfiles($sort = 'DESC')
 
 		// make sure we set the parameters once
 		if (empty($profiles[$row['id_profile']]['parameters']['boards']))
+		{
 			$profiles[$row['id_profile']]['parameters']['boards'] = 'all';
+		}
 		if (empty($profiles[$row['id_profile']]['parameters']['like_threshold']))
+		{
 			$profiles[$row['id_profile']]['parameters']['like_threshold'] = 0;
+		}
 		if (empty($profiles[$row['id_profile']]['parameters']['min_topic_replies']))
+		{
 			$profiles[$row['id_profile']]['parameters']['min_topic_replies'] = 0;
+		}
 	}
 	$db->free_result($request);
 
@@ -1548,7 +1615,9 @@ function AwardsLoadProfile($id)
 
 	// Check if that profile exists
 	if (count($row['id_profile']) !== 1)
+	{
 		fatal_lang_error('awards_error_no_profile');
+	}
 
 	$profile = array(
 		'id' => $row['id_profile'],
@@ -1580,7 +1649,9 @@ function AwardsInProfiles($id = null)
 		);
 		$profiles = array();
 		while ($row = $db->fetch_assoc($request))
+		{
 			$profiles[$row['id_profile']]['awards'] = $row['num_awards'];
+		}
 	}
 	else
 	{
@@ -1696,13 +1767,20 @@ function AwardsCacheMaintenance($awid = null, $prid = null)
 
 	$where = '';
 	if (isset($awid, $prid))
+	{
 		$where = 'area_key LIKE {string:area_key} OR area_key LIKE {string:profile_key}';
+	}
 	elseif (isset($awid))
+	{
 		$where = 'area_key LIKE {string:area_key}';
+	}
 	elseif (isset($prid))
+	{
 		$where = 'area_key LIKE {string:profile_key}';
-
+	}
+	/*
 	if (!empty($where))
+	{
 		$db->query('', '
 			DELETE FROM {db_prefix}awards_cache
 			WHERE ' . $where,
@@ -1711,6 +1789,7 @@ function AwardsCacheMaintenance($awid = null, $prid = null)
 				'area_key' => $awid . '_%'
 			)
 		);
+	}*/
 }
 
 /**
@@ -1727,18 +1806,22 @@ function instantiate_award($name, $awardids = null, $autoawardsprofiles = null)
 	static $instances = array(), $db = null;
 
 	if ($db === null)
+	{
 		$db = database();
+	}
 
 	// First time for this one
 	if (!isset($instances[$name]))
 	{
 		// Find the class file for this award
-		require_once(BOARDDIR . '/awards/' . str_replace('_', '', $name) . '.award.php');
+		require_once(SUBSDIR . '/awards/' . str_replace('_', '', $name) . '.award.php');
 		$class = $name . '_Award';
 
 		// Let er rip tatter chip
 		if (class_exists($class))
+		{
 			$instances[$name] = new $class($db, $awardids, $autoawardsprofiles);
+		}
 	}
 
 	$instance = isset($instances[$name]) ? $instances[$name] : null;

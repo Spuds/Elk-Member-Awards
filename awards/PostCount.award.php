@@ -14,7 +14,9 @@
  */
 
 if (!defined('ELK'))
+{
 	die('No access...');
+}
 
 /**
  * Post Count based awards
@@ -48,8 +50,6 @@ class Post_Count_Award extends Abstract_Award
 	 * Main processing function for checking award worthiness
 	 *
 	 * @param int[] $new_loaded_ids
-	 *
-	 * @return array
 	 */
 	public function process($new_loaded_ids)
 	{
@@ -104,7 +104,9 @@ class Post_Count_Award extends Abstract_Award
 		global $user_profile;
 
 		if (empty($this->remaining_ids))
+		{
 			return;
+		}
 
 		$boards = $this->profiles[$key]['parameters']['boards'];
 
@@ -112,7 +114,9 @@ class Post_Count_Award extends Abstract_Award
 		if ($boards == 'all')
 		{
 			foreach ($this->remaining_ids as $member_id)
+			{
 				$user_profile[$member_id][self::FUNC . '_' . $key] = $user_profile[$member_id]['posts'];
+			}
 		}
 		// Some boards means we have some work
 		else
@@ -130,7 +134,9 @@ class Post_Count_Award extends Abstract_Award
 				)
 			);
 			while ($row = $this->_db->fetch_assoc($request))
+			{
 				$user_profile[$row['id_member']][self::FUNC . '_' . $key] = $row['posts'];
+			}
 
 			$this->_db->free_result($request);
 		}
