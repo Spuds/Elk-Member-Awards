@@ -32,7 +32,7 @@ class Awards_Controller extends Action_Controller
 
 		// If Member Awards is disabled, we don't go any further unless you are the admin
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
-			fatal_lang_error('feature_disabled', true);
+			throw new Elk_Exception('feature_disabled', 'fatal');
 
 		// Its on, but are we allowed to manage or assign
 		isAllowedTo(array('manage_awards', 'assign_awards'));
@@ -314,10 +314,10 @@ class Awards_Controller extends Action_Controller
 
 			// Check if any of the key values where left empty, and if so tell them
 			if (empty($_POST['award_name']))
-				fatal_lang_error('awards_error_empty_badge_name', false);
+				throw new Elk_Exception('awards_error_empty_badge_name', 'general');
 
 			if (empty($_FILES['awardFile']['name']) && $_POST['a_id'] == 0)
-				fatal_lang_error('awards_error_no_file', false);
+				throw new Elk_Exception('awards_error_no_file', 'general');
 
 			// Clean and cast the values
 			$id = (int) $_POST['a_id'];
@@ -510,7 +510,7 @@ class Awards_Controller extends Action_Controller
 
 			// Quick check for mischievous users, you can't just enter any a_id ;)
 			if (!allowedTo('manage_awards') && isset($_REQUEST['a_id']) && empty($context['awards'][$_REQUEST['a_id']]['assignable']))
-				fatal_lang_error('awards_error_hack_error');
+				throw new Elk_Exception('awards_error_hack_error');
 
 			// Set the current step.
 			$context['step'] = 1;
@@ -539,7 +539,7 @@ class Awards_Controller extends Action_Controller
 			}
 
 			if (empty($members) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_members', false);
+				throw new Elk_Exception('awards_error_no_members', 'general');
 
 			// Set a valid date, award.
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
@@ -628,7 +628,7 @@ class Awards_Controller extends Action_Controller
 			}
 
 			if (empty($membergroups) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_groups', false);
+				throw new Elk_Exception('awards_error_no_groups', 'general');
 
 			// Set the award date
 			$date_received = (int) $_POST['year'] . '-' . (int) $_POST['month'] . '-' . (int) $_POST['day'];
@@ -729,7 +729,7 @@ class Awards_Controller extends Action_Controller
 
 			// No members no awards
 			if (empty($_POST['member']) || empty($_POST['award']))
-				fatal_lang_error('awards_error_no_members', false);
+				throw new Elk_Exception('awards_error_no_members', 'general');
 
 			// Make sure that they picked an award and group to assign it to...
 			foreach($_POST['member'] as $member)
@@ -771,7 +771,7 @@ class Awards_Controller extends Action_Controller
 		// An award must be selected.
 		$id = (int) $_REQUEST['a_id'];
 		if (empty($id) || $id <= 0)
-			fatal_lang_error('awards_error_no_award', false);
+			throw new Elk_Exception('awards_error_no_award', 'general');
 
 		// Load in our helper functions
 		require_once(SUBSDIR . '/Awards.subs.php');
@@ -961,7 +961,7 @@ class Awards_Controller extends Action_Controller
 
 			// Needs to be an int!
 			if (empty($id) || $id <= 0)
-				fatal_lang_error('awards_error_no_id_category', false);
+				throw new Elk_Exception('awards_error_no_id_category', 'general');
 
 			// Load single category for editing.
 			$context['category'] = AwardsLoadCategory($id);
@@ -991,7 +991,7 @@ class Awards_Controller extends Action_Controller
 
 			// Check if any of the values were left empty
 			if (empty($name))
-				fatal_lang_error('awards_error_empty_category_name', false);
+				throw new Elk_Exception('awards_error_empty_category_name', 'general');
 
 			// Add a new or Update and existing
 			if ($_POST['id_category'] == 0)
@@ -1055,7 +1055,7 @@ class Awards_Controller extends Action_Controller
 		$id = (int) $_REQUEST['a_id'];
 
 		if ($id == 1)
-			fatal_lang_error('awards_error_delete_main_category', false);
+			throw new Elk_Exception('awards_error_delete_main_category', 'general');
 
 		AwardsDeleteCategory($id);
 

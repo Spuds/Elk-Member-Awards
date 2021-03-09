@@ -31,7 +31,7 @@ class Awards_Controller extends Action_Controller
 
 		// If Member Awards is disabled, we don't go any further
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
-			fatal_lang_error('feature_disabled', true);
+			throw new Elk_Exception('feature_disabled', 'fatal');
 
 		// Some things we will need
 		loadLanguage('AwardsManage');
@@ -236,13 +236,13 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
-				fatal_lang_error('awards_error_not_requestable', false);
+				throw new Elk_Exception('awards_error_not_requestable', 'general');
 
 			// Dude allready has this one?
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 			{
 				if ($award['id'] == $id)
-					fatal_lang_error('awards_error_have_already', false);
+					throw new Elk_Exception('awards_error_have_already', 'general');
 			}
 
 			// Set the context values
@@ -268,12 +268,12 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
-				fatal_lang_error('awards_error_not_requestable', false);
+				throw new Elk_Exception('awards_error_not_requestable', 'general');
 
 			// cant ask for what you have
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 				if ($award['id'] == $id)
-					fatal_lang_error('awards_error_have_already', false);
+					throw new Elk_Exception('awards_error_have_already', 'general');
 
 			// If we made it this far insert /replace it so it can be reviewed.
 			AwardsMakeRequest($id, $date, $comments, true);
