@@ -1,4 +1,5 @@
 <?php
+global $scripturl;
 
 // Tabs
 $txt['awards_title'] = 'Awards';

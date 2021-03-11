@@ -42,8 +42,8 @@ function AwardsLoadAward($id = -1)
 	$row = $db->fetch_assoc($request);
 
 	// Check if that award actually exists
-	if (count($row['id_award']) != 1)
-		fatal_lang_error('awards_error_no_award');
+	if ($row['id_award'] != $id)
+		throw new Elk_Exception('awards_error_no_award');
 
 	$award = array(
 		'id' => $row['id_award'],
@@ -876,8 +876,8 @@ function AwardsLoadCategory($id)
 	$row = $db->fetch_assoc($request);
 
 	// Check if that category exists
-	if (count($row['id_category']) != 1)
-		fatal_lang_error('awards_error_no_category');
+	if ($row['id_category'] != 1)
+		throw new Elk_Exception('awards_error_no_category');
 
 	$category = array(
 		'id' => $row['id_category'],
@@ -1302,24 +1302,24 @@ function AwardsValidateImage($name, $id)
 
 	// Check if file was uploaded.
 	if ($award['error'] === 1 || $award['error'] === 2)
-		fatal_lang_error('awards_error_upload_size');
+		throw new Elk_Exception('awards_error_upload_size');
 	elseif ($award['error'] !== 0)
-		fatal_lang_error('awards_error_upload_failed');
+		throw new Elk_Exception('awards_error_upload_failed');
 
 	// Check the extensions
 	$goodExtensions = array('jpg', 'jpeg', 'gif', 'png');
 	if (!in_array(strtolower(substr(strrchr($award['name'], '.'), 1)), $goodExtensions))
-		fatal_lang_error('awards_error_wrong_extension');
+		throw new Elk_Exception('awards_error_wrong_extension');
 
 	// Generally a valid image file?
 	$sizes = @getimagesize($award['tmp_name']);
 	if ($sizes === false)
-		fatal_lang_error('awards_error_upload_failed');
+		throw new Elk_Exception('awards_error_upload_failed');
 
 	// Now check if it has a potential virus etc.
 	require_once(SUBSDIR . '/Graphics.subs.php');
 	if (!checkImageContents($award['tmp_name'], !empty($modSettings['avatar_paranoid'])))
-		fatal_lang_error('awards_error_upload_security_failed');
+		throw new Elk_Exception('awards_error_upload_security_failed');
 }
 
 /**
