@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Member Awards Addon
+ * @package   Member Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,14 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0.1
+ * @version 1.2
  *
  */
-
-if (!defined('ELK'))
-{
-	die('No access...');
-}
 
 /**
  * Profile Menu Hook, integrate_profile_areas, called from Profile.controller.php
@@ -96,7 +91,7 @@ function iui_member_awards()
 {
 	global $user_info, $user_settings;
 
-	$user_info['awards'] = isset($user_settings['awards']) ? $user_settings['awards'] : array();
+	$user_info['awards'] = $user_settings['awards'] ?? array();
 }
 
 /**
@@ -259,8 +254,6 @@ function imc_member_awards($user)
 function iwoa_member_awards(&$allowedActions)
 {
 	$allowedActions['awards'] = array('manage_awards');
-
-	return;
 }
 
 /**

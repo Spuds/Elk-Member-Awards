@@ -85,7 +85,7 @@ function template_awards()
 								</td>
 								<td class="centertext">',
 									$context['allowed_fav'] && $award['favorite']['allowed'] ? '<a href="' . $award['favorite']['href'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $award['favorite']['img'] . '</a>' : '',
-									$award['favorite']['fav'] == 1 ? '<img src="' . $settings['images_url'] . '/awards/star.png" alt="' . $txt['awards_favorite']. '" />' : '', '
+									$award['favorite']['fav'] == 1 ? '<img src="' . $settings['images_url'] . '/awardimg/star.png" alt="' . $txt['awards_favorite']. '" />' : '', '
 								</td>
 							</tr>';
 			}
@@ -154,7 +154,7 @@ function template_awards_list()
 		{
 			echo '
 					<h3 class="secondary_header">
-						<img class="icon" src="' . $settings['images_url'] . '/awards/category.png" alt="" />&nbsp;', '<a href="', $category['view'], '">', $txt['awards_category'], ': ', $category['name'], '</a>
+						<img class="icon" src="' . $settings['images_url'] . '/awardimg/category.png" alt="" />&nbsp;', '<a href="', $category['view'], '">', $txt['awards_category'], ': ', $category['name'], '</a>
 					</h3>
 					<table class="table_grid">
 					<thead>
@@ -182,13 +182,13 @@ function template_awards_list()
 							<td>', $award['description'], '</td>
 							<td class="centertext">
 								<a href="', $award['view_assigned'], '">
-									<img src="', $settings['images_url'], '/awards/user.png" title="', $txt['awards_button_members'], '" alt="" />
+									<img src="', $settings['images_url'], '/awardimg/user.png" title="', $txt['awards_button_members'], '" alt="" />
 								</a>';
 
 				if (!empty($award['requestable']))
 					echo '
 								<a href="', $award['requestable_link'], '">
-									<img src="', $settings['images_url'], '/awards/award_request.png" title="', $txt['awards_request_award'], '" alt="" />
+									<img src="', $settings['images_url'], '/awardimg/award_request.png" title="', $txt['awards_request_award'], '" alt="" />
 								</a>';
 
 				echo '

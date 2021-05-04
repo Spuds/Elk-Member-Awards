@@ -248,9 +248,7 @@ function template_show_award_options()
 										</a>';
 
 		// Use a specific or generic name for this field
-		$temp = isset($txt['awards_' . $context['award']['award_function'] . '_' . $name])
-			? $txt['awards_' . $context['award']['award_function'] . '_' . $name]
-			: $txt['awards_parameter_' . $name];
+		$temp = $txt['awards_' . $context['award']['award_function'] . '_' . $name] ?? $txt['awards_parameter_' . $name];
 
 		echo '
 										<label for="', $name, '">', $temp, ':</label>
@@ -409,7 +407,7 @@ function template_assign_group()
 									</dd>
 								</dl>
 								<h3 class="secondary_header">
-									<img class="icon" src="' . $settings['images_url'] . '/awards/group.png" alt="" />', $txt['awards_mem_group'], '
+									<img class="icon" src="' . $settings['images_url'] . '/awardimg/group.png" alt="" />', $txt['awards_mem_group'], '
 								</h3>
 								<div class="windowbg">
 									<dl class="settings">
@@ -528,7 +526,7 @@ function template_assign()
 								</dl>
 								<div class="title_bar">
 									<h3 class="secondary_header">
-										<img class="icon" src="' . $settings['images_url'] . '/awards/user.png" alt="" />', $txt['awards_select_member'], '
+										<img class="icon" src="' . $settings['images_url'] . '/awardimg/user.png" alt="" />', $txt['awards_select_member'], '
 									</h3>
 								</div>
 								<div class="windowbg">
@@ -672,7 +670,7 @@ function template_assign_mass()
 							</dl>
 
 							<h3 class="secondary_header">
-								<img class="icon" src="' . $settings['images_url'] . '/awards/multiple.png" alt="" />', $txt['awards_select_member'], '
+								<img class="icon" src="' . $settings['images_url'] . '/awardimg/multiple.png" alt="" />', $txt['awards_select_member'], '
 							</h3>
 							<div class="windowbg">';
 
@@ -1006,9 +1004,9 @@ function template_list_categories()
 			echo '
 						<tr>
 							<td>
-								<a href="', $cat['edit'], '" title="', $txt['awards_button_edit'], '"><img class="icon" src="', $settings['images_url'], '/awards/modify.png" alt="[', $txt['awards_button_edit'], ']" /></a> ', ($cat['id'] != 1) ? '
+								<a href="', $cat['edit'], '" title="', $txt['awards_button_edit'], '"><img class="icon" src="', $settings['images_url'], '/awardimg/modify.png" alt="[', $txt['awards_button_edit'], ']" /></a> ', ($cat['id'] != 1) ? '
 								<a href="' . $cat['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_category'] . '\');" title="' . $txt['awards_button_delete'] . '">
-									<img class="icon" src="' . $settings['images_url'] . '/awards/delete.png" alt="[' . $txt['awards_button_delete'] . ']F" />
+									<img class="icon" src="' . $settings['images_url'] . '/awardimg/delete.png" alt="[' . $txt['awards_button_delete'] . ']F" />
 								</a>' : '', '
 							</td>
 							<td>
@@ -1279,10 +1277,10 @@ function template_list_profiles()
 						<tr>
 							<td>
 								<a href="', $prof['edit'], '" title="', $txt['awards_button_edit'], '">
-									<img class="icon" src="', $settings['images_url'], '/awards/modify.png" alt="' . $txt['awards_button_edit'] . '" />
+									<img class="icon" src="', $settings['images_url'], '/awardimg/modify.png" alt="' . $txt['awards_button_edit'] . '" />
 								</a> ', ($prof['id'] != 0) ? '
 								<a href="' . $prof['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_profile'] . '\');" title="' . $txt['awards_button_delete'] . '">
-									<img class="icon" src="' . $settings['images_url'] . '/awards/delete.png" alt="' . $txt['awards_button_delete'] . '" />
+									<img class="icon" src="' . $settings['images_url'] . '/awardimg/delete.png" alt="' . $txt['awards_button_delete'] . '" />
 								</a>' : '', '
 							</td>
 							<td>

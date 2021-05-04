@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Addon
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,14 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0.1
+ * @version 1.2
  *
  */
-
-if (!defined('ELK'))
-{
-	die('No access...');
-}
 
 /**
  * Loads an award by ID and places the values in to context
@@ -46,12 +41,12 @@ function AwardsLoadAward($id = -1)
 	$db->free_result($request);
 
 	// Check if that award actually exists
-	if (count($row['id_award']) !== 1)
+	if ($row['id_award'] != $id)
 	{
-		fatal_lang_error('awards_error_no_award');
+		throw new Elk_Exception('awards_error_no_award');
 	}
 
-	$award = array(
+	return array(
 		'id' => $row['id_award'],
 		'award_name' => $row['award_name'],
 		'award_function' => $row['award_function'],
@@ -70,8 +65,6 @@ function AwardsLoadAward($id = -1)
 		'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
 		'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 	);
-
-	return $award;
 }
 
 /**
@@ -259,14 +252,14 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 			'more' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'favorite' => array(
 				'fav' => $row['favorite'],
-				'href' => $scripturl . '?action=profile;area=showAwards;in=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1
-						? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
-				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete'
-						: 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
+				'href' => $scripturl . '?action=profile;area=showAwards;in=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
+				'img' => '<img src="' . $settings['images_url'] . '/awardimg/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
 				'allowed' => empty($row['id_group']),
 			),
 			'filename' => $row['filename'],
-			'time' => list ($year, $month, $day) = sscanf($row['date_received'], '%d-%d-%d'),
+			// @todo this was list($year, $month, $day) which makes no sense so see where this is
+			// used and make needed adjustments
+			'time' => [$year, $month, $day] = sscanf($row['date_received'], '%d-%d-%d'),
 			'img' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['filename'],
 			'small' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['minifile'],
 		);
@@ -351,10 +344,8 @@ function AwardsLoadRequestedAwards()
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
 			'description' => parse_bbc($row['description']),
-			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? ''
-					: $modSettings['awards_dir'] . '/') . $row['filename'],
-			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? ''
-					: $modSettings['awards_dir'] . '/') . $row['minifile'],
+			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
+			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'members' => array(),
 		);
 	}
@@ -432,9 +423,7 @@ function AwardsAddAward($award_values, $parameters)
 	);
 
 	// Get the id_award for this new award
-	$id = $db->insert_id('{db_prefix}awards', 'id_award');
-
-	return $id;
+	return $db->insert_id('{db_prefix}awards', 'id_award');
 }
 
 /**
@@ -449,7 +438,7 @@ function AwardsUpdateAward($id, $award_values, $parameters)
 	$db = database();
 
 	// Make the updates to the award
-	$editAward = $db->query('', '
+	return $db->query('', '
 		UPDATE {db_prefix}awards
 		SET
 			award_name = {string:awardname},
@@ -472,15 +461,13 @@ function AwardsUpdateAward($id, $award_values, $parameters)
 			'category' => $award_values['category'],
 			'profile' => $award_values['profile'],
 			'awardtype' => $award_values['award_type'],
-			'trigger' => isset($parameters['trigger']) ? $parameters['trigger'] : 0,
+			'trigger' => $parameters['trigger'] ?? 0,
 			'parameters' => serialize($parameters),
 			'awardlocation' => $award_values['award_location'],
 			'awardrequestable' => $award_values['award_requestable'],
 			'awardassignable' => $award_values['award_assignable'],
 		)
 	);
-
-	return $editAward;
 }
 
 /**
@@ -593,7 +580,7 @@ function AwardsLoadGroupMembers()
 
 	$members = array();
 
-	// Stop any monkey bussiness
+	// Stop any monkey business
 	$allowed_groups = $_SESSION['allowed_groups'];
 	$_POST['who'] = array_intersect_key($_POST['who'], $allowed_groups);
 	$postsave = $_POST['who'];
@@ -835,7 +822,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 				array(
 					'active' => 1,
 					'id_award' => $id_award,
-					'members' => $awards[$id_award],
+					'members' => $member,
 				)
 			);
 		}
@@ -852,13 +839,11 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 					AND id_member IN ({array_int:members})',
 				array(
 					'id_award' => $id_award,
-					'members' => $awards[$id_award],
+					'members' => $member,
 				)
 			);
 		}
 	}
-
-	return;
 }
 
 /**
@@ -926,9 +911,9 @@ function AwardsLoadCategory($id)
 	$row = $db->fetch_assoc($request);
 
 	// Check if that category exists
-	if (count($row['id_category']) != 1)
+	if ($row['id_category'] != 1)
 	{
-		fatal_lang_error('awards_error_no_category');
+		throw new Elk_Exception('awards_error_no_category');
 	}
 
 	$category = array(
@@ -1040,13 +1025,13 @@ function AwardsCount()
 /**
  * Lists all awards in the system by cat, tuned to a users view
  *
- * @todo combine with AwardsLoadCategoryAwards
- *
  * @param int $start
  * @param int $end
  * @param int[] $awardcheck
  *
- * @return type
+ * @return array
+ * @todo combine with AwardsLoadCategoryAwards
+ *
  */
 function AwardsListAll($start, $end, $awardcheck = array())
 {
@@ -1089,16 +1074,13 @@ function AwardsListAll($start, $end, $awardcheck = array())
 			'time' => standardTime($row['time_added']),
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
-			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? ''
-					: $modSettings['awards_dir'] . '/') . $row['filename'],
-			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? ''
-					: $modSettings['awards_dir'] . '/') . $row['minifile'],
+			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
+			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'view_assigned' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'trigger' => $row['award_trigger'],
 			'award_type' => $row['award_type'],
 			'requestable' => (!empty($row['award_requestable']) && empty($awardcheck[$row['id_award']])),
-			'requestable_link' => ((!empty($row['award_requestable']) && empty($awardcheck[$row['id_award']]))
-				? $scripturl . '?action=profile;area=requestAwards;a_id=' . $row['id_award'] : ''),
+			'requestable_link' => ((!empty($row['award_requestable']) && empty($awardcheck[$row['id_award']])) ? $scripturl . '?action=profile;area=requestAwards;a_id=' . $row['id_award'] : ''),
 			'members' => array(),
 		);
 	}
@@ -1140,8 +1122,6 @@ function AwardsSaveCategory($name, $id_category = 0)
 			)
 		);
 	}
-
-	return;
 }
 
 /**
@@ -1175,8 +1155,6 @@ function AwardsDeleteCategory($id)
 			'id' => $id
 		)
 	);
-
-	return;
 }
 
 /**
@@ -1217,7 +1195,7 @@ function AwardsRemoveMembers($id, $members = array())
 /**
  * Adds an award to a membergroup or a group of individual members
  *
- * @param mixed[] $values
+ * @param array $values
  * @param boolean $group
  */
 function AwardsAddMembers($values, $group = false)
@@ -1381,32 +1359,32 @@ function AwardsValidateImage($name, $id)
 	// Check if file was uploaded.
 	if ($award['error'] === 1 || $award['error'] === 2)
 	{
-		fatal_lang_error('awards_error_upload_size');
+		throw new Elk_Exception('awards_error_upload_size');
 	}
 	elseif ($award['error'] !== 0)
 	{
-		fatal_lang_error('awards_error_upload_failed');
+		throw new Elk_Exception('awards_error_upload_failed');
 	}
 
 	// Check the extensions
 	$goodExtensions = array('jpg', 'jpeg', 'gif', 'png');
 	if (!in_array(strtolower(substr(strrchr($award['name'], '.'), 1)), $goodExtensions))
 	{
-		fatal_lang_error('awards_error_wrong_extension');
+		throw new Elk_Exception('awards_error_wrong_extension');
 	}
 
 	// Generally a valid image file?
 	$sizes = @getimagesize($award['tmp_name']);
 	if ($sizes === false)
 	{
-		fatal_lang_error('awards_error_upload_failed');
+		throw new Elk_Exception('awards_error_upload_failed');
 	}
 
 	// Now check if it has a potential virus etc.
 	require_once(SUBSDIR . '/Graphics.subs.php');
 	if (!checkImageContents($award['tmp_name'], !empty($modSettings['avatar_paranoid'])))
 	{
-		fatal_lang_error('awards_error_upload_security_failed');
+		throw new Elk_Exception('awards_error_upload_security_failed');
 	}
 }
 
@@ -1449,8 +1427,6 @@ function AwardsSetFavorite($memID, $award_id, $makefav)
 			'make_favorite' => $makefav,
 		)
 	);
-
-	return;
 }
 
 /**
@@ -1577,10 +1553,12 @@ function AwardsLoadProfiles($sort = 'DESC')
 		{
 			$profiles[$row['id_profile']]['parameters']['boards'] = 'all';
 		}
+
 		if (empty($profiles[$row['id_profile']]['parameters']['like_threshold']))
 		{
 			$profiles[$row['id_profile']]['parameters']['like_threshold'] = 0;
 		}
+
 		if (empty($profiles[$row['id_profile']]['parameters']['min_topic_replies']))
 		{
 			$profiles[$row['id_profile']]['parameters']['min_topic_replies'] = 0;
@@ -1616,17 +1594,15 @@ function AwardsLoadProfile($id)
 	// Check if that profile exists
 	if (count($row['id_profile']) !== 1)
 	{
-		fatal_lang_error('awards_error_no_profile');
+		throw new Elk_Exception('awards_error_no_profile');
 	}
 
-	$profile = array(
+	return array(
 		'id' => $row['id_profile'],
 		'name' => $row['name'],
 		'type' => $row['type'],
 		'parameters' => unserialize($row['parameters'])
 	);
-
-	return $profile;
 }
 
 /**
@@ -1708,8 +1684,6 @@ function AwardsSaveProfile($name, $parameters, $id_profile = 0)
 			)
 		);
 	}
-
-	return;
 }
 
 /**
@@ -1744,12 +1718,11 @@ function AwardsDeleteProfile($id)
 			'id' => $id
 		)
 	);
-
-	return;
 }
 
 /**
  * Utility function to clear cache data
+ *
  * - Called when a profile changes
  * - Called when a award changes
  *
@@ -1824,7 +1797,5 @@ function instantiate_award($name, $awardids = null, $autoawardsprofiles = null)
 		}
 	}
 
-	$instance = isset($instances[$name]) ? $instances[$name] : null;
-
-	return $instance;
+	return $instances[$name] ?? null;
 }

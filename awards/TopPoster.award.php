@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Addon
+ * @pacakge   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,19 +9,14 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0.1
+ * @version 1.2
  *
  */
-
-if (!defined('ELK'))
-{
-	die('No access...');
-}
 
 /**
  * Top Poster Award
  *
- * @param mixed[] $parameters
+ * @param array $parameters
  * @param int $id - not used in this award
  * @param boolean $return_parameters if true returns the configuration options for the award
  */

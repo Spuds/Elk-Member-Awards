@@ -302,4 +302,4 @@ $txt['awards_desc'] = 'Award Description';
 $txt['awards_view_album'] = 'View member\'s badge album.';
 $txt['awards_modify'] = 'Modify';
 $txt['awards_actions'] = 'Actions';
-$txt['whoallow_awards'] = 'Managing <a href="' . $scripturl . '?action=awards">Awards</a>.';
+$txt['whoallow_awards'] = 'Managing <a href="{script_url}"?action=awards">Awards</a>.';

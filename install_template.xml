@@ -27,7 +27,7 @@
 			<search position="before"><![CDATA[		// Show the member's signature?
 		if (!empty($message['member']['signature']) && empty($options['show_no_signatures']) && $context['signature_enabled'])
 			echo '
-						<div class="signature" id="msg_', $message['id'], '_signature"', $ignoring ? ' style="display:none;"' : '', '>', $message['member']['signature'], '</div>';]]></search>
+						<div id="msg_', $message['id'], '_signature" class="signature', $ignoring ? ' hide"' : '"', '>', $message['member']['signature'], '</div>';]]></search>
 			<add><![CDATA[
 		// Show their signature awards?
 		if (!empty($context['award']['signature']))

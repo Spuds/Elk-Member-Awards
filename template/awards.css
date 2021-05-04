@@ -16,7 +16,7 @@
 
 .award_poster_3 {
 	padding: 0 10px;
-	border: 0px #CCCCCC solid;
+	border: 0 #CCCCCC solid;
 }
 
 .award_signature_1 {
@@ -32,7 +32,7 @@
 
 .award_signature_3 {
 	padding: 0 0;
-	border: 0px #CCCCCC solid;
+	border: 0 #CCCCCC solid;
 }
 
 .table_grid a img.icon {
@@ -40,7 +40,7 @@
 }
 
 .cat_img_award_add:before {
-	background-image: url(../images/awards/award_hd.png);
+	background-image: url(../images/awardimg/award_hd.png);
 }
 
 .secondary_header img.icon {

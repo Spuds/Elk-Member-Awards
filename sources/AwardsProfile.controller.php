@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Addon
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,14 +9,10 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0.1
+ * @version 1.2
  *
  */
 
-if (!defined('ELK'))
-{
-	die('No access...');
-}
 
 /**
  * This is the awards profile controller class.
@@ -34,7 +30,7 @@ class Awards_Profile_Controller extends Action_Controller
 		// If Member Awards is disabled, we don't go any further
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
 		{
-			fatal_lang_error('feature_disabled', true);
+			throw new Elk_Exception('feature_disabled', true);
 		}
 
 		// Some things we will need
@@ -217,8 +213,7 @@ class Awards_Profile_Controller extends Action_Controller
 
 		// Array of this members awards to prevent a request for something they have
 		$awardcheck = array();
-		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards']
-			: array();
+		$awards = $user_profile[$user_info['id']]['awards'] ?? array();
 		foreach ($awards as $award)
 		{
 			$awardcheck[$award['id']] = 1;
@@ -248,7 +243,7 @@ class Awards_Profile_Controller extends Action_Controller
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
 			{
-				fatal_lang_error('awards_error_not_requestable', false);
+				throw new Elk_Exception('awards_error_not_requestable', false);
 			}
 
 			// Dude allready has this one?
@@ -256,7 +251,7 @@ class Awards_Profile_Controller extends Action_Controller
 			{
 				if ($award['id'] == $id)
 				{
-					fatal_lang_error('awards_error_have_already', false);
+					throw new Elk_Exception('awards_error_have_already', false);
 				}
 			}
 
@@ -284,7 +279,7 @@ class Awards_Profile_Controller extends Action_Controller
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
 			{
-				fatal_lang_error('awards_error_not_requestable', false);
+				throw new Elk_Exception('awards_error_not_requestable', false);
 			}
 
 			// cant ask for what you have
@@ -292,7 +287,7 @@ class Awards_Profile_Controller extends Action_Controller
 			{
 				if ($award['id'] == $id)
 				{
-					fatal_lang_error('awards_error_have_already', false);
+					throw new Elk_Exception('awards_error_have_already', false);
 				}
 			}
 

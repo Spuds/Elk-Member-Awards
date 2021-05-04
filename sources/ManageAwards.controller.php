@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Addon
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0.1
+ * @version 1.2
  *
  */
 
@@ -35,7 +35,7 @@ class Awards_Controller extends Action_Controller
 		// If Member Awards is disabled, we don't go any further unless you are the admin
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
 		{
-			fatal_lang_error('feature_disabled', true);
+			throw new Elk_Exception('feature_disabled', true);
 		}
 
 		// Its on, but are we allowed to manage or assign
@@ -293,23 +293,23 @@ class Awards_Controller extends Action_Controller
 
 								$result = ((allowedTo('manage_awards')) ? '
 									<a href="' . $row['edit'] . '" title="' . $txt['awards_button_edit'] . '">
-										<img src="' . $settings['images_url'] . '/awards/modify.png" alt="" />
+										<img src="' . $settings['images_url'] . '/awardimg/modify.png" alt="" />
 									</a>
 									<a href="' . $row['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_award'] . '\');" title="' . $txt['awards_button_delete'] . '">
-										<img src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
+										<img src="' . $settings['images_url'] . '/awardimg/delete.png" alt="" />
 									</a>' : '');
 
 								if (($row['award_type'] <= 1) && (allowedTo('manage_awards') || (allowedTo('assign_awards') && !empty($row['assignable']))))
 								{
 									$result .= '
 											<a href="' . $row['assign'] . '" title="' . $txt['awards_button_assign'] . '">
-												<img src="' . $settings['images_url'] . '/awards/assign.png" alt="" />
+												<img src="' . $settings['images_url'] . '/awardimg/assign.png" alt="" />
 											</a>';
 								}
 
 								$result .= '
 											<a href="' . $row['view_assigned'] . '" title="' . $txt['awards_button_members'] . '">
-												<img src="' . $settings['images_url'] . '/awards/user.png" alt="" />
+												<img src="' . $settings['images_url'] . '/awardimg/user.png" alt="" />
 											</a>';
 
 								return $result;
@@ -422,7 +422,7 @@ class Awards_Controller extends Action_Controller
 		$this_award = AwardsLoadType(str_replace('_', '', $context['award']['award_function']));
 		if (empty($this_award))
 		{
-			fatal_lang_error('awards_error_no_award', false);
+			throw new Elk_Exception('awards_error_no_award', false);
 		}
 
 		$context['award']['options'] = $this_award['options'];
@@ -455,19 +455,19 @@ class Awards_Controller extends Action_Controller
 		// You must supply a name
 		if (empty($_POST['award_name']))
 		{
-			fatal_lang_error('awards_error_empty_award_name', false);
+			throw new Elk_Exception('awards_error_empty_award_name', false);
 		}
 
 		// This will be what you chose from the add form
 		if (empty($_POST['id_func']))
 		{
-			fatal_lang_error('awards_error_empty_type', false);
+			throw new Elk_Exception('awards_error_empty_type', false);
 		}
 
 		// And you must supply a image file
 		if (empty($_FILES['awardFile']['name']) && $_POST['a_id'] == 0)
 		{
-			fatal_lang_error('awards_error_no_file', false);
+			throw new Elk_Exception('awards_error_no_file', false);
 		}
 
 		// Clean and cast the values
@@ -665,7 +665,7 @@ class Awards_Controller extends Action_Controller
 			// Quick check for mischievous users, you can't just enter any a_id ;)
 			if (!allowedTo('manage_awards') && isset($_REQUEST['a_id']) && empty($context['awards'][$_REQUEST['a_id']]['assignable']))
 			{
-				fatal_lang_error('awards_error_hack_error');
+				throw new Elk_Exception('awards_error_hack_error');
 			}
 
 			// Set the current step.
@@ -698,7 +698,7 @@ class Awards_Controller extends Action_Controller
 
 			if (empty($members) || empty($_POST['award']))
 			{
-				fatal_lang_error('awards_error_no_members', false);
+				throw new Elk_Exception('awards_error_no_members', false);
 			}
 
 			// Set a valid date, award.
@@ -790,7 +790,7 @@ class Awards_Controller extends Action_Controller
 
 			if (empty($membergroups) || empty($_POST['award']))
 			{
-				fatal_lang_error('awards_error_no_groups', false);
+				throw new Elk_Exception('awards_error_no_groups', false);
 			}
 
 			// Set the award date
@@ -895,7 +895,7 @@ class Awards_Controller extends Action_Controller
 			// No members no awards
 			if (empty($_POST['member']) || empty($_POST['award']))
 			{
-				fatal_lang_error('awards_error_no_members', false);
+				throw new Elk_Exception('awards_error_no_members', false);
 			}
 
 			// Make sure that they picked an award and group to assign it to...
@@ -952,7 +952,7 @@ class Awards_Controller extends Action_Controller
 		$id = (int) $_REQUEST['a_id'];
 		if (empty($id) || $id <= 0)
 		{
-			fatal_lang_error('awards_error_no_award', false);
+			throw new Elk_Exception('awards_error_no_award', false);
 		}
 
 		// Removing the award from some members?
@@ -1160,7 +1160,7 @@ class Awards_Controller extends Action_Controller
 			// Needs to be an int!
 			if (empty($id) || $id <= 0)
 			{
-				fatal_lang_error('awards_error_no_id_category', false);
+				throw new Elk_Exception('awards_error_no_id_category', false);
 			}
 
 			// Load single category for editing.
@@ -1192,7 +1192,7 @@ class Awards_Controller extends Action_Controller
 			// Check if any of the values were left empty
 			if (empty($name))
 			{
-				fatal_lang_error('awards_error_empty_category_name', false);
+				throw new Elk_Exception('awards_error_empty_category_name', false);
 			}
 
 			// Add a new or Update and existing
@@ -1243,8 +1243,6 @@ class Awards_Controller extends Action_Controller
 		// Set the context values
 		$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_list_categories'];
 		$context['sub_template'] = 'list_categories';
-
-		return;
 	}
 
 	/**
@@ -1264,7 +1262,7 @@ class Awards_Controller extends Action_Controller
 
 		if ($id == 1)
 		{
-			fatal_lang_error('awards_error_delete_main_category', false);
+			throw new Elk_Exception('awards_error_delete_main_category', false);
 		}
 
 		AwardsDeleteCategory($id);
@@ -1411,8 +1409,6 @@ class Awards_Controller extends Action_Controller
 		// Set the context values
 		$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_list_profiles'];
 		$context['sub_template'] = 'list_profiles';
-
-		return;
 	}
 
 	/**
@@ -1478,7 +1474,7 @@ class Awards_Controller extends Action_Controller
 			// Check if any of the values were left empty
 			if (empty($name))
 			{
-				fatal_lang_error('awards_error_empty_profile_name', false);
+				throw new Elk_Exception('awards_error_empty_profile_name', false);
 			}
 
 			// Add a new or Update and existing
@@ -1526,7 +1522,7 @@ class Awards_Controller extends Action_Controller
 
 		if ($id == 0)
 		{
-			fatal_lang_error('awards_error_delete_main_profile', false);
+			throw new Elk_Exception('awards_error_delete_main_profile', false);
 		}
 
 		AwardsDeleteProfile($id);
