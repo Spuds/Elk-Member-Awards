@@ -104,7 +104,7 @@ $tables[] = array(
 		array(
 			'name' => 'comments',
 			'type' => 'text',
-			'null' => false
+			'null' => `
 		)
 	),
 	'indexes' => array(
@@ -164,12 +164,12 @@ $tables[] = array(
 		array(
 			'name' => 'filename',
 			'type' => 'tinytext',
-			'null' => false
+			'null' => true
 		),
 		array(
 			'name' => 'minifile',
 			'type' => 'tinytext',
-			'null' => false
+			'null' => true
 		),
 		array(
 			'name' => 'award_trigger',
