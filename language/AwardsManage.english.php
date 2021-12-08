@@ -1,5 +1,4 @@
 <?php
-global $scripturl;
 
 // Tabs
 $txt['awards_title'] = 'Awards';
@@ -21,8 +20,9 @@ $txt['awards_description_requests'] = 'This is where you approve or deny member 
 $txt['awards_help'] = 'This is where you add, edit, delete and assign awards.';
 $txt['awards_category_help'] = 'This is where you add, edit, delete award categories';
 $txt['awards_main'] = 'Main';
-$txt['awards_add'] = 'Add';
+$txt['awards_add'] = 'Create';
 $txt['awards_edit'] = 'Edit';
+$txt['awards_categories'] = 'Categories';
 $txt['awards_assign'] = 'Member Assign';
 $txt['awards_assign_membergroup'] = 'Group Assign';
 $txt['awards_assign_mass'] = 'Multi Assign';
@@ -40,15 +40,15 @@ $txt['awards_error_no_id'] = 'You must select an award to edit.';
 $txt['awards_error_no_id_category'] = 'You must select a category to edit.';
 $txt['awards_error_no_award'] = 'The award that you entered does not exist.';
 $txt['awards_error_no_category'] = 'The category that you entered does not exist.';
-$txt['awards_error_empty_badge_name'] = 'You must enter a name for this category!';
-$txt['awards_error_empty_category_name'] = 'You must enter a name for this award!';
-$txt['awards_error_empty_category'] = 'That category doesn\'t have any awards!';
+$txt['awards_error_empty_award_name'] = 'You must enter a name for this category.';
+$txt['awards_error_empty_category_name'] = 'You must enter a name for this award.';
+$txt['awards_error_empty_category'] = 'That category doesn\'t have any awards.';
 $txt['awards_error_empty_description'] = 'You must enter a description for this award!';
 $txt['awards_error_cant_delete'] = 'You are not allowed to delete awards!';
 $txt['awards_error_no_who'] = 'You must select the membergroups that you want to assign an award to.';
 $txt['awards_error_no_members'] = 'You must select a member and/or award in order to continue!';
 $txt['awards_error_no_group'] = 'You must select a group and/or award in order to continue!';
-$txt['awards_error_no_badges'] = 'No Awards have been added';
+$txt['awards_error_no_awards'] = 'No Awards have been added';
 $txt['awards_error_no_categories'] = 'You have not added any categories.';
 $txt['awards_error_delete_main_category'] = 'You cannot delete category #1 because it is the default category.';
 $txt['awards_error_upload_invalid'] = 'The file you tried to upload did not pass security checks. Please try again with another file.';
@@ -196,7 +196,8 @@ $txt['awards_no_assigned_members'] = 'There are no members that have received th
 $txt['awards_no_assigned_members2'] = 'There are no members or groups (visible to you), that have received this award.';
 $txt['awards_unassign'] = 'Unassign Award';
 $txt['awards_members_with'] = 'Members with Award';
-$txt['awards_no_badges_member'] = 'You have not received any awards';
+$txt['awards_no_awards_member'] = 'You have not received any awards';
+$txt['awards_no_awards_this_member'] = '%1$s has not received any awards';
 $txt['awards_view_album'] = 'View member\'s awards album.';
 $txt['awards_count_badges'] = 'This member has a total of <strong>%1$s</strong> award(s).  The award details are below:';
 $txt['awards_confirm_delete_category'] = 'Are you sure you wish to delete this category?';
@@ -219,4 +220,4 @@ $txt['awards_view_album'] = 'View member\'s badge album.';
 $txt['awards_modify'] = 'Modify';
 $txt['awards_actions'] = 'Actions';
 $txt['awards_categories'] = 'Categories';
-$txt['whoallow_awards'] = 'Managing <a href="' . $scripturl . '?action=awards">Awards</a>.';
+$txt['whoallow_awards'] = 'Managing <a href="{script_url}"?action=awards">Awards</a>.';
