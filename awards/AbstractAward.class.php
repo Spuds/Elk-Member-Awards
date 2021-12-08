@@ -196,7 +196,7 @@ abstract class Abstract_Award
 	 */
 	public function manually_assigned()
 	{
-		return $this->award_type() !== $this->award_type();
+		return $this->award_type() !== self::AUTOMATIC;
 	}
 
 	/**
