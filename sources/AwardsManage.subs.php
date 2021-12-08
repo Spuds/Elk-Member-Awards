@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,12 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.1
  *
  */
-
-if (!defined('ELK'))
-	die('No access...');
 
 /**
  * Loads all the awards for the members in the list
@@ -133,7 +130,7 @@ function AwardsAutoCheck($new_loaded_ids)
 
 	$db = database();
 
-	// See if we already have this in the cache
+	// See if we already have the available auto awards in the cache
 	$autoawards = cache_get_data('awards:autoawards', 4 * 3600);
 	$autoawardsid = cache_get_data('awards:autoawardsid', 4 * 3600);
 	if ($autoawards === null || $autoawardsid === null)
@@ -409,7 +406,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 		$request = $db->query('', '
 			SELECT
 				COUNT(*) AS num_topics, id_member_started
-			FROM smf_topics
+			FROM {db_prefix}topics
 			WHERE id_member_started IN ({array_int:memberlist})' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 				AND id_board != {int:recycle_board}' : '') . '
 			GROUP BY id_member_started',
@@ -537,7 +534,7 @@ function AwardsTopTopicStarter_1_N($limit = 10)
 			'limit' => $limit
 		)
 	);
-	// Make them available for use to use in user_profile
+	// Make them available for use in user_profile
 	$topic_number = 0;
 	while ($row = $db->fetch_assoc($request))
 	{
