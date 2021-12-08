@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @package   Awards Modification
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,12 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.1
  *
  */
-
-if (!defined('ELK'))
-	die('No access...');
 
 /**
  * This is the awards profile controller class.

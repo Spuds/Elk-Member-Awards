@@ -1,4 +1,4 @@
-##Member Awards v1.0
+##Member Awards
 ---
 
 **License**  
