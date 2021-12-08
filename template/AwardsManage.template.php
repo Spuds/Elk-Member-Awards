@@ -18,6 +18,7 @@ function template_modify()
 	echo '
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=modify" method="post" name="award" accept-charset="UTF-8" enctype="multipart/form-data">';
 
+	// Show them it saved, if it just did
 	if (isset($_GET['saved']))
 		echo'
 					<div class="infobox">',
@@ -25,12 +26,14 @@ function template_modify()
 					</div>';
 
 	echo '
-					<h3 class="category_header hdicon cat_img_award_add ">
-						', ($context['editing'] === true ? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] : $txt['awards_add_award']), '
+					<h3 class="category_header hdicon cat_img_award_add ">', 
+						$context['editing'] === true 
+							? $txt['awards_edit_award'] . ' - ' . $context['award']['award_name'] 
+							: $txt['awards_add_award'], '
 					</h3>';
 
+	// Start with award details, like name, description, category, profile, etc
 	echo '
-					<div class="windowbg2">
 						<div class="content">
 							<fieldset>
 								<legend>', $txt['awards_add_name'], '</legend>
@@ -46,7 +49,7 @@ function template_modify()
 										<label for="description">', $txt['awards_edit_description'], '</label>
 									</dt>
 									<dd>
-										<input type="text" name="description" id="description" value="', $context['award']['description'], '" size="30" />
+										<textarea name="description" id="description" cols="40" rows="5">', $context['award']['description'], '</textarea>
 									</dd>
 
 									<dt>
@@ -128,7 +131,7 @@ function template_modify()
 										&nbsp;
 									</dt>
 									<dd>',
-										!empty($context['award']['small']) ? '<img id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
+										!empty($context['award']['small']) ? '<img style="max-width:95%" id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
 									</dd>
 									<dt>
 										<label for="awardFileMini">', $txt['awards_badge_upload_mini'], '</label>
@@ -144,7 +147,7 @@ function template_modify()
 									<dd>
 										<select name="award_location" id="award_location">';
 
-	// our awards type list selection
+	// The awards location list selection
 	foreach ($context['award_placements'] as $type)
 		echo '
 											<option value="', $type['id'], '"', (isset($context['award']['location']) && $type['id'] == $context['award']['location']) ? ' selected="selected"' : '', '>', $type['name'], '</option>';
@@ -153,8 +156,10 @@ function template_modify()
 										</select>
 									</dd>
 								</dl>
-							</fieldset>
+							</fieldset>';
 
+	// Special options, like the award is requestable or assignable
+	echo '
 							<fieldset>
 								<legend>', $txt['awards_extras'], '</legend>
 								<dl class="settings">
@@ -181,7 +186,6 @@ function template_modify()
 								<input type="submit" class="button_submit" name="award_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_submit'], '" accesskey="s" />
 							</div>
 						</div>
-					</div>
 				</form>';
 }
 
@@ -200,11 +204,10 @@ function template_assign_group()
 
 			<div id="awardassign">
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assigngroup;step=2" method="post" name="assigngroup" id="assigngroup" accept-charset="UTF-8">
-					<div class="floatleft" style="width:22%">
+					<div class="floatleft" style="width:22%;">
 						<h3 class="category_header">
 							', $txt['awards_select_badge'], '
 						</h3>
-						<div class="windowbg">
 							<div class="content">
 								<dl id="awardselect" class="settings">
 									<dt>
@@ -222,9 +225,8 @@ function template_assign_group()
 								</dl>
 							</div>
 						</div>
-					</div>
 
-					<div class="floatright" style="width:75%">
+					<div class="floatright" style="width:75%;">
 						<h3 class="category_header hdicon cat_img_plus">
 							', $txt['awards_assign_badge'], '
 						</h3>
@@ -322,11 +324,10 @@ function template_assign()
 			</div>
 			<div id="awardassign">
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assign;step=2" method="post" name="assign" id="assign" accept-charset="UTF-8">
-					<div class="floatleft" style="width:22%">
+					<div class="floatleft" style="width:22%;">
 						<h3 class="category_header">
 							', $txt['awards_select_badge'], '
 						</h3>
-						<div class="windowbg">
 							<div class="content">
 								<dl id="awardselect" class="settings">
 									<dt>
@@ -343,9 +344,8 @@ function template_assign()
 								</dl>
 							</div>
 						</div>
-					</div>
 
-					<div class="floatright" style="width:75%">
+					<div class="floatright" style="width:75%;">
 						<h3 class="category_header hdicon cat_img_plus">
 							', $txt['awards_assign_badge'], '
 						</h3>
@@ -467,11 +467,10 @@ function template_assign_mass()
 				</div>
 
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=assignmass;step=3" method="post" name="assigngroup2" id="assigngroup2" accept-charset="UTF-8">
-				<div class="floatleft" style="width:22%">
+				<div class="floatleft" style="width:22%;">
 					<h3 class="category_header">
 						', $txt['awards_select_badge'], '
 					</h3>
-					<div class="windowbg">
 						<div class="content">
 							<dl id="awardselect" class="settings">
 								<dt>
@@ -488,9 +487,8 @@ function template_assign_mass()
 							</dl>
 						</div>
 					</div>
-				</div>
 
-				<div class="floatright" style="width:75%">
+				<div class="floatright" style="width:75%;">
 					<h3 class="category_header hdicon cat_img_plus">
 						', $txt['awards_assign_badge'], '
 					</h3>
@@ -633,16 +631,6 @@ function template_assign_mass()
 				</form>
 			</div>
 		</div>';
-
-	echo '
-		<script><!-- // --><![CDATA[
-			function showaward()
-			{
-				awards = ' . $context['awardsjavasciptarray'] . '
-				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'filename\'];
-				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'minifile\'];
-			}
-		// ]]></script>';
 }
 
 /**
@@ -653,21 +641,16 @@ function template_view_assigned()
 	global $context;
 
 	echo '
-	<span class="upperframe"><span></span></span>
 	<div class="roundframe">
-		<div id="award">
-			<img style="vertical-align:middle;padding:0 5px" src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" />
-			<img style="vertical-align:middle;padding:0 5px" src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" />
-			- <strong>', $context['award']['award_name'], '</strong> - ', $context['award']['description'], '
+		<div id="award_assigned">
+			<img src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" />
+			<img src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" />
+			- <strong>', $context['award']['award_name'], '</strong> 
+			<div>', $context['award']['description'], '</div>
 		</div>
-	</div>
-	<span class="lowerframe"><span></span></span>
-	<br class="clear" />';
+	</div>';
 
 	template_show_list('view_assigned');
-
-	echo '
-	<br class="clear" />';
 }
 
 /**
@@ -691,7 +674,7 @@ function template_settings()
 					</h3>
 
 					<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=settings;saved=1" method="post" name="badge" id="badge" accept-charset="UTF-8" enctype="multipart/form-data" >
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
+						<fieldset style="border-width: 1px 0 0 0; padding: 5px 10px;">
 						<legend>', $txt['awards_basic_settings'], '</legend>
 						<div class="roundframe">
 						<dl class="settings">
@@ -730,7 +713,7 @@ function template_settings()
 						</div>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
+						<fieldset style="border-width: 1px 0 0 0; padding: 5px 10px;">
 						<legend>', $txt['awards_aboveavatar_style'], '</legend>
 						<div class="roundframe">
 						<dl class="settings">
@@ -760,7 +743,7 @@ function template_settings()
 						</div>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
+						<fieldset style="border-width: 1px 0 0 0; padding: 5px 10px;">
 						<legend>', $txt['awards_belowavatar_style'], '</legend>
 						<div class="roundframe">
 						<dl class="settings">
@@ -790,7 +773,7 @@ function template_settings()
 						</div>
 						</fieldset>
 
-						<fieldset style="border-width: 1px 0px 0px 0px; padding: 5px 10xp;">
+						<fieldset style="border-width: 1px 0 0 0; padding: 5px 10px;">
 						<legend>', $txt['awards_signature_style'], '</legend>
 						<div class="roundframe">
 						<dl class="settings">
@@ -839,9 +822,8 @@ function template_edit_category()
 	echo '
 				<form id="admin_form_wrapper" action="', $scripturl, '?action=admin;area=awards;sa=editcategory" method="post" name="category" id="category" accept-charset="UTF-8">
 					<h3 class="category_header">
-						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? $txt['awards_saved_category'] : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
+						', ((isset($_GET['saved']) && $_GET['saved'] == '1') ? '<strong>' . $txt['awards_saved_category'] . '</strong>' : ($context['editing'] == true ? $txt['awards_edit_category'] : $txt['awards_add_category'])), '
 					</h3>
-					<div class="windowbg">
 						<div class="content">
 							<dl class="settings">
 								<dt>
@@ -857,12 +839,11 @@ function template_edit_category()
 								<input type="submit" class="button_submit" name="category_save" value="', $context['editing'] ? $txt['save'] : $txt['awards_add_category'], '" accesskey="s" />
 							</div>
 						</div>
-					</div>
 				</form>';
 }
 
 /**
- * Show all of the categorys in the system with modificaiton options
+ * Show all of the category's in the system with edit options
  */
 function template_list_categories()
 {
@@ -886,7 +867,7 @@ function template_list_categories()
 	// Check if there are any categories
 	if (empty($context['categories']))
 		echo '
-						<tr class="windowbg2">
+						<tr>
 							<td colspan="3">', $txt['awards_error_no_categories'], '</td>
 						</tr>';
 	else
@@ -894,7 +875,7 @@ function template_list_categories()
 		foreach ($context['categories'] as $cat)
 		{
 			echo '
-						<tr class="windowbg">
+						<tr>
 							<td>
 								<a href="', $cat['edit'], '" title="', $txt['awards_button_edit'], '">[', $txt['awards_button_edit'], ']&nbsp;<img class="icon" src="', $settings['images_url'], '/awards/modify.png" alt="" /></a> ', ($cat['id'] != 1) ? '
 								<a href="' . $cat['delete'] . '" onclick="return confirm(\'' . $txt['awards_confirm_delete_category'] . '\');" title="' . $txt['awards_button_delete'] . '">
@@ -956,7 +937,7 @@ function template_view_category()
 		// Check if there are any awards
 		if (empty($context['awards']))
 			echo '
-						<tr class="windowbg2">
+						<tr>
 							<td colspan="4">', $txt['awards_error_empty_category'], '</td>
 						</tr>';
 		else
@@ -964,7 +945,7 @@ function template_view_category()
 			foreach ($context['awards'] as $award)
 			{
 				echo '
-						<tr class="windowbg">
+						<tr>
 							<td>
 								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
 							</td>
@@ -1022,7 +1003,7 @@ function template_request_award()
 			// show this awards info in the header
 			echo '
 					<div class="description centertext">
-						<img style="padding:0 0 5px 0" src="', $award['img'], '" alt="', $award['award_name'], '" /><br />';
+						<img style="padding:0 0 5px 0;" src="', $award['img'], '" alt="', $award['award_name'], '" /><br />';
 
 			// Small image as well?
 			if ($award['img'] != $award['small'])

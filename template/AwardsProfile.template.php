@@ -35,7 +35,7 @@ function template_awards()
 	if (empty($context['categories']))
 		echo '
 					<div class="infobox">',
-						$txt['awards_no_badges_member'], '
+						$context['user']['is_owner'] ? $txt['awards_no_awards_member'] : sprintf($txt['awards_no_awards_this_member'], $context['award_user']), '
 					</div>';
 	else
 	{
@@ -51,10 +51,10 @@ function template_awards()
 							<tr class="table_head">
 								<th scope="col" class="grid17 centertext">', $txt['awards_image'], '</th>
 								<th scope="col" class="grid17 centertext">', $txt['awards_mini'], '</th>
-								<th scope="col" class="grid17">', $txt['awards_name'], '</th>
+								<th scope="col" class="grid20">', $txt['awards_name'], '</th>
 								<th scope="col" class="grid17">', $txt['awards_date'], '</th>
 								<th scope="col">', $txt['awards_details'], '</th>
-								<th scope="col" class"centertext" class="grid8">', $txt['awards_favorite2'], '</th>
+								<th scope="col" class="centertext grid8">', $txt['awards_favorite2'], '</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -63,15 +63,15 @@ function template_awards()
 			foreach ($category['awards'] as $award)
 			{
 				echo '
-							<tr class="windowbg">
+							<tr>
 								<td class="centertext">
 									<a href="', $award['more'], '">
-										<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+										<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
 									</a>
 								</td>
 								<td class="centertext">
 									<a href="', $award['more'], '">
-										<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+										<img class="award_mini_image" src="', $award['small'], '" alt="', $award['award_name'], '" />
 									</a>
 								</td>
 								<td>
@@ -131,7 +131,7 @@ function template_awards_members()
 }
 
 /**
- * Template for showing the awards that a member has
+ * Template for showing available awards
  */
 function template_awards_list()
 {
@@ -146,7 +146,7 @@ function template_awards_list()
 	if (empty($context['categories']))
 		echo '
 				<div class="infobox">',
-					$txt['awards_error_no_badges'], '
+					$txt['awards_error_no_awards'], '
 				</div>';
 	else
 	{
@@ -171,12 +171,12 @@ function template_awards_list()
 			foreach ($category['awards'] as $award)
 			{
 				echo '
-						<tr class="windowbg">
-							<td align="center">
-								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+						<tr>
+							<td class="centertext">
+								<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
 							</td>
 							<td align="center">
-								<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+								<img class="award_mini_image" src="', $award['small'], '" alt="', $award['award_name'], '" />
 							</td>
 							<td>', $award['award_name'], '</td>
 							<td>', $award['description'], '</td>
