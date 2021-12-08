@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @package   Awards Modification
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,12 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.1
  *
  */
-
-if (!defined('ELK'))
-	die('No access...');
 
 /**
  * Loads an award by ID and places the values in to context
@@ -248,7 +245,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 				'allowed' => empty($row['id_group']),
 			),
 			'filename' => $row['filename'],
-			'time' => list ($year, $month, $day) = sscanf($row['date_received'], '%d-%d-%d'),
+			'time' => sscanf($row['date_received'], '%d-%d-%d'),
 			'img' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['filename'],
 			'small' => dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/' . $row['minifile'],
 		);
@@ -259,7 +256,7 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 }
 
 /**
- * Loads all of the non-auto assignable awards for use in the template
+ * Loads all non-auto assignable awards for use in the template
  *
  * - Returns an array of awards/details for each one allowable
  */
