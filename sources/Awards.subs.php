@@ -49,7 +49,7 @@ function AwardsLoadAward($id = -1)
 	return array(
 		'id' => $row['id_award'],
 		'award_name' => $row['award_name'],
-		'award_function' => $row['award_function'],
+		'award_function' => empty($row['award_function']) ? 'Regular' : $row['award_function'],
 		'description' => $row['description'],
 		'category' => $row['id_category'],
 		'profile' => $row['id_profile'],
@@ -98,6 +98,7 @@ function AwardsCountCategoryAwards($cat)
  * Helper function to load the awards in a given category
  *
  * - Used by createlist in awardsmain
+ * - Groups the sort by award types and profiles
  *
  * @param int $start
  * @param int $items_per_page
@@ -1334,7 +1335,7 @@ function AwardsUpload($id_award)
 		// Try to CHMOD the uploaded file
 		@chmod($miniName, 0755);
 	}
-	// No mini just just the regular for it instead
+	// No mini just use the regular for it instead
 	elseif (($_FILES['awardFileMini']['error'] == 4) && ($_FILES['awardFile']['error'] != 4))
 	{
 		copy($newName, $miniName);
@@ -1518,7 +1519,7 @@ function AwardsLoadAllProfiles()
 }
 
 /**
- * Loads all of the profiles in the system
+ * Loads all profiles in the system
  *
  * - Returns array of profiles with key of name and value of id
  *
@@ -1592,7 +1593,7 @@ function AwardsLoadProfile($id)
 	$db->free_result($request);
 
 	// Check if that profile exists
-	if (count($row['id_profile']) !== 1)
+	if (empty($row))
 	{
 		throw new Elk_Exception('awards_error_no_profile');
 	}
@@ -1697,7 +1698,7 @@ function AwardsDeleteProfile($id)
 {
 	$db = database();
 
-	// If any awards will go astray after we delete their profile we first move them to
+	// If any awards go astray after we delete their profile we first move them to
 	// the default profile to prevent issues
 	$db->query('', '
 		UPDATE {db_prefix}awards
