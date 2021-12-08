@@ -88,7 +88,7 @@ function template_modify()
 										<label for="description">', $txt['awards_edit_description'], '</label>
 									</dt>
 									<dd>
-										<input type="text" name="description" id="description" value="', $context['award']['description'], '" size="30" />
+										<textarea name="description" id="description" cols="40" rows="5">', $context['award']['description'], '</textarea>
 									</dd>
 
 									<dt>
@@ -149,7 +149,7 @@ function template_modify()
 										&nbsp;
 									</dt>
 									<dd>',
-										!empty($context['award']['img']) ? '<img id="awardsfull" src="' . $context['award']['img'] . '" align="middle" alt="" />' : '&nbsp;', '
+										!empty($context['award']['img']) ? '<img style="max-width:95%" id="awardsfull" src="' . $context['award']['img'] . '" align="middle" alt="" />' : '&nbsp;', '
 									</dd>
 									<dt>
 										<label for="awardFile">', $txt['awards_badge_upload'], '</label>:
@@ -169,7 +169,7 @@ function template_modify()
 										&nbsp;
 									</dt>
 									<dd>',
-										!empty($context['award']['small']) ? '<img id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
+										!empty($context['award']['small']) ? '<img style="max-width:95%" id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
 									</dd>
 									<dt>
 										<label for="awardFileMini">', $txt['awards_badge_upload_mini'], '</label>
@@ -770,10 +770,11 @@ function template_view_assigned()
 
 	echo '
 	<div class="roundframe">
-		<div id="award">
-			<img style="vertical-align:middle;padding:0 5px;" src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" />
-			<img style="vertical-align:middle;padding:0 5px;" src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" />
-			- <strong>', $context['award']['award_name'], '</strong> - ', $context['award']['description'], '
+		<div id="award_assigned">
+			<img src="', $context['award']['img'], '" alt="', $context['award']['award_name'], '" />
+			<img src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" />
+			- <strong>', $context['award']['award_name'], '</strong>
+			<div>', $context['award']['description'], '</div>
 		</div>
 	</div>';
 

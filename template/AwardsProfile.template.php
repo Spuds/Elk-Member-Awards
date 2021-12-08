@@ -51,7 +51,7 @@ function template_awards()
 							<tr class="table_head">
 								<th scope="col" class="grid17 centertext">', $txt['awards_image'], '</th>
 								<th scope="col" class="grid17 centertext">', $txt['awards_mini'], '</th>
-								<th scope="col" class="grid17">', $txt['awards_name'], '</th>
+								<th scope="col" class="grid20">', $txt['awards_name'], '</th>
 								<th scope="col" class="grid17">', $txt['awards_date'], '</th>
 								<th scope="col">', $txt['awards_details'], '</th>
 								<th scope="col" class="centertext grid8">', $txt['awards_favorite2'], '</th>
@@ -66,12 +66,12 @@ function template_awards()
 							<tr>
 								<td class="centertext">
 									<a href="', $award['more'], '">
-										<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+										<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
 									</a>
 								</td>
 								<td class="centertext">
 									<a href="', $award['more'], '">
-										<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+										<img class="award_mini_image" src="', $award['small'], '" alt="', $award['award_name'], '" />
 									</a>
 								</td>
 								<td>
@@ -131,7 +131,7 @@ function template_awards_members()
 }
 
 /**
- * Template for showing the awards that a member has
+ * Template for showing available awards
  */
 function template_awards_list()
 {
@@ -172,11 +172,11 @@ function template_awards_list()
 			{
 				echo '
 						<tr>
-							<td align="center">
-								<img src="', $award['img'], '" alt="', $award['award_name'], '" />
+							<td class="centertext">
+								<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
 							</td>
 							<td align="center">
-								<img src="', $award['small'], '" alt="', $award['award_name'], '" />
+								<img class="award_mini_image" src="', $award['small'], '" alt="', $award['award_name'], '" />
 							</td>
 							<td>', $award['award_name'], '</td>
 							<td>', $award['description'], '</td>
