@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
 <modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
 	<id>spuds:MemberAwards</id>
-	<version>1.0</version>
+	<version>1.1</version>
 
 	<!-- These are the edits to the templates.  If you are using a custom theme they might not work at all! -->
 	<!-- If that happens, find something closely resembling the items in the search operation, and do the necessary -->
@@ -23,11 +23,22 @@
 	</file>
 
 	<file name="THEMEDIR/Display.template.php">
-		<operation>
+		<operation error="ignore">
 			<search position="before"><![CDATA[		// Show the member's signature?
 		if (!empty($message['member']['signature']) && empty($options['show_no_signatures']) && $context['signature_enabled'])
 			echo '
 						<div id="msg_', $message['id'], '_signature" class="signature', $ignoring ? ' hide"' : '"', '>', $message['member']['signature'], '</div>';]]></search>
+			<add><![CDATA[
+		// Show their signature awards?
+		if (!empty($context['award']['signature']))
+			echo $context['award']['signature'];
+]]></add>
+		</operation>
+		<operation error="ignore">
+			<search position="before"><![CDATA[		// Show the member's signature?
+		if (!empty($message['member']['signature']) && empty($options['show_no_signatures']) && $context['signature_enabled'])
+			echo '
+							<div id="msg_', $message['id'], '_signature" class="signature', $ignoring ? ' hide"' : '"', '>', $message['member']['signature'], '</div>';]]></search>
 			<add><![CDATA[
 		// Show their signature awards?
 		if (!empty($context['award']['signature']))
