@@ -48,7 +48,7 @@ class Regular_Award extends Abstract_Award
 	/**
 	 * Checks if the award is a automatic award
 	 *
-	 * @return string[]
+	 * @return int
 	 */
 	public function award_type()
 	{

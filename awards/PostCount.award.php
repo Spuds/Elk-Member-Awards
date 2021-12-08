@@ -71,7 +71,7 @@ class Post_Count_Award extends Abstract_Award
 			$this->members = array();
 			$this->_check_members($profile_group, $area);
 
-			// Anyone earn this area award
+			// Did anyone earn this area award
 			$this->assign($this->award_type(), $this->profile_award_ids[$key]);
 		}
 
@@ -107,14 +107,14 @@ class Post_Count_Award extends Abstract_Award
 		$boards = $this->profiles[$key]['parameters']['boards'];
 
 		// All boards is just their current post count
-		if ($boards == 'all')
+		if ($boards === 'all')
 		{
 			foreach ($this->remaining_ids as $member_id)
 			{
 				$user_profile[$member_id][self::FUNC . '_' . $key] = $user_profile[$member_id]['posts'];
 			}
 		}
-		// Some boards means we have some work
+		// Some boards mean we have some work
 		else
 		{
 			$request = $this->_db->query('', '

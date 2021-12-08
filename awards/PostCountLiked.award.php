@@ -55,7 +55,7 @@ class Post_Count_Liked_Award extends Abstract_Award
 		// For each grouping of boards
 		foreach ($this->profile_group as $key => $profile_group)
 		{
-			// Set the funckey :P Allows for multiple of this "award_type" based on board groups
+			// Set the func-key :P Allows for multiple of this "award_type" based on board groups
 			$area = self::FUNC . '_' . $key;
 
 			// See what we can fulfill from the cache
@@ -71,7 +71,7 @@ class Post_Count_Liked_Award extends Abstract_Award
 			$this->members = array();
 			$this->_check_members($profile_group, $area);
 
-			// Assign it to anyone that has earn this funckey award
+			// Assign it to anyone that has earned this func-key award
 			$this->assign($this->award_type(), $this->profile_award_ids[$key]);
 		}
 
@@ -148,7 +148,7 @@ class Post_Count_Liked_Award extends Abstract_Award
 		}
 		$this->_db->free_result($request);
 
-		// Finally load the total found in to the appropriate user_profiles
+		// Finally, load the total found in to the appropriate user_profiles
 		foreach ($this->remaining_ids as $id)
 		{
 			if (isset($members[$id]))

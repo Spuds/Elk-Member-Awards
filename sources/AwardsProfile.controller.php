@@ -246,7 +246,7 @@ class Awards_Profile_Controller extends Action_Controller
 				throw new Elk_Exception('awards_error_not_requestable', false);
 			}
 
-			// Dude allready has this one?
+			// Dude already has this one?
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 			{
 				if ($award['id'] == $id)

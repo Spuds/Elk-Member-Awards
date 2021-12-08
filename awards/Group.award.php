@@ -46,9 +46,9 @@ class Group_Award extends Abstract_Award
 	}
 
 	/**
-	 * Checks if the award is a automatic award
+	 * Checks if the award is an automatic award
 	 *
-	 * @return string[]
+	 * @return int
 	 */
 	public function award_type()
 	{
