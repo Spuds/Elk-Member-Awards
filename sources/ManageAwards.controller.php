@@ -13,13 +13,8 @@
  *
  */
 
-if (!defined('ELK'))
-{
-	die('No access...');
-}
-
 /**
- * This is the awards administration controller class.
+ * This is the awards' administration controller class.
  *
  * - This file handles the admin side of Awards.
  */
@@ -38,7 +33,7 @@ class Awards_Controller extends Action_Controller
 			throw new Elk_Exception('feature_disabled', true);
 		}
 
-		// Its on, but are we allowed to manage or assign
+		// It's on, but are we allowed to manage or assign?
 		isAllowedTo(array('manage_awards', 'assign_awards'));
 
 		// Some things we will need, template, language, css
@@ -208,7 +203,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'sprintf' => array(
-								'format' => '<img src="%1$s" alt="%2$s" />',
+								'format' => '<img class="award_regular_image" src="%1$s" alt="%2$s" />',
 								'params' => array(
 									'img' => false,
 									'award_name' => false,
@@ -224,7 +219,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'sprintf' => array(
-								'format' => '<img src="%1$s" alt="%2$s" />',
+								'format' => '<img class="award_mini_image" src="%1$s" alt="%2$s" />',
 								'params' => array(
 									'small' => false,
 									'award_name' => false,
@@ -384,7 +379,7 @@ class Awards_Controller extends Action_Controller
 			// Check that awards id is clean.
 			$id = (int) $_REQUEST['a_id'];
 
-			// Load a single award in for for editing.
+			// Load a single award in for editing.
 			$context['award'] = AwardsLoadAward($id);
 			$context['editing'] = true;
 
@@ -487,6 +482,7 @@ class Awards_Controller extends Action_Controller
 		// Start an instance of the "award func" class so we can clean its specific parameters
 		$award = instantiate_award($award_values['award_function']);
 		$parameters = $award->clean();
+		//$parameters['trigger'] = $parameters['trigger'] ?? 0;
 		$award_values['award_type'] = (int) $award->award_type();
 		$id = $award_values['id'];
 
@@ -540,7 +536,8 @@ class Awards_Controller extends Action_Controller
 		}
 
 		// Awards were changed, flush the cache(s)
-		AwardsCacheMaintenance($award::FUNC);
+		$area = defined(get_class($award).'::FUNC') ? $award::FUNC : null;
+		AwardsCacheMaintenance($area);
 
 		// Back to the admin panel
 		redirectexit('action=admin;area=awards;sa=modify;saved=1;a_id=' . $id);
