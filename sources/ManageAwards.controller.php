@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Awards Modification
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,15 +9,12 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.1
  *
  */
 
-if (!defined('ELK'))
-	die('No access...');
-
 /**
- * This is the awards administration controller class.
+ * This is the awards' administration controller class.
  *
  * - This file handles the admin side of Awards.
  */
@@ -34,13 +31,15 @@ class Awards_Controller extends Action_Controller
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
 			throw new Elk_Exception('feature_disabled', 'fatal');
 
-		// Its on, but are we allowed to manage or assign
+		// It's on, but are we allowed to manage or assign?
 		isAllowedTo(array('manage_awards', 'assign_awards'));
 
-		// Some things we will need
+		// Some things we will need, template, language, css
 		loadLanguage('AwardsManage');
 		loadTemplate('AwardsManage');
 		loadCSSFile('awards.css');
+
+		// And some files we need
 		require_once(SUBSDIR . '/Awards.subs.php');
 
 		// Our award types array, do not mess with these
@@ -55,7 +54,7 @@ class Awards_Controller extends Action_Controller
 			array('id' => 8, 'name' => $txt['awards_karma_level'], 'desc' => $txt['awards_karma_level_desc']),
 		);
 
-		// Our placement array
+		// Our allowed placement array
 		$context['award_placements'] = array(
 			array('id' => 1, 'name' => $txt['awards_image_placement_below']),
 			array('id' => 2, 'name' => $txt['awards_image_placement_above']),
@@ -63,7 +62,7 @@ class Awards_Controller extends Action_Controller
 			array('id' => 4, 'name' => $txt['awards_image_placement_off'])
 		);
 
-		// And our format array
+		// And our placement format array
 		$context['award_formats'] = array(
 			array('id' => 1, 'name' => $txt['awards_format_full_frame']),
 			array('id' => 2, 'name' => $txt['awards_format_heading']),
@@ -72,8 +71,9 @@ class Awards_Controller extends Action_Controller
 	}
 
 	/**
-	 * Default action method, if a specific method wasn't directly called
-	 * already. Simply forwards to main.
+	 * Default action method.
+	 *
+	 * If a specific method wasn't directly called, forwards to main.
 	 */
 	public function action_index()
 	{
@@ -97,7 +97,11 @@ class Awards_Controller extends Action_Controller
 		// You way will end here if you don't have permission.
 		$action = new Action();
 
-		// Set up the admin tabs
+		// Default to sub-action 'main'
+		$subAction = $action->initialize($subActions, 'main');
+		$context['sub_action'] = $subAction;
+
+		// Set up the admin tabs (see iaa_member_awards() as well)
 		$context[$context['admin_menu_name']]['tab_data'] = array(
 			'title' => $txt['awards'],
 			'help' => 'awards_help',
@@ -138,9 +142,15 @@ class Awards_Controller extends Action_Controller
 			),
 		);
 
-		// Default to sub-action 'main'
-		$subAction = $action->initialize($subActions, 'main');
-		$context['sub_action'] = $subAction;
+		// Keep add or modify as the action indicates
+		if (isset($_REQUEST['a_id']))
+		{
+			unset($context[$context['admin_menu_name']]['tab_data']['tabs']['add']);
+		}
+		else
+		{
+			unset($context[$context['admin_menu_name']]['tab_data']['tabs']['modify']);
+		}
 
 		// Call the right function
 		$action->dispatch($subAction);
@@ -153,24 +163,25 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_awards_main()
 	{
-		global $context, $scripturl, $txt;
+		global $context, $scripturl, $txt, $settings;
 
-		// Load dependancies
+		// Load dependencies
 		require_once(SUBSDIR . '/GenericList.class.php');
 
 		// Load all the categories.
 		$categories = AwardsLoadCategories();
 
-		// Build an award list for each category
+		// Build an award list for *each* category
 		$count = 0;
 		foreach ($categories as $name => $cat)
 		{
 			$listOptions = array(
+				// ID per category
 				'id' => 'awards_cat_list_' . $count,
 				'title' => $name,
 				'items_per_page' => 25,
 				'default_sort_col' => 'award_name',
-				'no_items_label' => $txt['awards_error_no_badges'],
+				'no_items_label' => $txt['awards_error_no_awards'],
 				'base_href' => $scripturl . '?action=admin;area=awards' . (isset($_REQUEST['sort' . $count]) ? ';sort' . $count . '=' . urlencode($_REQUEST['sort' . $count]) : ''),
 				'request_vars' => array(
 					'sort' => 'sort' . $count,
@@ -198,7 +209,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'sprintf' => array(
-								'format' => '<img src="%1$s" alt="%2$s" />',
+								'format' => '<img class="award_regular_image" src="%1$s" alt="%2$s" />',
 								'params' => array(
 									'img' => false,
 									'award_name' => false,
@@ -214,7 +225,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'sprintf' => array(
-								'format' => '<img src="%1$s" alt="%2$s" />',
+								'format' => '<img class="award_mini_image" src="%1$s" alt="%2$s" />',
 								'params' => array(
 									'small' => false,
 									'award_name' => false,
@@ -254,23 +265,30 @@ class Awards_Controller extends Action_Controller
 							'class' => 'centertext',
 						),
 						'data' => array(
-							'function' => create_function('$row', '
-								global $txt, $settings;
+							'function' => function($row) use($txt, $settings) {
+								$result = (allowedTo('manage_awards') ? '
+									<a href="' . $row['edit'] . '" title="' . $txt['awards_button_edit'] . '">
+										<img src="' . $settings['images_url'] . '/awards/modify.png" alt="" />
+									</a>
+									<a href="'  . $row['delete'] . '" onclick="return confirm(' . $txt['awards_confirm_delete_award'] . ')" title="' . $txt['awards_button_delete'] . '">
+										<img src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
+									</a>
+									<br />' : '');
 
-								$result = ((allowedTo(\'manage_awards\')) ? \'<a href="\' . $row[\'edit\'] . \'" title="\' . $txt[\'awards_button_edit\'] . \'"><img src="\' . $settings[\'images_url\'] . \'/awards/modify.png" alt="" /></a>
-											<a href="\'  . $row[\'delete\'] . \'" onclick="return confirm(\\\'\' . $txt[\'awards_confirm_delete_award\'] . \'\\\');" title="\' . $txt[\'awards_button_delete\'] . \'"><img src="\' . $settings[\'images_url\'] . \'/awards/delete.png" alt="" /></a>
-											<br />\' : \'\');
+								if (($row['award_type'] <= 1) && (allowedTo('manage_awards') || (allowedTo('assign_awards') && !empty($row['assignable']))))
+									$result .= '
+										<a href="' . $row['assign'] . '" title="' . $txt['awards_button_assign'] . '">
+											<img src="' . $settings['images_url'] . '/awards/assign.png" alt="" />
+										</a>';
 
-								if (($row[\'award_type\'] <= 1) && (allowedTo(\'manage_awards\') || (allowedTo(\'assign_awards\') && !empty($row[\'assignable\']))))
-									$result .= \'
-											<a href="\' . $row[\'assign\'] . \'" title="\' . $txt[\'awards_button_assign\'] . \'"><img src="\' . $settings[\'images_url\'] . \'/awards/assign.png" alt="" /></a>\';
+								$result .= '
+										<a href="' . $row['view_assigned'] . '" title="' . $txt['awards_button_members'] . '">
+											<img src="' . $settings['images_url'] . '/awards/user.png" alt="" />
+										</a>';
 
-								$result .= \'
-											<a href="\' . $row[\'view_assigned\'] . \'" title="\' . $txt[\'awards_button_members\'] . \'"><img src="\' . $settings[\'images_url\'] . \'/awards/user.png" alt="" /></a>\';
-
-								return $result;'
-							),
-							'class' => 'grid8 centertext',
+								return $result;
+							},
+							'class' => 'grid10 centertext',
 						),
 					),
 				),
@@ -314,7 +332,7 @@ class Awards_Controller extends Action_Controller
 
 			// Check if any of the key values where left empty, and if so tell them
 			if (empty($_POST['award_name']))
-				throw new Elk_Exception('awards_error_empty_badge_name', 'general');
+				throw new Elk_Exception('awards_error_empty_award_name', 'general');
 
 			if (empty($_FILES['awardFile']['name']) && $_POST['a_id'] == 0)
 				throw new Elk_Exception('awards_error_no_file', 'general');
@@ -654,7 +672,7 @@ class Awards_Controller extends Action_Controller
 			'description' => $txt['awards_description_assigngroup'],
 		);
 
-		// Add some JS for the UI excperiance
+		// Add some JS for the UI experience
 		addInlineJavascript('
 			function showaward()
 			{
@@ -680,7 +698,7 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_assign_mass()
 	{
-		global $context, $txt;
+		global $context, $txt, $scripturl, $modSettings;
 
 		// Load in our helper functions
 		require_once(SUBSDIR . '/Awards.subs.php');
@@ -750,6 +768,15 @@ class Awards_Controller extends Action_Controller
 			redirectexit('action=admin;area=awards;sa=viewassigned;a_id=' . $_POST['award']);
 		}
 
+		addInlineJavascript('
+		function showaward()
+		{
+			awards = ' . $context['awardsjavasciptarray'] . '
+			document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'filename\'];
+			document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup2.award.value][\'minifile\'];
+		};
+		');
+
 		$context['sub_template'] = 'assign_mass';
 		$context['tabindex'] = 1;
 		$context[$context['admin_menu_name']]['tab_data'] = array(
@@ -795,6 +822,7 @@ class Awards_Controller extends Action_Controller
 
 		// Load the awards info for this award
 		$context['award'] = AwardsLoadAward($id);
+		$context['award']['description'] = parse_bbc($context['award']['description']);
 
 		// Build the listoption array to display the data
 		$listOptions = array(
@@ -822,13 +850,16 @@ class Awards_Controller extends Action_Controller
 						'value' => $txt['members'],
 					),
 					'data' => array(
-						'function' => create_function('$rowData', '
+						'function' => function($rowData) use ($scripturl) {
 							global $scripturl;
 
-							if ($rowData["id_member"] > 0)
-								return \'<a href="\' . strtr($scripturl, array(\'%\' => \'%%\')) . \'?action=profile;u=\' . $rowData[\'id_member\'] . \'">\' . $rowData[\'member_name\'] . \'</a>\';
-							return $rowData["member_name"];
-						'),
+							if ($rowData['id_member'] > 0)
+							{
+								return '<a href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=' . $rowData['id_member'] . '">' . $rowData['member_name'] . '</a>';
+							}
+
+							return $rowData['member_name'];
+						},
 					),
 					'sort' => array(
 						'default' => 'm.member_name ',
@@ -1079,7 +1110,7 @@ class Awards_Controller extends Action_Controller
 		$start = isset($_REQUEST['start']) ? (int) $_REQUEST['start'] : 0;
 
 		// Count the number of awards in this cat for create index
-		$count_awards = AwardsInCategories($id_category);
+		$count_awards = (int) AwardsInCategories($id_category);
 
 		// And find the category name
 		$category = AwardsLoadCategory($id_category);
