@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package   Awards Modification
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -28,7 +28,9 @@ class Awards_Controller extends Action_Controller
 
 		// If Member Awards is disabled, we don't go any further
 		if (empty($modSettings['awards_enabled']) && !$user_info['is_admin'])
+		{
 			throw new Elk_Exception('feature_disabled', 'fatal');
+		}
 
 		// Some things we will need
 		loadLanguage('AwardsManage');
@@ -208,7 +210,9 @@ class Awards_Controller extends Action_Controller
 		$awardcheck = array();
 		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards'] : array();
 		foreach ($awards as $award)
+		{
 			$awardcheck[$award['id']] = 1;
+		}
 
 		// Select the awards and their categories.
 		$context['categories'] = AwardsListAll($start, $maxAwards, $awardcheck);
@@ -233,13 +237,17 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, then how did we get here?
 			if (empty($context['award']['requestable']))
+			{
 				throw new Elk_Exception('awards_error_not_requestable', 'general');
+			}
 
-			// Dude allready has this one?
+			// Dude already has this one?
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
 			{
 				if ($award['id'] == $id)
+				{
 					throw new Elk_Exception('awards_error_have_already', 'general');
+				}
 			}
 
 			// Set the context values
@@ -265,14 +273,20 @@ class Awards_Controller extends Action_Controller
 
 			// Not requestable, how did we get here?
 			if (empty($context['award']['requestable']))
+			{
 				throw new Elk_Exception('awards_error_not_requestable', 'general');
+			}
 
-			// cant ask for what you have
+			// can't ask for what you have
 			foreach ($user_profile[$user_info['id']]['awards'] as $award)
+			{
 				if ($award['id'] == $id)
+				{
 					throw new Elk_Exception('awards_error_have_already', 'general');
+				}
+			}
 
-			// If we made it this far insert /replace it so it can be reviewed.
+			// If we made it this far insert /replace such that it can be reviewed.
 			AwardsMakeRequest($id, $date, $comments, true);
 
 			updateSettings(array(

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name      Member Awards Addon
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
  * This software is a derived product, based on:
@@ -9,12 +9,9 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.0
+ * @version   1.1
  *
  */
-
-if (!defined('ELK'))
-	die('No access...');
 
 /**
  * Profile Menu Hook, integrate_profile_areas, called from Profile.controller.php
@@ -30,7 +27,9 @@ function ipa_member_awards(&$profile_areas)
 
 	// No need to show these profile option to guests, perhaps a view_awards permissions should be added?
 	if ($user_info['is_guest'])
+	{
 		return;
+	}
 
 	loadLanguage('AwardsManage');
 
@@ -100,6 +99,7 @@ function iui_member_awards()
  *
  * - Adds the admin menu and all award sub actions as a sub menu
  * - hidden to all but admin, accessable via manage_award permission
+ *
  * @param mixed[] $admin_areas
  */
 function iaa_member_awards(&$admin_areas)
@@ -121,12 +121,12 @@ function iaa_member_awards(&$admin_areas)
 		'icon' => 'awards.png',
 		'permission' => array('manage_awards', 'assign_awards'),
 		'subsections' => array(
-			'main' => array($txt['awards_main'], array('assign_awards','manage_awards')),
+			'main' => array($txt['awards_main'], array('assign_awards', 'manage_awards')),
 			'categories' => array($txt['awards_categories'], 'manage_awards'),
 			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),
 			'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
 			'assigngroup' => array($txt['awards_assign_membergroup'], 'manage_awards'),
-			'assignmass' => array($txt['awards_assign_mass'],'manage_awards'),
+			'assignmass' => array($txt['awards_assign_mass'], 'manage_awards'),
 			'requests' => array($txt['awards_requests'] . (empty($modSettings['awards_request']) ? '' : ' (<b>' . $modSettings['awards_request'] . '</b>)'), array('assign_awards', 'manage_awards')),
 			'settings' => array($txt['awards_settings'], 'manage_awards'),
 		)
@@ -169,7 +169,9 @@ function imb_member_awards(&$buttons)
 
 	// Bit of a cheat but known to happen
 	if (empty($txt['awards']))
+	{
 		$txt['awards'] = 'Awards';
+	}
 
 	// allows members with manage_awards permission to see a menu item since the admin menu is hidden for them
 	$buttons['mlist']['sub_buttons']['awards'] = array(
@@ -183,6 +185,7 @@ function imb_member_awards(&$buttons)
  * Load Member Data hook, integrate_load_member_data, Called from load.php
  *
  * - Used to add columns / tables to the query so additional data can be loaded for a set
+ *
  * @param int[] $new_loaded_ids
  * @param string $set
  */
@@ -222,7 +225,9 @@ function imc_member_awards($user)
 
 	// @todo reference needed here?, like &$user_profile[$user]['awards']
 	if ($context['loadMemberContext_set'] !== 'minimal')
+	{
 		$memberContext[$user]['awards'] = $user_profile[$user]['awards'];
+	}
 }
 
 /**
@@ -298,8 +303,8 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Specific style class chosen?
 			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
-			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
-			: 'award_poster_3');
+				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
+					: 'award_poster_3');
 
 			$award_output = '
 				<li class="listlevel1">
@@ -307,10 +312,12 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Title for the above awards "box"
 			if (isset($modSettings['awards_aboveavatar_title']))
+			{
 				$award_output .= '
 						<legend>
 							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_aboveavatar_title'] . '</a>
 						</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[2]) . '
 					</fieldset>
@@ -330,18 +337,20 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Style for this area?
 			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1) ? 'award_poster_1'
-			: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
-			: 'award_poster_3');
+				: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
+					: 'award_poster_3');
 
 			$award_output = '
 				<li>
 					<fieldset class="' . $style . '">';
 
 			if (isset($modSettings['awards_belowavatar_title']))
+			{
 				$award_output .= '
 						<legend>
 							<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_belowavatar_title'] . '</a>
 						</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[1]) . '
 					</fieldset>
@@ -359,19 +368,21 @@ function injectProfileAwards(&$poster_div, $message)
 
 			// Style for the sigs?
 			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_signature_1'
-			: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
-			: 'award_signature_3');
+				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
+					: 'award_signature_3');
 
 			$award_output = '
 					<div class="signature">
-						<fieldset class="' .  $style . '">';
+						<fieldset class="' . $style . '">';
 
-				// Title for the signature area?
-				if (isset($modSettings['awards_signature_title']))
-					$award_output .= '
+			// Title for the signature area?
+			if (isset($modSettings['awards_signature_title']))
+			{
+				$award_output .= '
 							<legend>
 								<a href="' . $scripturl . '?action=profile;area=showAwards;u=' . $message['member']['id'] . '" title="' . $txt['awards'] . '">' . $modSettings['awards_signature_title'] . '</a>
 							</legend>';
+			}
 
 			$award_output .= implode('', $awards_link[3]) . '
 						</fieldset>
@@ -401,7 +412,9 @@ function awards_str_replace_once($needle, $replace, $haystack)
 	// Looks for the first occurrence of $needle in $haystack and replaces it with $replace
 	$pos = strpos($haystack, $needle);
 	if ($pos === false)
+	{
 		return $haystack;
+	}
 
 	return substr_replace($haystack, $replace, $pos, strlen($needle));
 }
