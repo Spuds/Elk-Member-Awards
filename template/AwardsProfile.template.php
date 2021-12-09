@@ -1,14 +1,15 @@
 <?php
 
 /**
- * @name      Member Awards Addon
+ * @package   Awards Addon
  * @license   Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
- * @version   1.0 Alpha
- *
+ * This software is a derived product, based on:
  * Original Software by:           Juan "JayBachatero" Hernandez
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
+ *
+ * @version   1.1
  *
  */
 
@@ -175,7 +176,7 @@ function template_awards_list()
 							<td class="centertext">
 								<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
 							</td>
-							<td align="center">
+							<td class="centertext">
 								<img class="award_mini_image" src="', $award['small'], '" alt="', $award['award_name'], '" />
 							</td>
 							<td>', $award['award_name'], '</td>
@@ -239,18 +240,18 @@ function template_awards_request()
 
 	// Enter a reason why you want this award.
 	echo '
-			<table width="100%" class="table_grid">
+			<table class="table_grid">
 				<thead>
-					<tr class="titlebg">
-						<th scope="col" class="first_th smalltext" >', $txt['awards_request_comments'], '</th>
-						<th scope="col" class="last_th smalltext" ></th>
+					<tr class="table_head">
+						<th scope="col" class="smalltext" >', $txt['awards_request_comments'], '</th>
+						<th scope="col" class="smalltext" ></th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr class="windowbg2">
-						<td colspan="2" align="center">
-							<div style="margin-bottom: 2ex;">
-								<textarea cols="75" rows="7" style="', isBrowser('is_ie8') ? 'max-width: 100%; min-width: 100%' : 'width: 100%', '; height: 100px;" name="comments" tabindex="', $context['tabindex']++, '"></textarea><br />
+					<tr>
+						<td colspan="2">
+							<div>
+								<textarea style="width: 100%; height: 125px;" name="comments" tabindex="', $context['tabindex']++, '"></textarea><br />
 							</div>
 						</td>
 					</tr>
