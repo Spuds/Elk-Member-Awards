@@ -80,7 +80,8 @@ function AwardsCountCategoryAwards($cat)
 
 	// Count the number of items in the database for create index
 	$request = $db->query('', '
-		SELECT COUNT(id_award)
+		SELECT 
+			COUNT(id_award)
 		FROM {db_prefix}awards
 		WHERE id_category = {int:cat}',
 		array(
@@ -309,7 +310,7 @@ function AwardsLoadRequestedAwards()
 
 	$db = database();
 
-	// Select all the requestable awards so we have the award specifics
+	// Select all the requestable awards, so we have the award specifics
 	$request = $db->query('', '
 		SELECT 
 			a.id_award, a.award_name, a.filename, a.minifile, a.description
@@ -392,6 +393,8 @@ function AwardsAddAward($award_name, $description, $time_added, $category, $awar
 			'award_name' => 'string',
 			'description' => 'string',
 			'time_added' => 'int',
+			'filename' => 'string',
+			'minifile' => 'string',
 			'id_category' => 'int',
 			'award_type' => 'int',
 			'award_trigger' => 'int',
@@ -403,6 +406,8 @@ function AwardsAddAward($award_name, $description, $time_added, $category, $awar
 			$award_name,
 			$description,
 			$time_added,
+			'',
+			'',
 			$category,
 			$award_type,
 			$trigger,
@@ -413,7 +418,7 @@ function AwardsAddAward($award_name, $description, $time_added, $category, $awar
 		array('id_award')
 	);
 
-	// Get the id_award for this new award
+	// Return the id_award for this new award
 	return $db->insert_id('{db_prefix}awards', 'id_award');
 }
 
@@ -1252,7 +1257,7 @@ function AwardsAddImage($id, $newName = '', $miniName = '')
 {
 	$db = database();
 
-	// update the database with this new image so its available.
+	// Update the database with this new image, so it's available.
 	$db->query('', '
 		UPDATE {db_prefix}awards
 		SET ' . (!empty($newName) ? 'filename = {string:file},' : '') .
@@ -1298,7 +1303,7 @@ function AwardsUpload($id_award)
 		$award = $_FILES['awardFile'];
 		$newName = BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '.' . strtolower(substr(strrchr($award['name'], '.'), 1));
 
-		// create the miniName in case we need to use this file as the mini as well
+		// Create the miniName in case we need to use this file as the mini as well
 		$miniName = BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $id_award . '-mini.' . strtolower(substr(strrchr($award['name'], '.'), 1));
 
 		// Move the file to the right directory
@@ -1330,7 +1335,7 @@ function AwardsUpload($id_award)
 		copy($newName, $miniName);
 	}
 
-	// Update the database with this new image(s) so its available.
+	// Update the database with this new image(s) so it's available.
 	AwardsAddImage($id_award, $newName, $miniName);
 }
 
