@@ -144,7 +144,7 @@ function template_modify()
 									&nbsp;
 								</dt>
 								<dd>',
-									!empty($context['award']['small']) ? '<img style="max-width:95%" id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
+									!empty($context['award']['small']) ? '<img id="awardssmall" src="' . $context['award']['small'] . '" align="middle" alt="" />' : '&nbsp;', '
 								</dd>
 								<dt>
 									<label for="awardFileMini">', $txt['awards_badge_upload_mini'], '</label>
