@@ -187,6 +187,8 @@ $txt['awards_view_album'] = 'Show Awards';
 $txt['showAwards'] = 'Show My Awards';
 $txt['listAwards'] = 'Show Available Awards';
 $txt['viewingAwards'] = 'Viewing Award:';
+$txt['awards_make_favorite'] = 'Add as Favorite';
+$txt['awards_remove_favorite'] = 'Remove as Favorite';
 
 // Others
 $txt['awards_showmembers'] = 'Showing Members with the Award';
