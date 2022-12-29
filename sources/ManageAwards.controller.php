@@ -9,9 +9,11 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.1
+ * @version   1.1.1
  *
  */
+
+use BBC\ParserWrapper;
 
 /**
  * This is the awards' administration controller class.
@@ -21,7 +23,7 @@
 class Awards_Controller extends Action_Controller
 {
 	/**
-	 * Entry point function for Member Awards, permission checks, makes sure its on
+	 * Entry point function for Member Awards, permission checks, makes sure it is on
 	 */
 	public function pre_dispatch()
 	{
@@ -91,6 +93,7 @@ class Awards_Controller extends Action_Controller
 			'requests' => array($this, 'action_awards_requests', 'permission' => array('assign_awards', 'manage_awards')),
 			'settings' => array($this, 'action_settings', 'permission' => 'manage_awards'),
 			'delete' => array($this, 'action_delete', 'permission' => 'manage_awards'),
+			'viewcategory' => array($this, 'action_view_category', 'permission' => 'manage_awards'),
 			'editcategory' => array($this, 'action_edit_category', 'permission' => 'manage_awards'),
 			'deletecategory' => array($this, 'action_delete_category', 'permission' => 'manage_awards'),
 			'viewassigned' => array($this, 'action_view_assigned', 'permission' => 'manage_awards'),
@@ -118,7 +121,7 @@ class Awards_Controller extends Action_Controller
 					'permission' => 'manage_awards'
 				),
 				'modify' => array(
-					'label' => isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'],
+					'label' => isset($_REQUEST['a_id']) && $subAction === 'modify' ? $txt['awards_modify'] : $txt['awards_add'],
 					'permission' => 'manage_awards'
 				),
 				'assign' => array(
@@ -144,16 +147,6 @@ class Awards_Controller extends Action_Controller
 			),
 		);
 
-		// Keep add or modify as the action indicates
-		if (isset($_REQUEST['a_id']))
-		{
-			unset($context[$context['admin_menu_name']]['tab_data']['tabs']['add']);
-		}
-		else
-		{
-			unset($context[$context['admin_menu_name']]['tab_data']['tabs']['modify']);
-		}
-
 		// Call the right function
 		$action->dispatch($subAction);
 	}
@@ -165,7 +158,7 @@ class Awards_Controller extends Action_Controller
 	 */
 	public function action_awards_main()
 	{
-		global $context, $scripturl, $txt, $settings;
+		global $context, $scripturl, $txt;
 
 		// Load dependencies
 		require_once(SUBSDIR . '/GenericList.class.php');
@@ -242,7 +235,7 @@ class Awards_Controller extends Action_Controller
 						),
 						'data' => array(
 							'db' => 'award_name',
-							'class' => "grid25",
+							'class' => 'grid25',
 						),
 						'sort' => array(
 							'default' => 'award_name',
@@ -267,13 +260,13 @@ class Awards_Controller extends Action_Controller
 							'class' => 'centertext',
 						),
 						'data' => array(
-							'function' => function ($row) use ($txt, $settings) {
+							'function' => function ($row) use ($txt) {
 								$result = (allowedTo('manage_awards') ? '
 									<a href="' . $row['edit'] . '" title="' . $txt['awards_button_edit'] . '">
-										<img src="' . $settings['images_url'] . '/awards/modify.png" alt="" />
+										<i class="icon i-modify"></i>
 									</a>
 									<a href="' . $row['delete'] . '" onclick="return confirm(' . $txt['awards_confirm_delete_award'] . ')" title="' . $txt['awards_button_delete'] . '">
-										<img src="' . $settings['images_url'] . '/awards/delete.png" alt="" />
+										<i class="icon i-delete"></i>
 									</a>
 									<br />' : '');
 
@@ -281,18 +274,18 @@ class Awards_Controller extends Action_Controller
 								{
 									$result .= '
 										<a href="' . $row['assign'] . '" title="' . $txt['awards_button_assign'] . '">
-											<img src="' . $settings['images_url'] . '/awards/assign.png" alt="" />
+											<i class="icon i-user-plus"></i>
 										</a>';
 								}
 
 								$result .= '
 										<a href="' . $row['view_assigned'] . '" title="' . $txt['awards_button_members'] . '">
-											<img src="' . $settings['images_url'] . '/awards/user.png" alt="" />
+											<i class="icon i-users"></i>
 										</a>';
 
 								return $result;
 							},
-							'class' => 'grid10 centertext',
+							'class' => 'nowrap centertext',
 						),
 					),
 				),
@@ -332,7 +325,7 @@ class Awards_Controller extends Action_Controller
 		// Check if they are saving the changes
 		if (isset($_POST['award_save']))
 		{
-			checkSession('post');
+			checkSession();
 
 			// Check if any of the key values where left empty, and if so tell them
 			if (empty($_POST['award_name']))
@@ -384,18 +377,15 @@ class Awards_Controller extends Action_Controller
 				$editAward = AwardsUpdateAward($id, $award_name, $description, $category, $award_type, $trigger, $award_location, $award_requestable, $award_assignable);
 
 				// Are we uploading new images for this award?
-				if ($editAward == true && ((isset($_FILES['awardFile']) && $_FILES['awardFile']['error'] == 0) || (isset($_FILES['awardFileMini']) && $_FILES['awardFileMini']['error'] == 0)))
+				if ($editAward && ((isset($_FILES['awardFile']) && $_FILES['awardFile']['error'] == 0) || (isset($_FILES['awardFileMini']) && $_FILES['awardFileMini']['error'] == 0)))
 				{
-					// Lets make sure that we delete the file that we are supposed to and not something harmful
+					// Let's make sure that we delete the file that we are supposed to and not something harmful
 					list ($filename, $minifile) = AwardLoadFiles($id);
 
 					// Delete the old file(s) first.
-					if ($_FILES['awardFile']['error'] == 0)
+					if (($_FILES['awardFile']['error'] == 0) && file_exists(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename))
 					{
-						if (file_exists(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename))
-						{
-							@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
-						}
+						@unlink(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $filename);
 					}
 
 					if (file_exists(BOARDDIR . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $minifile))
@@ -421,7 +411,7 @@ class Awards_Controller extends Action_Controller
 
 		// Some javascript to disable the trigger text box if the first option e.g. regular is selected
 		addInlineJavascript('
-			var award_type = document.getElementById(\'id_type\');
+			let award_type = document.getElementById(\'id_type\');
 
 			mod_addEvent(award_type, \'change\', toggleAwardTrigger);
 			toggleAwardTrigger();
@@ -436,7 +426,7 @@ class Awards_Controller extends Action_Controller
 
 			function toggleAwardTrigger()
 			{
-				var select_elem = document.getElementById(\'awardTrigger\');
+				let select_elem = document.getElementById(\'awardTrigger\');
 
 				select_elem.disabled = award_type.value == 1;
 
@@ -541,7 +531,7 @@ class Awards_Controller extends Action_Controller
 			$context['awardsjavasciptarray'] = json_encode($context['awards']);
 
 			// Quick check for mischievous users, you can't just enter any a_id ;)
-			if (!allowedTo('manage_awards') && isset($_REQUEST['a_id']) && empty($context['awards'][$_REQUEST['a_id']]['assignable']))
+			if (isset($_REQUEST['a_id']) && !allowedTo('manage_awards') && empty($context['awards'][$_REQUEST['a_id']]['assignable']))
 			{
 				throw new Elk_Exception('awards_error_hack_error');
 			}
@@ -556,7 +546,7 @@ class Awards_Controller extends Action_Controller
 		elseif (isset($_GET['step']) && $_GET['step'] == 2)
 		{
 			// Check session.
-			checkSession('post');
+			checkSession();
 
 			// Well we need this
 			$members = array();
@@ -704,7 +694,7 @@ class Awards_Controller extends Action_Controller
 		addInlineJavascript('
 			function showaward()
 			{
-				awards= ' . $context['awardsjavasciptarray'] . '
+				awards = ' . $context['awardsjavasciptarray'] . '
 				document.getElementById(\'awards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'filename\'];
 				document.getElementById(\'miniawards\').src = \'' . dirname($scripturl) . '/' . $modSettings['awards_dir'] . '/\' + awards[document.forms.assigngroup.award.value][\'minifile\'];
 			}', true);
@@ -751,7 +741,7 @@ class Awards_Controller extends Action_Controller
 			// Good old number 2 ... they have selected some groups, we need to load the members for them
 			if (isset($_REQUEST['step']) && (int) $_REQUEST['step'] == 2)
 			{
-				// Make sure that they checked some groups so we can load them
+				// Make sure that they checked some groups, so we can load them
 				if (!empty($_POST['who']))
 				{
 					$context['members'] = AwardsLoadGroupMembers();
@@ -842,7 +832,7 @@ class Awards_Controller extends Action_Controller
 		// Removing the award from some members?
 		if (isset($_POST['unassign']))
 		{
-			checkSession('post');
+			checkSession();
 
 			// Get all the id's selected in the form
 			$ids = array();
@@ -860,9 +850,10 @@ class Awards_Controller extends Action_Controller
 
 		// Load the awards info for this award
 		$context['award'] = AwardsLoadAward($id);
-		$context['award']['description'] = parse_bbc($context['award']['description']);
+		$parser = ParserWrapper::instance();
+		$context['award']['description'] = $parser->parseMessage($context['award']['description'], true);
 
-		// Build the listoption array to display the data
+		// Build the list option array to display the data
 		$listOptions = array(
 			'id' => 'view_assigned',
 			'title' => $txt['awards_showmembers'] . ': ' . $context['award']['award_name'],
@@ -893,7 +884,7 @@ class Awards_Controller extends Action_Controller
 
 							if ($rowData['id_member'] > 0)
 							{
-								return '<a href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=' . $rowData['id_member'] . '">' . $rowData['member_name'] . '</a>';
+								return '<a class="linkbutton" href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=' . $rowData['id_member'] . '">' . $rowData['member_name'] . '</a>';
 							}
 
 							return $rowData['member_name'];
@@ -988,15 +979,15 @@ class Awards_Controller extends Action_Controller
 		if (isset($_POST['save_settings']))
 		{
 			// Check the session
-			checkSession('post');
+			checkSession();
 
 			// Strip any slashes from the awards dir
 			$_POST['awards_dir'] = str_replace(array('\\', '/'), '', $_POST['awards_dir']);
 
-			// Try to create a new dir if it doesn't exists.
+			// Try to create a new dir if it doesn't exist.
 			if (!is_dir(BOARDDIR . '/' . $_POST['awards_dir']) && trim($_POST['awards_dir']) != '')
 			{
-				if (!mkdir(BOARDDIR . '/' . $_POST['awards_dir'], 0755))
+				if (!mkdir($concurrentDirectory = BOARDDIR . '/' . $_POST['awards_dir'], 0755) && !is_dir($concurrentDirectory))
 				{
 					$context['awards_mkdir_fail'] = true;
 				}
@@ -1060,7 +1051,7 @@ class Awards_Controller extends Action_Controller
 		// Check if they are saving the changes
 		if (isset($_POST['category_save']))
 		{
-			checkSession('post');
+			checkSession();
 
 			$name = trim(strtr(Util::htmlspecialchars($_REQUEST['category_name'], ENT_QUOTES), array("\r" => '', "\n" => '', "\t" => '')));
 
@@ -1174,11 +1165,14 @@ class Awards_Controller extends Action_Controller
 		$context['sub_template'] = 'view_category';
 
 		// And the admin tabs
-		$context[$context['admin_menu_name']]['tab_data'] = array(
+		$context[$context['admin_menu_name']]['tab_data'] += array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_view_category'],
+			'description' => $txt['awards_description_viewcategory']
 		);
+
+		// A cheat to show categories as selected when in view category
+		$context['menu_data_1']['current_subsection'] = 'categories';
 	}
 
 	/**
@@ -1191,7 +1185,7 @@ class Awards_Controller extends Action_Controller
 	{
 		global $context, $txt;
 
-		// Load just the members awaiting approval so we can reject them >:D
+		// Load just the members awaiting approval, so we can reject them >:D
 		$awards = AwardsLoadRequestedAwards();
 
 		// Place them in context for the template
@@ -1222,12 +1216,12 @@ class Awards_Controller extends Action_Controller
 		global $modSettings;
 
 		// Check session.
-		checkSession('post');
+		checkSession();
 
 		// Start the counter.
 		$requests_count = 0;
 
-		// Lets sanitize these up.
+		// Let's sanitize these up.
 		$awards = array();
 		foreach ($_POST['requests'] as $id_award => $members)
 		{
@@ -1241,7 +1235,7 @@ class Awards_Controller extends Action_Controller
 		// Accept the request
 		if (isset($_POST['approve_selected']))
 		{
-			AwardsApproveDenyRequests($awards, true);
+			AwardsApproveDenyRequests($awards);
 		}
 		// Or the more fun, deny em!
 		elseif (isset($_POST['reject_selected']))
