@@ -9,9 +9,11 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.1
+ * @version   1.1.1
  *
  */
+
+use BBC\ParserWrapper;
 
 /**
  * Loads all the awards for the members in the list
@@ -43,6 +45,7 @@ function AwardsLoad($new_loaded_ids)
 		)
 	);
 	// Fetch the award info just once
+	$parser = ParserWrapper::instance();
 	while ($row = $db->fetch_assoc($request))
 	{
 		// Track group awards separately
@@ -52,7 +55,7 @@ function AwardsLoad($new_loaded_ids)
 			$group_awards_details[$row['id_group']] = array(
 				'id' => $row['id_award'],
 				'award_name' => $row['award_name'],
-				'description' => parse_bbc($row['description']),
+				'description' => $parser->parseMessage($row['description'], true),
 				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
 				'minifile' => $row['minifile'],
@@ -69,7 +72,7 @@ function AwardsLoad($new_loaded_ids)
 				'id' => $row['id_award'],
 				'id_group' => $row['id_group'],
 				'award_name' => $row['award_name'],
-				'description' => parse_bbc($row['description']),
+				'description' => $parser->parseMessage($row['description'], true),
 				'more' => '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 				'href' => '?action=profile;area=showAwards;u=' . $row['id_member'],
 				'minifile' => $row['minifile'],
@@ -95,14 +98,14 @@ function AwardsLoad($new_loaded_ids)
 		// check each member to see if they are a member of a group that has a group awards
 		foreach ($new_loaded_ids as $member_id)
 		{
-			// make an array of this users groups
+			// make an array of this user groups
 			$user_profile[$member_id]['groups'] = array($user_profile[$member_id]['id_group'], $user_profile[$member_id]['id_post_group']);
 			if (!empty($user_profile[$member_id]['additional_groups']))
 			{
 				$user_profile[$member_id]['groups'] = array_merge($user_profile[$member_id]['groups'], explode(',', $user_profile[$member_id]['additional_groups']));
 			}
 
-			// See if any of this members groups match a group award
+			// See if any of this member groups match a group award
 			$give_group_awards = array_intersect($user_profile[$member_id]['groups'], $group_awards);
 			if (!empty($give_group_awards))
 			{
@@ -117,14 +120,12 @@ function AwardsLoad($new_loaded_ids)
 			}
 		}
 	}
-
-	return;
 }
 
 /**
  * Master auto award function, runs the show
  *
- * - Loads all of the defined auto awards and groups them
+ * - Loads all the defined auto awards and groups them
  * - Uses the cache when it can
  * - Determines if any members in the list have earned any of the auto awards
  *
@@ -145,7 +146,7 @@ function AwardsAutoCheck($new_loaded_ids)
 		$autoawards = array();
 		$autoawardsid = array();
 
-		// Load all the defined auto awards .. uses a filesort,
+		// Load all the defined auto awards (uses a filesort),
 		// but how many auto award definitions are there, <100? php sort instead?
 		// The key is the trigger desc sort, this allows us to use 1 query for that auto award 'type',
 		// all others will be a subset of that
@@ -175,7 +176,7 @@ function AwardsAutoCheck($new_loaded_ids)
 		}
 	}
 
-	// Now lets do something with each award type
+	// Now let's do something with each award type
 	foreach ($autoawards as $award_type => $awardids)
 	{
 		switch ($award_type)
@@ -269,7 +270,7 @@ function AwardsAutoCheck($new_loaded_ids)
  * @param int[] $awardids
  * @param int[] $new_loaded_ids
  * @param string $area
- * @param boolean $one_to_n
+ * @param bool $one_to_n
  */
 function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = false)
 {
@@ -303,17 +304,14 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
 				}
 			}
 			// 1 to n position based awards
-			else
+			elseif (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] <= $award['award_trigger']))
 			{
-				if (isset($user_profile[$member_id][$area]) && ($user_profile[$member_id][$area] <= $award['award_trigger']))
+				// Give this member a hoho, if they don't already have it, and stop looking for more
+				if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
 				{
-					// Give this member a hoho, if they don't already have it, and stop looking for more
-					if (!in_array($award['id_award'], $user_profile[$member_id]['awardlist']))
-					{
-						$members[$member_id] = (int) $award['id_award'];
-					}
-					break;
+					$members[$member_id] = (int) $award['id_award'];
 				}
+				break;
 			}
 		}
 	}
@@ -328,7 +326,7 @@ function AwardsAutoAssignMembers($awardids, $new_loaded_ids, $area, $one_to_n = 
  *
  * @param int[] $members
  * @param string $award_type
- * @param boolean $awardids
+ * @param bool $awardids
  */
 function AwardsAutoAssign($members, $award_type, $awardids)
 {
@@ -381,8 +379,6 @@ function AwardsAutoAssign($members, $award_type, $awardids)
 		$values,
 		array('id_member', 'id_award')
 	);
-
-	return;
 }
 
 /**
@@ -401,7 +397,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 	// Init with all members in the query
 	$temp = $memberlist;
 
-	// Lets see if this is cached in our "cache in a cache"tm :P
+	// Let's see if this is cached in our "cache in a cache"tm :P
 	if (($awards_topic_started = cache_get_data('awards:topic_started', $ttl)) != null)
 	{
 		// Reset this since we have a cache, we will build it for only the members we need data on
@@ -419,7 +415,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 				}
 				else
 				{
-					// Its a stale entry in the cache, add it to our lookup and drop if from the cache array
+					// Stale entry in the cache, add it to our lookup and drop if from the cache array
 					unset($awards_topic_started[$member]);
 					$temp[] = $member;
 				}
@@ -508,7 +504,7 @@ function AwardsTopPosters_1_N($limit = 10)
 		$members = array(0 => 0);
 	}
 
-	// Load them up so we can see if the kids have won a new toy
+	// Load them up, so we can see if the kids have won a new toy
 	foreach ($members as $id_member => $poster_number)
 	{
 		$user_profile[$id_member]['top_posters'] = $poster_number;
