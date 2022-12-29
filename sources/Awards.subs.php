@@ -9,9 +9,11 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.1
+ * @version   1.1.1
  *
  */
+
+use BBC\ParserWrapper;
 
 /**
  * Loads an award by ID and places the values in to context
@@ -129,6 +131,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 		)
 	);
 	$categories = array();
+	$parser = ParserWrapper::instance();
 	// Loop through the results.
 	while ($row = $db->fetch_assoc($request))
 	{
@@ -137,7 +140,7 @@ function AwardsLoadCategoryAwards($start, $items_per_page, $sort, $cat)
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
 			'award_type' => $row['award_type'],
-			'description' => parse_bbc($row['description']),
+			'description' => $parser->parseMessage($row['description'], true),
 			'time' => standardTime($row['time_added']),
 			'requestable' => $row['award_requestable'],
 			'assignable' => $row['award_assignable'],
@@ -178,7 +181,7 @@ function AwardsCountMembersAwards($memID)
 			AND active = {int:active}',
 		array(
 			'mem' => $memID,
-			'groups' => !empty($cur_profile['groups']) ? array_map('intval', $cur_profile['groups']) : '',
+			'groups' => !empty($cur_profile['groups']) ? array_map('\intval', $cur_profile['groups']) : '',
 			'active' => 1
 		)
 	);
@@ -193,7 +196,7 @@ function AwardsCountMembersAwards($memID)
 }
 
 /**
- * Loads in the awards/categories details for an members set of awards
+ * Loads in the awards/categories details for a members set of awards
  *
  * @param int $start
  * @param int $end
@@ -223,11 +226,12 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 			'start' => $start,
 			'end' => $end,
 			'member' => $memID,
-			'groups' => !empty($cur_profile['groups']) ? array_map('intval', $cur_profile['groups']) : '',
+			'groups' => !empty($cur_profile['groups']) ? array_map('\intval', $cur_profile['groups']) : '',
 			'active' => 1
 		)
 	);
 	$categories = array();
+	$parser = ParserWrapper::instance();
 	// Fetch the award info just once
 	while ($row = $db->fetch_assoc($request))
 	{
@@ -243,12 +247,12 @@ function AwardsLoadMembersAwards($start, $end, $memID)
 		$categories[$row['id_category']]['awards'][$row['id_award']] = array(
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
-			'description' => parse_bbc($row['description']),
+			'description' => $parser->parseMessage($row['description'], true),
 			'more' => $scripturl . '?action=profile;area=membersAwards;a_id=' . $row['id_award'],
 			'favorite' => array(
 				'fav' => $row['favorite'],
 				'href' => $scripturl . '?action=profile;area=showAwards;in=' . $row['id_award'] . ';makeFavorite=' . ($row['favorite'] == 1 ? '0' : '1') . (isset($_REQUEST['u']) ? ';u=' . $_REQUEST['u'] : ''),
-				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . $txt['awards_favorite2'] . '" />',
+				'img' => '<img src="' . $settings['images_url'] . '/awards/' . ($row['favorite'] == 1 ? 'delete' : 'add') . '.png" alt="' . $txt['awards_favorite2'] . '" title="' . ($row['favorite'] == 1 ? $txt['awards_remove_favorite'] : $txt['awards_make_favorite']) . '" />',
 				'allowed' => empty($row['id_group']),
 			),
 			'filename' => $row['filename'],
@@ -327,6 +331,7 @@ function AwardsLoadRequestedAwards()
 		)
 	);
 	$awards = array();
+	$parser = ParserWrapper::instance();
 	while ($row = $db->fetch_assoc($request))
 	{
 		$awards[$row['id_award']] = array(
@@ -334,7 +339,7 @@ function AwardsLoadRequestedAwards()
 			'award_name' => $row['award_name'],
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
-			'description' => parse_bbc($row['description']),
+			'description' => $parser->parseMessage($row['description'], true),
 			'img' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['filename'],
 			'small' => dirname($scripturl) . '/' . (empty($modSettings['awards_dir']) ? '' : $modSettings['awards_dir'] . '/') . $row['minifile'],
 			'members' => array(),
@@ -490,7 +495,7 @@ function AwardsDeleteAward($id)
  * Load the list of groups that this member can see
  *
  * - Counts the number of members in each group (including post count based ones)
- * - Loads all groups, normal, moderator, postcount, hidden, etc
+ * - Loads all groups, normal, moderator, postcount, hidden, etc.
  * - Returns the array of values
  */
 function AwardsLoadGroups()
@@ -576,7 +581,7 @@ function AwardsLoadGroupMembers()
 
 	$members = array();
 
-	// Stop any monkey bussiness
+	// Stop any monkey business
 	$allowed_groups = $_SESSION['allowed_groups'];
 	$_POST['who'] = array_intersect_key($_POST['who'], $allowed_groups);
 	$postsave = $_POST['who'];
@@ -739,7 +744,7 @@ function AwardsLoadMembersCount($id)
  * @param int $id
  * @param int $date
  * @param string $comments
- * @param boolean $flush
+ * @param bool $flush
  */
 function AwardsMakeRequest($id, $date, $comments, $flush = true)
 {
@@ -798,7 +803,7 @@ function AwardsMakeRequest($id, $date, $comments, $flush = true)
  * Approve or deny a request by a member for a requestable award
  *
  * @param int[] $awards
- * @param boolean $approve
+ * @param bool $approve
  */
 function AwardsApproveDenyRequests($awards, $approve = true)
 {
@@ -818,7 +823,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 				array(
 					'active' => 1,
 					'id_award' => $id_award,
-					'members' => $awards[$id_award],
+					'members' => $member,
 				)
 			);
 		}
@@ -848,7 +853,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
  * - Returns array of categories with key of name and value of id
  *
  * @param string $sort order to return the categories
- * @param boolean $multi if true will return an array of arrays
+ * @param bool $multi if true will return an array of arrays
  */
 function AwardsLoadCategories($sort = 'DESC', $multi = false)
 {
@@ -868,16 +873,16 @@ function AwardsLoadCategories($sort = 'DESC', $multi = false)
 	while ($row = $db->fetch_assoc($request))
 	{
 		// return the data as key names or arrays
-		if (!$multi)
-		{
-			$categories[$row['category_name']] = $row['id_category'];
-		}
-		else
+		if ($multi)
 		{
 			$categories[] = array(
 				'id' => $row['id_category'],
 				'name' => $row['category_name'],
 			);
+		}
+		else
+		{
+			$categories[$row['category_name']] = $row['id_category'];
 		}
 	}
 	$db->free_result($request);
@@ -907,7 +912,7 @@ function AwardsLoadCategory($id)
 	$row = $db->fetch_assoc($request);
 
 	// Check if that category exists
-	if ($row['id_category'] != 1)
+	if ($db->num_rows($request) == 0)
 	{
 		throw new Elk_Exception('awards_error_no_category');
 	}
@@ -1051,6 +1056,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 	);
 	// Loop through the results.
 	$categories = array();
+	$parser = ParserWrapper::instance();
 	while ($row = $db->fetch_assoc($request))
 	{
 		if (!isset($categories[$row['id_category']]['name']))
@@ -1065,7 +1071,7 @@ function AwardsListAll($start, $end, $awardcheck = array())
 		$categories[$row['id_category']]['awards'][] = array(
 			'id' => $row['id_award'],
 			'award_name' => $row['award_name'],
-			'description' => parse_bbc($row['description']),
+			'description' => $parser->parseMessage($row['description'], true),
 			'time' => standardTime($row['time_added']),
 			'filename' => $row['filename'],
 			'minifile' => $row['minifile'],
@@ -1190,19 +1196,19 @@ function AwardsRemoveMembers($id, $members = array())
 /**
  * Adds an award to a membergroup or a group of individual members
  *
- * @param mixed[] $values
- * @param boolean $group
+ * @param array $values
+ * @param bool $group
  */
 function AwardsAddMembers($values, $group = false)
 {
 	$db = database();
 
 	// Insert the data for a set of members
-	if (!$group)
+	if ($group)
 	{
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
-			array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'active' => 'int'),
+			array('id_award' => 'int', 'id_member' => 'int', 'id_group' => 'int', 'date_received' => 'string', 'active' => 'int'),
 			$values,
 			array('id_member', 'id_award')
 		);
@@ -1212,7 +1218,7 @@ function AwardsAddMembers($values, $group = false)
 	{
 		$db->insert('ignore',
 			'{db_prefix}awards_members',
-			array('id_award' => 'int', 'id_member' => 'int', 'id_group' => 'int', 'date_received' => 'string', 'active' => 'int'),
+			array('id_award' => 'int', 'id_member' => 'int', 'date_received' => 'string', 'active' => 'int'),
 			$values,
 			array('id_member', 'id_award')
 		);
@@ -1287,7 +1293,7 @@ function AwardsUpload($id_award)
 	$newName = '';
 	$miniName = '';
 
-	// Lets try to CHMOD the awards dir if needed.
+	// Let's try to CHMOD the awards dir if needed.
 	if (!is_writable(BOARDDIR . '/' . $modSettings['awards_dir']))
 	{
 		@chmod(BOARDDIR . '/' . $modSettings['awards_dir'], 0755);
@@ -1330,7 +1336,7 @@ function AwardsUpload($id_award)
 		@chmod($miniName, 0755);
 	}
 	// No mini just the regular for it instead
-	elseif (($_FILES['awardFileMini']['error'] == 4) && ($_FILES['awardFile']['error'] != 4))
+	elseif ($_FILES['awardFile']['error'] != 4)
 	{
 		copy($newName, $miniName);
 	}
@@ -1356,7 +1362,8 @@ function AwardsValidateImage($name, $id)
 	{
 		throw new Elk_Exception('awards_error_upload_size');
 	}
-	elseif ($award['error'] !== 0)
+
+	if ($award['error'] !== 0)
 	{
 		throw new Elk_Exception('awards_error_upload_failed');
 	}
