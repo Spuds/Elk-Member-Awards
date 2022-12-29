@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<!DOCTYPE modification SYSTEM "http://www.elkarte.net/site/modification">
-<modification xmlns="http://www.elkarte.net/site/modification" xmlns:elk="http://www.elkarte.net/">
+<!DOCTYPE modification SYSTEM "https://www.elkarte.net/site/modification">
+<modification xmlns="https://www.elkarte.net/site/modification" xmlns:elk="https://www.elkarte.net/">
 	<id>spuds:MemberAwards</id>
-	<version>1.1</version>
+	<version>1.1.1</version>
 
 	<!-- These are the edits to the templates.  If you are using a custom theme they might not work at all! -->
 	<!-- If that happens, find something closely resembling the items in the search operation, and do the necessary -->
