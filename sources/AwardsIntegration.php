@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.1
+ * @version   1.1.1
  *
  */
 
@@ -19,7 +19,7 @@
  * Used to add menu items to the profile area
  * Adds show my & view award options
  *
- * @param mixed[] $profile_areas
+ * @param array $profile_areas
  */
 function ipa_member_awards(&$profile_areas)
 {
@@ -51,7 +51,7 @@ function ipa_member_awards(&$profile_areas)
 					'file' => 'AwardsProfile.controller.php',
 					'controller' => 'Awards_Controller',
 					'function' => 'action_membersAwards',
-					'hidden' => (isset($_GET['area']) && $_GET['area'] !== "membersAwards"),
+					'hidden' => (isset($_GET['area']) && $_GET['area'] !== 'membersAwards'),
 					'permission' => array(
 						'own' => 'profile_view_own',
 						'any' => 'profile_view_any',
@@ -91,16 +91,16 @@ function iui_member_awards()
 {
 	global $user_info;
 
-	$user_info['awards'] = isset($user_settings['awards']) ? $user_settings['awards'] : array();
+	$user_info['awards'] = $user_settings['awards'] ?? array();
 }
 
 /**
  * Admin hook, integrate_admin_areas, called from Admin.php
  *
  * - Adds the admin menu and all award sub actions as a sub menu
- * - hidden to all but admin, accessable via manage_award permission
+ * - hidden to all but admin, accessible via manage_award permission
  *
- * @param mixed[] $admin_areas
+ * @param array $admin_areas
  */
 function iaa_member_awards(&$admin_areas)
 {
@@ -111,6 +111,9 @@ function iaa_member_awards(&$admin_areas)
 	// allow members with this permission to access the menu :P
 	$admin_areas['members']['permission'][] = 'manage_awards';
 	$admin_areas['members']['permission'][] = 'assign_awards';
+
+	// Create or Modify
+	$modify = isset($_REQUEST['a_id'], $_REQUEST['sa']) && $_REQUEST['sa'] === 'modify';
 
 	// our main awards menu area, under the members tab
 	$admin_areas['members']['areas']['awards'] = array(
@@ -123,7 +126,7 @@ function iaa_member_awards(&$admin_areas)
 		'subsections' => array(
 			'main' => array($txt['awards_main'], array('assign_awards', 'manage_awards')),
 			'categories' => array($txt['awards_categories'], 'manage_awards'),
-			'modify' => array(isset($_REQUEST['a_id']) ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),
+			'modify' => array($modify ? $txt['awards_modify'] : $txt['awards_add'], 'manage_awards'),
 			'assign' => array($txt['awards_assign'], array('assign_awards', 'manage_awards')),
 			'assigngroup' => array($txt['awards_assign_membergroup'], 'manage_awards'),
 			'assignmass' => array($txt['awards_assign_mass'], 'manage_awards'),
@@ -136,13 +139,13 @@ function iaa_member_awards(&$admin_areas)
 /**
  * Permissions hook, integrate_load_permissions, called from ManagePermissions.php
  *
- * - Used to add new permisssions
+ * - Used to add new permissions
  *
- * @param mixed[] $permissionGroups
- * @param mixed[] $permissionList
- * @param mixed[] $leftPermissionGroups
- * @param mixed[] $hiddenPermissions
- * @param mixed[] $relabelPermissions
+ * @param array $permissionGroups
+ * @param array $permissionList
+ * @param array $leftPermissionGroups
+ * @param array $hiddenPermissions
+ * @param array $relabelPermissions
  */
 function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissionGroups, &$hiddenPermissions, &$relabelPermissions)
 {
@@ -161,7 +164,7 @@ function ilp_member_awards(&$permissionGroups, &$permissionList, &$leftPermissio
  *
  * - Used to add top menu buttons
  *
- * @param mixed[] $buttons
+ * @param array $buttons
  */
 function imb_member_awards(&$buttons)
 {
@@ -177,7 +180,7 @@ function imb_member_awards(&$buttons)
 	$buttons['mlist']['sub_buttons']['awards'] = array(
 		'title' => $txt['awards'],
 		'href' => $scripturl . '?action=admin;area=awards;sa=main',
-		'show' => (allowedTo('manage_awards') || allowedto('assign_awards')),
+		'show' => (allowedTo('manage_awards') || allowedTo('assign_awards')),
 	);
 }
 
@@ -237,24 +240,22 @@ function imc_member_awards($user)
  *
  * - Used to add action view permissions checks to the who's online listing
  *
- * @param mixed[] $allowedActions
+ * @param array $allowedActions
  */
 function iwoa_member_awards(&$allowedActions)
 {
 	$allowedActions['awards'] = array('manage_awards');
-
-	return;
 }
 
 /**
  * Used to place the awards in to the users post profile
  *
  * - Directly injects the changes to the generic template which affects the
- * user poster area in post/pm/etc
+ * user poster area in post/pm/etc.
  * - Builds the signature area, used in the display template, just for posts
  *
- * @param type $poster_div
- * @param type $message
+ * @param string $poster_div
+ * @param string $message
  */
 function injectProfileAwards(&$poster_div, $message)
 {
@@ -274,7 +275,7 @@ function injectProfileAwards(&$poster_div, $message)
 			{
 				$awards_link[2][] = '
 					<a href="' . $scripturl . $award['more'] . '">
-						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['award_name'] . '" title="' . $award['description'] . '" />
 					</a> ';
 			}
 			// Below
@@ -282,7 +283,7 @@ function injectProfileAwards(&$poster_div, $message)
 			{
 				$awards_link[1][] = '
 					<a href="' . $scripturl . $award['more'] . '">
-						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['award_name'] . '" title="' . $award['description'] . '" />
 					</a> ';
 			}
 			// Signature
@@ -290,7 +291,7 @@ function injectProfileAwards(&$poster_div, $message)
 			{
 				$awards_link[3][] = '
 					<a href="' . $scripturl . $award['more'] . '">
-						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['description'] . '" title="' . $award['description'] . '" />
+						<img src="' . dirname($scripturl) . $award['img'] . '" alt="' . $award['award_name'] . '" title="' . $award['description'] . '" />
 					</a> ';
 			}
 		}
@@ -302,16 +303,17 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[2], $modSettings['awards_in_post']);
 
 			// Specific style class chosen?
-			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_poster_1'
-				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_poster_2"'
-					: 'award_poster_3');
+			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1)
+				? 'award_top award_poster_1'
+				: ($modSettings['awards_aboveavatar_format'] == 2
+					? 'award_top award_poster_2"' : 'award_top award_poster_3');
 
 			$award_output = '
 				<li class="listlevel1">
 					<fieldset class="' . $style . '">';
 
 			// Title for the above awards "box"
-			if (isset($modSettings['awards_aboveavatar_title']))
+			if (!empty($modSettings['awards_aboveavatar_title']))
 			{
 				$award_output .= '
 						<legend>
@@ -323,7 +325,7 @@ function injectProfileAwards(&$poster_div, $message)
 					</fieldset>
 				</li>';
 
-			// Insert the award output in the approriate spot, right above the dropdown
+			// Insert the award output in the appropriate spot, right above the dropdown
 			$find = '<li class="listlevel1 poster_avatar">';
 			$replace = $award_output . $find;
 			$poster_div = awards_str_replace_once($find, $replace, $poster_div);
@@ -336,15 +338,16 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[1], $modSettings['awards_in_post']);
 
 			// Style for this area?
-			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1) ? 'award_poster_1'
-				: ($modSettings['awards_belowavatar_format'] == 2 ? 'award_poster_2"'
-					: 'award_poster_3');
+			$style = (empty($modSettings['awards_belowavatar_format']) || $modSettings['awards_belowavatar_format'] == 1)
+				? 'award_bottom award_poster_1'
+				: ($modSettings['awards_belowavatar_format'] == 2
+					? 'award_bottom award_poster_2"' : 'award_bottom award_poster_3');
 
 			$award_output = '
 				<li>
 					<fieldset class="' . $style . '">';
 
-			if (isset($modSettings['awards_belowavatar_title']))
+			if (!empty($modSettings['awards_belowavatar_title']))
 			{
 				$award_output .= '
 						<legend>
@@ -356,7 +359,7 @@ function injectProfileAwards(&$poster_div, $message)
 					</fieldset>
 				</li>';
 
-			// Insert the award output in the approriate spot, at the end of the poster div sounds good
+			// Insert the award output in the appropriate spot, at the end of the poster div sounds good
 			$poster_div .= $award_output;
 		}
 
@@ -367,16 +370,17 @@ function injectProfileAwards(&$poster_div, $message)
 			array_splice($awards_link[3], $modSettings['awards_in_post']);
 
 			// Style for the sigs?
-			$style = (empty($modSettings['awards_aboveavatar_format']) || $modSettings['awards_aboveavatar_format'] == 1) ? 'award_signature_1'
-				: ($modSettings['awards_aboveavatar_format'] == 2 ? 'award_signature_2"'
-					: 'award_signature_3');
+			$style = (empty($modSettings['awards_signature_format']) || $modSettings['awards_signature_format'] == 1)
+				? 'award_signature_1'
+				: ($modSettings['awards_signature_format'] == 2
+					? 'award_signature_2"' : 'award_signature_3');
 
 			$award_output = '
 					<div class="signature">
 						<fieldset class="' . $style . '">';
 
 			// Title for the signature area?
-			if (isset($modSettings['awards_signature_title']))
+			if (!empty($modSettings['awards_signature_title']))
 			{
 				$award_output .= '
 							<legend>
@@ -388,7 +392,7 @@ function injectProfileAwards(&$poster_div, $message)
 						</fieldset>
 					</div>';
 
-			// Just make it availale to the template, can't inject this one from here
+			// Just make it available to the template, can't inject this one from here
 			$context['award']['signature'] = $award_output;
 
 		}
