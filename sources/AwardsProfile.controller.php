@@ -13,6 +13,8 @@
  *
  */
 
+use BBC\ParserWrapper;
+
 /**
  * This is the awards profile controller class.
  * This file handles the profile side of Awards.
@@ -206,9 +208,9 @@ class Awards_Controller extends Action_Controller
 		$context['page_index'] = constructPageIndex($scripturl . '?action=profile;area=listAwards', $_REQUEST['start'], $countAwards, $maxAwards);
 		$start = isset($_REQUEST['start']) ? (int) $_REQUEST['start'] : 0;
 
-		// Array of this members awards to prevent a request for something they have
+		// Array of their awards to prevent a request for something they have
 		$awardcheck = array();
-		$awards = isset($user_profile[$user_info['id']]['awards']) ? $user_profile[$user_info['id']]['awards'] : array();
+		$awards = $user_profile[$user_info['id']]['awards'] ?? array();
 		foreach ($awards as $award)
 		{
 			$awardcheck[$award['id']] = 1;
@@ -251,27 +253,28 @@ class Awards_Controller extends Action_Controller
 			}
 
 			// Set the context values
-			$context['award']['description'] = parse_bbc($context['award']['description']);
+			$parser = ParserWrapper::instance();
+			$context['award']['description'] = $parser->parseMessage($context['award']['description'], true);
 			$context['step'] = 1;
 			$context['page_title'] = $txt['awards_request_award'] . ' - ' . $context['award']['award_name'];
 			$context['sub_template'] = 'awards_request';
 		}
 		// step '2', they have actually demanded an award!
-		elseif (isset($_GET['step']) && (int) $_GET['step'] == 2)
+		elseif ((int) $_GET['step'] === 2)
 		{
 			// Check session.
-			checkSession('post');
+			checkSession();
 
 			// Clean those dirty pigs.
 			$id = (int) $_POST['id_award'];
 			$comments = strtr(Util::htmlspecialchars($_POST['comments'], ENT_QUOTES), array("\n" => '<br />', '"' => '&quot;', '<' => '&lt;', '>' => '&gt;', '  ' => ' &nbsp;'));
-			censorText($comments);
+			censor($comments);
 			$date = date('Y-m-d');
 
 			// let's see if the award exists, silly hackers
 			$context['award'] = AwardsLoadAward($id);
 
-			// Not requestable, how did we get here?
+			// Not requestable? how did we get here?
 			if (empty($context['award']['requestable']))
 			{
 				throw new Elk_Exception('awards_error_not_requestable', 'general');
@@ -287,7 +290,7 @@ class Awards_Controller extends Action_Controller
 			}
 
 			// If we made it this far insert /replace such that it can be reviewed.
-			AwardsMakeRequest($id, $date, $comments, true);
+			AwardsMakeRequest($id, $date, $comments);
 
 			updateSettings(array(
 				'awards_request' => $modSettings['awards_request'],
