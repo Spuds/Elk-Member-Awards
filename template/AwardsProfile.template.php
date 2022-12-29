@@ -9,7 +9,7 @@
  * Copyright (c) 2006-2009:        YodaOfDarkness (Fustrate)
  * Copyright (c) 2010:             Jason "JBlaze" Clemons
  *
- * @version   1.1
+ * @version   1.1.1
  *
  */
 
@@ -36,7 +36,7 @@ function template_awards()
 	if (empty($context['categories']))
 		echo '
 					<div class="infobox">',
-						$context['user']['is_owner'] ? $txt['awards_no_awards_member'] : sprintf($txt['awards_no_awards_this_member'], $context['award_user']), '
+						$context['user']['is_owner'] ? $txt['awards_no_awards_member'] : sprintf($txt['awards_no_awards_this_member'], $context['member']['name']), '
 					</div>';
 	else
 	{
@@ -51,7 +51,7 @@ function template_awards()
 						<thead>
 							<tr class="table_head">
 								<th scope="col" class="grid17 centertext">', $txt['awards_image'], '</th>
-								<th scope="col" class="grid17 centertext">', $txt['awards_mini'], '</th>
+								<th scope="col" class="grid8 centertext">', $txt['awards_mini'], '</th>
 								<th scope="col" class="grid20">', $txt['awards_name'], '</th>
 								<th scope="col" class="grid17">', $txt['awards_date'], '</th>
 								<th scope="col">', $txt['awards_details'], '</th>
@@ -64,7 +64,7 @@ function template_awards()
 			foreach ($category['awards'] as $award)
 			{
 				echo '
-							<tr>
+							<tr', $award['favorite']['fav'] == 1 ? ' class="favorite"' : '', '>
 								<td class="centertext">
 									<a href="', $award['more'], '">
 										<img class="award_regular_image" src="', $award['img'], '" alt="', $award['award_name'], '" />
@@ -85,8 +85,12 @@ function template_awards()
 									$award['description'], '
 								</td>
 								<td class="centertext">',
-									$context['allowed_fav'] && $award['favorite']['allowed'] ? '<a href="' . $award['favorite']['href'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $award['favorite']['img'] . '</a>' : '',
-									$award['favorite']['fav'] == 1 ? '<img src="' . $settings['images_url'] . '/awards/star.png" alt="' . $txt['awards_favorite']. '" />' : '', '
+									$award['favorite']['fav'] == 1
+										? '<img src="' . $settings['images_url'] . '/awards/star.png" alt="' . $txt['awards_favorite']. '" />'
+										: '',
+									$context['allowed_fav'] && $award['favorite']['allowed']
+										? '<a href="' . $award['favorite']['href'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $award['favorite']['img'] . '</a>'
+										: '', '
 								</td>
 							</tr>';
 			}
