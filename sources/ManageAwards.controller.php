@@ -543,7 +543,7 @@ class Awards_Controller extends Action_Controller
 			$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_select_badge'];
 		}
 		// Ah step '2', they selected some bum(s) to get an award :)
-		elseif (isset($_GET['step']) && $_GET['step'] == 2)
+		elseif ($_GET['step'] == 2)
 		{
 			// Check session.
 			checkSession();
@@ -633,7 +633,7 @@ class Awards_Controller extends Action_Controller
 		// Load in our helper functions
 		require_once(SUBSDIR . '/Awards.subs.php');
 
-		// First step, select the memebrgroups and awards
+		// First step, select the membergroups and awards
 		if (!isset($_REQUEST['step']) || (int) $_REQUEST['step'] == 1)
 		{
 			// Load all the member groups
@@ -648,7 +648,7 @@ class Awards_Controller extends Action_Controller
 			$context['page_title'] = $txt['awards_title'] . ' - ' . $txt['awards_mem_group'];
 		}
 		// Ah step 'duo', they selected some ungrateful group(s) to get an award :P
-		elseif (isset($_REQUEST['step']) && (int) $_REQUEST['step'] == 2)
+		elseif ((int) $_REQUEST['step'] == 2)
 		{
 			// Make sure that they picked an award and group to assign it to...
 			if (isset($_POST['who']))
@@ -739,7 +739,7 @@ class Awards_Controller extends Action_Controller
 			$_SESSION['allowed_groups'] = array_keys($context['groups']);
 
 			// Good old number 2 ... they have selected some groups, we need to load the members for them
-			if (isset($_REQUEST['step']) && (int) $_REQUEST['step'] == 2)
+			if (isset($_REQUEST['step']) && (int) $_REQUEST['step'] === 2)
 			{
 				// Make sure that they checked some groups, so we can load them
 				if (!empty($_POST['who']))
@@ -759,7 +759,7 @@ class Awards_Controller extends Action_Controller
 			}
 		}
 		// Ah step 3, they selected mass quantities of members to get a special award
-		elseif (isset($_REQUEST['step']) && (int) $_REQUEST['step'] == 3)
+		elseif ((int) $_REQUEST['step'] == 3)
 		{
 			checkSession();
 
@@ -880,8 +880,6 @@ class Awards_Controller extends Action_Controller
 					),
 					'data' => array(
 						'function' => function ($rowData) use ($scripturl) {
-							global $scripturl;
-
 							if ($rowData['id_member'] > 0)
 							{
 								return '<a class="linkbutton" href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=' . $rowData['id_member'] . '">' . $rowData['member_name'] . '</a>';
@@ -1124,7 +1122,7 @@ class Awards_Controller extends Action_Controller
 
 		$id = (int) $_REQUEST['a_id'];
 
-		if ($id == 1)
+		if ($id === 1)
 		{
 			throw new Elk_Exception('awards_error_delete_main_category', 'general');
 		}
@@ -1168,7 +1166,7 @@ class Awards_Controller extends Action_Controller
 		$context[$context['admin_menu_name']]['tab_data'] += array(
 			'title' => $txt['awards'],
 			'help' => $txt['awards_help'],
-			'description' => $txt['awards_description_viewcategory']
+			'description' => $txt['awards_description_viewcategory'],
 		);
 
 		// A cheat to show categories as selected when in view category

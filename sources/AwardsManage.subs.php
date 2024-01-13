@@ -443,6 +443,7 @@ function AwardsTopicsStarted($memberlist, $ttl = 300)
 				'recycle_board' => $modSettings['recycle_board'],
 			)
 		);
+
 		// Load them in to user_profile
 		while ($row = $db->fetch_assoc($request))
 		{

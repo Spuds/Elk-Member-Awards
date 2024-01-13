@@ -22,26 +22,30 @@ function template_awards()
 
 	echo '
 					<h3 class="category_header hdicon cat_img_award_add">
-						' ,$txt['awards'], '
+						', $txt['awards'], '
 					</h3>';
 
 	// Show the amount of awards that a member has
 	if (!empty($context['count_awards']))
+	{
 		echo '
 					<p class="description">',
 						sprintf($txt['awards_count_badges'], $context['count_awards']), '
 					</p>';
+	}
 
 	// Check if this member has any awards
 	if (empty($context['categories']))
+	{
 		echo '
 					<div class="infobox">',
 						$context['user']['is_owner'] ? $txt['awards_no_awards_member'] : sprintf($txt['awards_no_awards_this_member'], $context['member']['name']), '
 					</div>';
+	}
 	else
 	{
 		// There be awards !!, output them by category for viewing
-		foreach($context['categories'] as $category)
+		foreach ($context['categories'] as $category)
 		{
 			echo '
 						<h3 class="category_header hdicon cat_img_database">
@@ -123,8 +127,10 @@ function template_awards_members()
 			<br />';
 
 	if ($context['award']['img'] != $context['award']['small'])
+	{
 		echo '
 			<img style="vertical-align:middle" src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" /> ';
+	}
 
 	echo '
 			<strong>', $context['award']['award_name'], '</strong>
@@ -149,13 +155,15 @@ function template_awards_list()
 
 	// Check if there are any awards
 	if (empty($context['categories']))
+	{
 		echo '
 				<div class="infobox">',
 					$txt['awards_error_no_awards'], '
 				</div>';
+	}
 	else
 	{
-		foreach($context['categories'] as $key => $category)
+		foreach ($context['categories'] as $key => $category)
 		{
 			echo '
 					<h3 class="secondary_header">
@@ -191,10 +199,12 @@ function template_awards_list()
 								</a>';
 
 				if (!empty($award['requestable']))
+				{
 					echo '
 								<a href="', $award['requestable_link'], '">
 									<img src="', $settings['images_url'], '/awards/award_request.png" title="', $txt['awards_request_award'], '" alt="" />
 								</a>';
+				}
 
 				echo '
 							</td>
@@ -230,8 +240,10 @@ function template_awards_request()
 			<br />';
 
 	if ($context['award']['img'] != $context['award']['small'])
+	{
 		echo '
 			<img style="vertical-align:middle" src="', $context['award']['small'], '" alt="', $context['award']['award_name'], '" /> ';
+	}
 
 	echo '
 			<strong>', $context['award']['award_name'], '</strong>

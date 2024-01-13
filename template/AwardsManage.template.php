@@ -33,10 +33,12 @@ function template_modify()
 
 	// Show them it saved, if it just did
 	if (isset($_GET['saved']))
-		echo'
+	{
+		echo '
 					<div class="infobox">',
 						$txt['awards_saved_award'], '
 					</div>';
+	}
 
 	echo '
 					<h3 class="category_header hdicon cat_img_award_add ">',
@@ -72,8 +74,10 @@ function template_modify()
 									<select name="id_category" id="id_category">';
 
 	foreach ($context['categories'] as $category)
+	{
 		echo '
 										<option value="', $category['id'], '"', ($category['id'] == $context['award']['category']) ? ' selected="selected"' : '', '>', $category['name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -92,8 +96,10 @@ function template_modify()
 
 	// our awards type list selection
 	foreach ($context['award_types'] as $type)
+	{
 		echo '
 										<option value="', $type['id'], '"', (isset($context['award']['type']) && $type['id'] == $context['award']['type']) ? ' selected="selected"' : '', '>', $type['name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -106,8 +112,10 @@ function template_modify()
 
 	// The descriptions for them, hidden and used by javascript to fill in the awardTrigger_desc span
 	foreach ($context['award_types'] as $desc)
+	{
 		echo '
 									<span id="trigger_desc_', $desc['id'], '" style="display:none">', $desc['desc'], '</span>';
+	}
 
 	echo '
 								</dt>
@@ -135,8 +143,10 @@ function template_modify()
 							</dl>';
 
 	if (!empty($context['award']['img']))
+	{
 		echo '
 							<br class="clear" />';
+	}
 
 	echo '
 							<dl class="settings">
@@ -162,8 +172,10 @@ function template_modify()
 
 	// The awards location list selection
 	foreach ($context['award_placements'] as $type)
+	{
 		echo '
 										<option value="', $type['id'], '"', (isset($context['award']['location']) && $type['id'] == $context['award']['location']) ? ' selected="selected"' : '', '>', $type['name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -228,11 +240,12 @@ function template_assign_group()
 										<option value="" disabled selected style="display:none;">Label</option>';
 
 
-
 	// Loop and show the drop-down.
 	foreach ($context['awards'] as $key => $award)
+	{
 		echo '
 										<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -269,24 +282,30 @@ function template_assign_group()
 									<select name="month" tabindex="', $context['tabindex']++, '">';
 
 	foreach ($txt['months'] as $key => $month)
+	{
 		echo '
 										<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="day" tabindex="', $context['tabindex']++, '">';
 
 	for ($i = 1; $i <= 31; $i++)
+	{
 		echo '
 										<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="year" tabindex="', $context['tabindex']++, '">';
 
 	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
+	{
 		echo '
 										<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
@@ -301,8 +320,10 @@ function template_assign_group()
 									<dt>';
 
 	foreach ($context['groups'] as $group)
+	{
 		echo '
 										<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check" /> ', $group['name'], ' <em>(', $group['member_count'], ')</em><br />';
+	}
 
 	echo '
 										<br class="clear" />
@@ -352,8 +373,10 @@ function template_assign()
 
 	// Loop and show the award selection drop-down.
 	foreach ($context['awards'] as $key => $award)
+	{
 		echo '
 										<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -390,23 +413,29 @@ function template_assign()
 									<select name="month" tabindex="', $context['tabindex']++, '">';
 
 	foreach ($txt['months'] as $key => $month)
+	{
 		echo '
 										<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="day" tabindex="', $context['tabindex']++, '">';
 	for ($i = 1; $i <= 31; $i++)
+	{
 		echo '
 										<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="year" tabindex="', $context['tabindex']++, '">';
 
 	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
+	{
 		echo '
 										<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
@@ -467,8 +496,10 @@ function template_assign_mass()
 
 	// Create the membergroup selection list
 	foreach ($context['groups'] as $group)
+	{
 		echo '
 								<input type="checkbox" name="who[', $group['id'], ']" id="who', $group['id'], '" value="', $group['id'], '" class="input_check"' . ((isset($_POST['who'][$group['id']])) ? 'checked="checked"' : '') . ' /> ', $group['name'], ' <em>(', $group['member_count'], ')</em><br />';
+	}
 
 	echo '
 								<br class="clear" />
@@ -495,8 +526,10 @@ function template_assign_mass()
 
 	// Loop and show the drop down.
 	foreach ($context['awards'] as $key => $award)
+	{
 		echo '
 										<option title="', $award['description'], '" value="', $key, '" ', isset($_REQUEST['a_id']) && $_REQUEST['a_id'] == $key ? 'selected="selected"' : '', '>', $award['award_name'], '</option>';
+	}
 
 	echo '
 									</select>
@@ -533,24 +566,30 @@ function template_assign_mass()
 									<select name="month" tabindex="', $context['tabindex']++, '">';
 
 	foreach ($txt['months'] as $key => $month)
+	{
 		echo '
 										<option value="', $key, '" ', date('F') == $month ? 'selected="selected"' : '', '>', $month, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="day" tabindex="', $context['tabindex']++, '">';
 
 	for ($i = 1; $i <= 31; $i++)
+	{
 		echo '
 										<option value="', $i, '" ', date('j') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
 									<select name="year" tabindex="', $context['tabindex']++, '">';
 
 	for ($i = date('Y') + 5; $i >= date('Y') - 5; $i--)
+	{
 		echo '
 										<option value="', $i, '" ', date('Y') == $i ? 'selected="selected"' : '', '>', $i, ' </option>';
+	}
 
 	echo '
 									</select>
@@ -581,8 +620,10 @@ function template_assign_mass()
 		{
 			// Open the tr
 			if ($counter == 0)
+			{
 				echo '
 								<tr>';
+			}
 
 			// The member
 			echo '
@@ -610,8 +651,10 @@ function template_assign_mass()
 			if ($columns - $counter > 0)
 			{
 				for ($i = 0; $i < $columns - $counter; $i++)
+				{
 					echo '
 									<td>&nbsp;</td>';
+				}
 			}
 
 			echo '
@@ -676,10 +719,12 @@ function template_settings()
 
 	// Just saved, let them know
 	if (isset($_GET['saved']))
-		echo'
+	{
+		echo '
 					<div class="infobox">',
 						$txt['awards_saved_settings'], '
 					</div>';
+	}
 
 	// On to all the settings!
 	echo '
@@ -747,8 +792,10 @@ function template_settings()
 
 	$select = !empty($modSettings['awards_aboveavatar_format']) ? $modSettings['awards_aboveavatar_format'] : 0;
 	foreach ($context['award_formats'] as $format)
+	{
 		echo '
 									<option value="', $format['id'], '"', ($format['id'] == $select) ? ' selected="selected"' : '', '>', $format['name'], '</option>';
+	}
 
 	echo '
 								</select>
@@ -777,8 +824,10 @@ function template_settings()
 
 	$select = !empty($modSettings['awards_belowavatar_format']) ? $modSettings['awards_belowavatar_format'] : 0;
 	foreach ($context['award_formats'] as $format)
+	{
 		echo '
 									<option value="', $format['id'], '"', ($format['id'] == $select) ? ' selected="selected"' : '', '>', $format['name'], '</option>';
+	}
 
 	echo '
 								</select>
@@ -807,8 +856,10 @@ function template_settings()
 
 	$select = !empty($modSettings['awards_signature_format']) ? $modSettings['awards_signature_format'] : 0;
 	foreach ($context['award_formats'] as $format)
+	{
 		echo '
 									<option value="', $format['id'], '"', ($format['id'] == $select) ? ' selected="selected"' : '', '>', $format['name'], '</option>';
+	}
 
 	echo '
 								</select>
@@ -880,10 +931,12 @@ function template_list_categories()
 
 	// Check if there are any categories
 	if (empty($context['categories']))
+	{
 		echo '
 						<tr>
 							<td colspan="3">', $txt['awards_error_no_categories'], '</td>
 						</tr>';
+	}
 	else
 	{
 		foreach ($context['categories'] as $cat)
@@ -955,10 +1008,12 @@ function template_view_category()
 
 	// Check if there are any awards
 	if (empty($context['awards']))
+	{
 		echo '
 					<tr>
 						<td colspan="4">', $txt['awards_error_empty_category'], '</td>
 					</tr>';
+	}
 	else
 	{
 		foreach ($context['awards'] as $award)
@@ -1026,8 +1081,10 @@ function template_request_award()
 
 			// Small image as well?
 			if ($award['img'] != $award['small'])
+			{
 				echo '
 						<img style="vertical-align:middle" src="', $award['small'], '" alt="', $award['award_name'], '" /> ';
+			}
 
 			echo '
 						<strong>', $award['award_name'], '</strong><br />', $award['description'], '
