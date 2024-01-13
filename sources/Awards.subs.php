@@ -840,7 +840,7 @@ function AwardsApproveDenyRequests($awards, $approve = true)
 					AND id_member IN ({array_int:members})',
 				array(
 					'id_award' => $id_award,
-					'members' => $awards[$id_award],
+					'members' => $member,
 				)
 			);
 		}
@@ -1197,7 +1197,7 @@ function AwardsRemoveMembers($id, $members = array())
  * Adds an award to a membergroup or a group of individual members
  *
  * @param array $values
- * @param bool $group
+ * @param bool $group if true does a membergroup assign
  */
 function AwardsAddMembers($values, $group = false)
 {
